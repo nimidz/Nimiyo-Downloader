@@ -152,7 +152,20 @@ const translations = {
     downloadModalTitle: "Downloading...",
     badgePhoto: "PHOTO",
     badgeVideo: "VIDEO",
-    badgeAudio: "AUDIO"
+    badgeAudio: "AUDIO",
+    labelAutoUpdate: "Auto-Update & Install APK",
+    hintAutoUpdate: "Allow automatic APK update installation",
+    btnPermissionAllow: "Allow",
+    btnPermissionGranted: "Enabled",
+    btnCheckUpdate: "Check for Updates",
+    updateModalTitle: "Update Available 🚀",
+    updateChangelogTitle: "Changelog:",
+    updateDownloading: "Downloading update...",
+    btnLater: "Later",
+    btnUpdateNow: "UPDATE NOW",
+    toastAppUpToDate: "You are using the latest version (v{version}).",
+    toastUpdateChecking: "Checking for updates...",
+    toastUpdateCheckFailed: "Could not check for updates. Check internet connection."
   },
   id: {
     appTitle: "NIMIYO",
@@ -298,7 +311,20 @@ const translations = {
     downloadModalTitle: "Mengunduh...",
     badgePhoto: "FOTO",
     badgeVideo: "VIDEO",
-    badgeAudio: "AUDIO"
+    badgeAudio: "AUDIO",
+    labelAutoUpdate: "Auto-Update & Izin Pasang APK",
+    hintAutoUpdate: "Izin pasang update APK otomatis tanpa ribet",
+    btnPermissionAllow: "Izinkan",
+    btnPermissionGranted: "Diaktifkan",
+    btnCheckUpdate: "Periksa Pembaruan",
+    updateModalTitle: "Pembaruan Tersedia 🚀",
+    updateChangelogTitle: "Catatan Pembaruan:",
+    updateDownloading: "Mengunduh pembaruan...",
+    btnLater: "Nanti",
+    btnUpdateNow: "UPDATE SEKARANG",
+    toastAppUpToDate: "Aplikasi sudah dalam versi terbaru (v{version}).",
+    toastUpdateChecking: "Memeriksa pembaruan...",
+    toastUpdateCheckFailed: "Gagal memeriksa pembaruan. Periksa koneksi internet."
   },
   zh: {
     appTitle: "NIMIYO",
@@ -444,7 +470,20 @@ const translations = {
     downloadModalTitle: "正在下载...",
     badgePhoto: "图片",
     badgeVideo: "视频",
-    badgeAudio: "音频"
+    badgeAudio: "音频",
+    labelAutoUpdate: "自动更新与安装权限",
+    hintAutoUpdate: "允许应用自动安装更新包",
+    btnPermissionAllow: "授权",
+    btnPermissionGranted: "已启用",
+    btnCheckUpdate: "检查更新",
+    updateModalTitle: "发现新版本 🚀",
+    updateChangelogTitle: "更新日志:",
+    updateDownloading: "正在下载更新...",
+    btnLater: "稍后",
+    btnUpdateNow: "立即更新",
+    toastAppUpToDate: "已是最新版本 (v{version})。",
+    toastUpdateChecking: "正在检查更新...",
+    toastUpdateCheckFailed: "检查更新失败，请检查网络连接。"
   },
   ja: {
     appTitle: "NIMIYO",
@@ -590,7 +629,20 @@ const translations = {
     downloadModalTitle: "ダウンロード中...",
     badgePhoto: "画像",
     badgeVideo: "動画",
-    badgeAudio: "音声"
+    badgeAudio: "音声",
+    labelAutoUpdate: "自動更新とインストール権限",
+    hintAutoUpdate: "アプリの自動更新インストールを許可",
+    btnPermissionAllow: "許可",
+    btnPermissionGranted: "有効",
+    btnCheckUpdate: "更新を確認",
+    updateModalTitle: "アップデートが利用可能です 🚀",
+    updateChangelogTitle: "更新履歴:",
+    updateDownloading: "更新をダウンロード中...",
+    btnLater: "後で",
+    btnUpdateNow: "今すぐ更新",
+    toastAppUpToDate: "最新バージョンを使用しています (v{version})。",
+    toastUpdateChecking: "更新を確認中...",
+    toastUpdateCheckFailed: "更新の確認に失敗しました。接続を確認してください。"
   }
 };
 
@@ -673,6 +725,12 @@ const fallbackChains = {
   rednote: ['direct']
 };
 
+// App Version Constants & GitHub Auto-Update Engine
+const APP_VERSION_NAME = "1.0.0";
+const APP_VERSION_CODE = 1;
+const UPDATE_MANIFEST_URL = "https://raw.githubusercontent.com/nimidz/Nimiyo-Downloader/main/version.json";
+let latestUpdateInfo = null;
+
 // Initialize Application
 document.addEventListener("DOMContentLoaded", () => {
   loadSettings();
@@ -680,6 +738,10 @@ document.addEventListener("DOMContentLoaded", () => {
   initUI();
   setupEventListeners();
   checkClipboardOnResume();
+  checkInstallPermissionStatus();
+  setTimeout(() => {
+    checkForAppUpdates(false);
+  }, 2500);
 });
 
 // Load Settings from LocalStorage
@@ -1433,10 +1495,53 @@ function setupEventListeners() {
     }
   });
 
-  // Register resume event listener for Auto-Paste
+  // Auto-Update permission button in Settings -> Advanced
+  const btnAutoUpdatePerm = document.getElementById("btnAutoUpdatePermission");
+  if (btnAutoUpdatePerm) {
+    btnAutoUpdatePerm.addEventListener("click", () => {
+      requestAutoUpdatePermission();
+    });
+  }
+
+  // Manual Check for Updates button in About App
+  const btnCheckUpdateManual = document.getElementById("btnCheckUpdateManual");
+  if (btnCheckUpdateManual) {
+    btnCheckUpdateManual.addEventListener("click", () => {
+      triggerHaptic();
+      checkForAppUpdates(true);
+    });
+  }
+
+  // Update Modal Close & Later buttons
+  const closeUpdateModalBtn = document.getElementById("closeUpdateModalBtn");
+  if (closeUpdateModalBtn) {
+    closeUpdateModalBtn.addEventListener("click", () => {
+      triggerHaptic();
+      document.getElementById("updateModal").classList.add("hidden");
+    });
+  }
+  const btnLaterUpdate = document.getElementById("btnLaterUpdate");
+  if (btnLaterUpdate) {
+    btnLaterUpdate.addEventListener("click", () => {
+      triggerHaptic();
+      document.getElementById("updateModal").classList.add("hidden");
+    });
+  }
+
+  // Update Now button
+  const btnStartUpdate = document.getElementById("btnStartUpdate");
+  if (btnStartUpdate) {
+    btnStartUpdate.addEventListener("click", () => {
+      triggerHaptic();
+      downloadAndInstallUpdate();
+    });
+  }
+
+  // Register resume event listener for Auto-Paste & Permission recheck
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
       checkClipboardOnResume();
+      checkInstallPermissionStatus();
     }
   });
 }
@@ -3458,5 +3563,225 @@ function getSVGPath(platform) {
       return `<path d="M0 18.75h14.302L24 5.25H9.698L0 18.75z"/>`;
     default:
       return `<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>`;
+  }
+}
+
+// -------------------------------------------------------------
+// Auto-Update & Native Install Permission Engine
+// -------------------------------------------------------------
+
+// Check & Update Permission Button Status (Izinkan vs Diaktifkan)
+async function checkInstallPermissionStatus() {
+  const permBtn = document.getElementById("btnAutoUpdatePermission");
+  const permTxt = document.getElementById("txtAutoUpdatePermission");
+  if (!permBtn || !permTxt) return false;
+
+  const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
+  if (MediaSaver && window.Capacitor?.isNativePlatform()) {
+    try {
+      const res = await MediaSaver.checkInstallPermission();
+      if (res && res.isGranted) {
+        permBtn.classList.add("granted");
+        permTxt.innerText = getTranslation("btnPermissionGranted");
+        return true;
+      } else {
+        permBtn.classList.remove("granted");
+        permTxt.innerText = getTranslation("btnPermissionAllow");
+        return false;
+      }
+    } catch (e) {
+      console.warn("checkInstallPermission error:", e);
+    }
+  }
+
+  permBtn.classList.remove("granted");
+  permTxt.innerText = getTranslation("btnPermissionAllow");
+  return false;
+}
+
+// Request Permission by opening Android Settings
+async function requestAutoUpdatePermission() {
+  triggerHaptic();
+  const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
+  if (MediaSaver && window.Capacitor?.isNativePlatform()) {
+    try {
+      await MediaSaver.requestInstallPermission();
+    } catch (e) {
+      console.warn("requestInstallPermission error:", e);
+    }
+  } else {
+    showToast(getTranslation("btnPermissionGranted"), "success");
+    const permBtn = document.getElementById("btnAutoUpdatePermission");
+    const permTxt = document.getElementById("txtAutoUpdatePermission");
+    if (permBtn && permTxt) {
+      permBtn.classList.add("granted");
+      permTxt.innerText = getTranslation("btnPermissionGranted");
+    }
+  }
+}
+
+// Check for App Updates from GitHub
+async function checkForAppUpdates(isManual = false) {
+  if (isManual) {
+    showToast(getTranslation("toastUpdateChecking"), "info");
+  }
+
+  try {
+    const fetchUrl = `${UPDATE_MANIFEST_URL}?_nocache=${Date.now()}`;
+    let manifestData = null;
+
+    if (window.Capacitor?.Plugins?.CapacitorHttp && window.Capacitor?.isNativePlatform()) {
+      const res = await window.Capacitor.Plugins.CapacitorHttp.request({
+        method: "GET",
+        url: fetchUrl,
+        headers: { "Cache-Control": "no-cache" }
+      });
+      manifestData = typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+    } else {
+      const res = await fetch(fetchUrl);
+      manifestData = await res.json();
+    }
+
+    if (!manifestData || typeof manifestData.versionCode !== "number") {
+      throw new Error("Invalid version manifest format");
+    }
+
+    latestUpdateInfo = manifestData;
+
+    if (manifestData.versionCode > APP_VERSION_CODE) {
+      // New update available! Show update dialog modal
+      showUpdateModal(manifestData);
+    } else {
+      if (isManual) {
+        showToast(getTranslation("toastAppUpToDate", { version: APP_VERSION_NAME }), "success");
+      }
+    }
+  } catch (err) {
+    console.error("checkForAppUpdates error:", err);
+    if (isManual) {
+      showToast(getTranslation("toastUpdateCheckFailed"), "error");
+    }
+  }
+}
+
+// Show Update Dialog Modal
+function showUpdateModal(data) {
+  const modal = document.getElementById("updateModal");
+  const badge = document.getElementById("updateVersionBadge");
+  const list = document.getElementById("updateChangelogList");
+  const progressBox = document.getElementById("updateDownloadProgressBox");
+  const actionRow = document.getElementById("updateActionRow");
+  const startBtn = document.getElementById("btnStartUpdate");
+
+  if (!modal) return;
+
+  if (badge) badge.innerText = `v${data.versionName || data.versionCode}`;
+
+  if (list) {
+    list.innerHTML = "";
+    const changelogs = Array.isArray(data.changelog) ? data.changelog : [data.changelog || "Perbaikan performa & stabilitas."];
+    changelogs.forEach(item => {
+      const li = document.createElement("li");
+      li.innerText = item;
+      list.appendChild(li);
+    });
+  }
+
+  if (progressBox) progressBox.classList.add("hidden");
+  if (actionRow) actionRow.classList.remove("hidden");
+  if (startBtn) {
+    startBtn.disabled = false;
+    startBtn.innerText = getTranslation("btnUpdateNow");
+  }
+
+  modal.classList.remove("hidden");
+  triggerHaptic();
+}
+
+// Download and Install APK Update
+async function downloadAndInstallUpdate(apkUrl) {
+  if (!apkUrl) {
+    apkUrl = latestUpdateInfo?.downloadUrl;
+  }
+  if (!apkUrl) return;
+
+  const progressBox = document.getElementById("updateDownloadProgressBox");
+  const actionRow = document.getElementById("updateActionRow");
+  const progressBarFill = document.getElementById("updateProgressBarFill");
+  const progressPercentText = document.getElementById("updateProgressPercent");
+  const progressText = document.getElementById("updateProgressText");
+
+  if (progressBox) progressBox.classList.remove("hidden");
+  if (actionRow) actionRow.classList.add("hidden");
+
+  let downloadPercent = 0;
+  const simInterval = setInterval(() => {
+    if (downloadPercent < 90) {
+      downloadPercent += Math.floor(Math.random() * 8) + 3;
+      if (downloadPercent > 90) downloadPercent = 90;
+      if (progressBarFill) progressBarFill.style.width = `${downloadPercent}%`;
+      if (progressPercentText) progressPercentText.innerText = `${downloadPercent}%`;
+    }
+  }, 250);
+
+  try {
+    const fileName = "nimiyo_update.apk";
+    const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
+
+    if (Filesystem && window.Capacitor?.isNativePlatform()) {
+      let apkPath = "";
+      try {
+        const dlRes = await Filesystem.downloadFile({
+          url: apkUrl,
+          path: fileName,
+          directory: "CACHE"
+        });
+        apkPath = dlRes?.path || fileName;
+      } catch (dlErr) {
+        const CapHttp = window.Capacitor?.Plugins?.CapacitorHttp;
+        if (CapHttp) {
+          const res = await CapHttp.request({
+            method: "GET",
+            url: apkUrl,
+            responseType: "base64"
+          });
+          const writeRes = await Filesystem.writeFile({
+            path: fileName,
+            data: res.data,
+            directory: "CACHE"
+          });
+          apkPath = writeRes?.uri || fileName;
+        } else {
+          throw dlErr;
+        }
+      }
+
+      clearInterval(simInterval);
+      if (progressBarFill) progressBarFill.style.width = "100%";
+      if (progressPercentText) progressPercentText.innerText = "100%";
+      if (progressText) progressText.innerText = getTranslation("btnPermissionGranted");
+
+      const uriRes = await Filesystem.getUri({
+        path: fileName,
+        directory: "CACHE"
+      });
+
+      if (MediaSaver) {
+        await MediaSaver.installApk({
+          filePath: uriRes?.uri || fileName
+        });
+      }
+    } else {
+      clearInterval(simInterval);
+      window.open(apkUrl, "_blank");
+      showToast(getTranslation("toastDownloadSuccess"), "success");
+    }
+
+  } catch (err) {
+    clearInterval(simInterval);
+    console.error("downloadAndInstallUpdate error:", err);
+    if (progressBox) progressBox.classList.add("hidden");
+    if (actionRow) actionRow.classList.remove("hidden");
+    showToast(`${getTranslation("toastDownloadFailManualServer")}: ${err.message}`, "error");
   }
 }

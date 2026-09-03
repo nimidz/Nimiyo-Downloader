@@ -321,6 +321,12 @@
               <div class="about-thanks">
                 <span data-i18n="aboutThanks">Thanks to:</span> coflyn for engine run on scrapr
               </div>
+              <button id="btnCheckUpdateManual" class="btn outline-btn check-update-btn">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                  <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+                </svg>
+                <span data-i18n="btnCheckUpdate">Periksa Pembaruan</span>
+              </button>
             </div>
           </div>
         </div>
@@ -571,10 +577,60 @@
               <label for="settingKeepAwake" data-i18n="labelKeepAwake">Keep Screen Awake</label>
               <input type="checkbox" id="settingKeepAwake" class="ios-switch">
             </div>
+            <div class="setting-item auto-update-perm-item">
+              <div class="setting-label-group">
+                <label data-i18n="labelAutoUpdate">Auto-Update & Install APK</label>
+                <span class="setting-hint" data-i18n="hintAutoUpdate">Allow automatic APK update installation</span>
+              </div>
+              <button id="btnAutoUpdatePermission" class="btn outline-btn perm-btn">
+                <span id="txtAutoUpdatePermission" data-i18n="btnPermissionAllow">Izinkan</span>
+              </button>
+            </div>
             <div class="setting-item action-row">
               <button id="resetSettingsBtn" class="btn danger-btn full-btn" data-i18n="btnResetSettings">RESET ALL SETTINGS TO DEFAULT</button>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Update Notification Dialog Modal -->
+  <div id="updateModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content update-modal-content">
+      <div class="modal-header">
+        <h3 data-i18n="updateModalTitle">Pembaruan Tersedia 🚀</h3>
+        <button id="closeUpdateModalBtn" class="icon-btn" aria-label="Close">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body update-modal-body">
+        <div class="update-banner">
+          <div class="update-version-badge" id="updateVersionBadge">v1.0.0</div>
+          <div class="update-app-title">NIMIYO Downloader (Lite)</div>
+        </div>
+        <div class="update-changelog-box">
+          <div class="update-changelog-title" data-i18n="updateChangelogTitle">Catatan Pembaruan:</div>
+          <ul id="updateChangelogList" class="update-changelog-list">
+            <!-- Dynamically populated -->
+          </ul>
+        </div>
+        <div id="updateDownloadProgressBox" class="update-progress-box hidden">
+          <div class="update-progress-label">
+            <span id="updateProgressText" data-i18n="updateDownloading">Mengunduh pembaruan...</span>
+            <span id="updateProgressPercent">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div id="updateProgressBarFill" class="progress-bar-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+        <div class="action-row update-action-row" id="updateActionRow">
+          <button id="btnLaterUpdate" class="btn outline-btn" data-i18n="btnLater">Nanti</button>
+          <button id="btnStartUpdate" class="btn primary-btn" data-i18n="btnUpdateNow">UPDATE SEKARANG</button>
         </div>
       </div>
     </div>

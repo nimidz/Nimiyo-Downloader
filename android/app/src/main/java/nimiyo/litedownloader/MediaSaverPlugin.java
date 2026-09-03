@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.Base64;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.FileProvider;
@@ -422,6 +423,97 @@ public class MediaSaverPlugin extends Plugin {
             call.resolve(ret);
         } catch (Exception e) {
             call.reject("Failed to get media data: " + e.getMessage());
+        }
+    }
+
+    @PluginMethod
+    public void checkInstallPermission(PluginCall call) {
+        JSObject ret = new JSObject();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            boolean granted = getContext().getPackageManager().canRequestPackageInstalls();
+            ret.put("isGranted", granted);
+        } else {
+            ret.put("isGranted", true);
+        }
+        call.resolve(ret);
+    }
+
+    @PluginMethod
+    public void requestInstallPermission(PluginCall call) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            try {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
+                intent.setData(Uri.parse("package:" + getContext().getPackageName()));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getContext().startActivity(intent);
+            } catch (Exception e) {
+                Intent fallbackIntent = new Intent(Settings.ACTION_SECURITY_SETTINGS);
+                fallbackIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getContext().startActivity(fallbackIntent);
+            }
+        }
+        JSObject ret = new JSObject();
+        ret.put("success", true);
+        call.resolve(ret);
+    }
+
+    @PluginMethod
+    public void installApk(PluginCall call) {
+        String filePath = call.getString("filePath");
+        if (filePath == null || filePath.isEmpty()) {
+            call.reject("filePath is required");
+            return;
+        }
+
+        try {
+            Context context = getContext();
+            File apkFile;
+            if (filePath.startsWith("content://") || filePath.startsWith("file://")) {
+                Uri parsed = Uri.parse(filePath);
+                apkFile = new File(parsed.getPath());
+            } else {
+                apkFile = new File(filePath);
+            }
+
+            if (!apkFile.exists()) {
+                File inCache = new File(context.getCacheDir(), filePath);
+                if (inCache.exists()) {
+                    apkFile = inCache;
+                } else {
+                    File inExternal = new File(context.getExternalFilesDir(null), filePath);
+                    if (inExternal.exists()) {
+                        apkFile = inExternal;
+                    }
+                }
+            }
+
+            if (!apkFile.exists()) {
+                call.reject("APK file does not exist: " + filePath);
+                return;
+            }
+
+            Uri apkUri;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                apkUri = FileProvider.getUriForFile(
+                    context,
+                    context.getPackageName() + ".fileprovider",
+                    apkFile
+                );
+            } else {
+                apkUri = Uri.fromFile(apkFile);
+            }
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+
+            JSObject ret = new JSObject();
+            ret.put("success", true);
+            call.resolve(ret);
+        } catch (Exception e) {
+            call.reject("Failed to trigger APK install: " + e.getMessage());
         }
     }
 }
