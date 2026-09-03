@@ -37,11 +37,11 @@
 
 | 1. Home / Analyzer | 2. Download Options | 3. History & Storage |
 | :---: | :---: | :---: |
-| <img src="assets/screenshots/screenshot_1.jpg" width="230" alt="Home Screen" /> | <img src="assets/screenshots/screenshot_2.jpg" width="230" alt="Download Links" /> | <img src="assets/screenshots/screenshot_3.jpg" width="230" alt="History Modal" /> |
+| <img src="assets/screenshots/screenshot_1.jpg" width="220" alt="1. Home Screen" /> | <img src="assets/screenshots/screenshot_2.jpg" width="220" alt="2. Download Links" /> | <img src="assets/screenshots/screenshot_3.jpg" width="220" alt="3. History Modal" /> |
 
 | 4. Built-in Player | 5. Settings Menu | 6. Rules & Guidelines |
 | :---: | :---: | :---: |
-| <img src="assets/screenshots/screenshot_4.jpg" width="230" alt="Media Player" /> | <img src="assets/screenshots/screenshot_5.jpg" width="230" alt="Settings Menu" /> | <img src="assets/screenshots/screenshot_6.jpg" width="230" alt="Rules Modal" /> |
+| <img src="assets/screenshots/screenshot_4.jpg" width="220" alt="4. Media Player" /> | <img src="assets/screenshots/screenshot_5.jpg" width="220" alt="5. Settings Menu" /> | <img src="assets/screenshots/screenshot_6.jpg" width="220" alt="6. Rules Modal" /> |
 
 </div>
 
