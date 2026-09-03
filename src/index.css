@@ -2153,13 +2153,62 @@ body.dark-mode .queue-progress-bar-bg {
 }
 
 /* ---------------------------------------------------- */
-/* Rules & Guidelines Modal Styling                     */
+/* Centered Window Popup Modal Styles                  */
 /* ---------------------------------------------------- */
-.rules-modal-content {
-  max-width: 440px;
-  max-height: 85vh;
+.window-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(18, 18, 18, 0.72);
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  backdrop-filter: blur(4px);
+  padding: 16px;
+  box-sizing: border-box;
+  animation: popup-fade-in 0.2s ease forwards;
+}
+
+.window-popup-overlay.hidden {
+  display: none !important;
+}
+
+.window-popup-card {
+  width: 100%;
+  max-width: 420px;
+  background-color: var(--bg-color);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: 6px 6px 0px var(--border-color);
   display: flex;
   flex-direction: column;
+  max-height: 85vh;
+  overflow: hidden;
+  box-sizing: border-box;
+  animation: popup-scale-in 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards;
+}
+
+@keyframes popup-scale-in {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes popup-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modal-header-icon-title {

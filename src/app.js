@@ -718,9 +718,23 @@ const translations = {
   }
 };
 
+// System Language Detection (Default to system device language)
+function detectSystemLanguage() {
+  const navLang = ((navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage || "en").toLowerCase();
+  if (navLang.startsWith("id") || navLang.startsWith("in")) {
+    return "id";
+  } else if (navLang.startsWith("zh")) {
+    return "zh";
+  } else if (navLang.startsWith("ja")) {
+    return "ja";
+  } else {
+    return "en";
+  }
+}
+
 // Default Settings
 let settings = {
-  language: 'en',
+  language: detectSystemLanguage(),
   autoPaste: false,
   autoAnalyze: false,
   autoClearInput: false,
@@ -752,7 +766,7 @@ let settings = {
 };
 
 // Local variables
-let currentLanguage = 'en';
+let currentLanguage = detectSystemLanguage();
 let localHistory = [];
 let activeAnalysisResult = null;
 let currentPlatform = '';
@@ -819,13 +833,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Load Settings from LocalStorage
 function loadSettings() {
+  const systemLang = detectSystemLanguage();
   const savedSettings = localStorage.getItem("nimiyo_settings");
   if (savedSettings) {
     try {
-      settings = { ...settings, ...JSON.parse(savedSettings) };
+      const parsed = JSON.parse(savedSettings);
+      settings = { ...settings, ...parsed };
+      if (!parsed.language) {
+        settings.language = systemLang;
+      }
     } catch (e) {
       console.error("Failed to parse settings", e);
+      settings.language = systemLang;
     }
+  } else {
+    settings.language = systemLang;
   }
   if (!settings.timeout || isNaN(settings.timeout)) {
     settings.timeout = 30;
@@ -833,7 +855,7 @@ function loadSettings() {
   if (!settings.preferredServer) {
     settings.preferredServer = 'auto';
   }
-  currentLanguage = settings.language || 'en';
+  currentLanguage = settings.language || systemLang;
   applyDarkMode(settings.darkMode);
 }
 
@@ -1116,7 +1138,7 @@ function wipeAllData() {
     localStorage.removeItem("nimiyo_history");
     localStorage.removeItem("nimiyo_settings");
     settings = {
-      language: 'en',
+      language: detectSystemLanguage(),
       autoPaste: false,
       autoAnalyze: false,
       autoClearInput: false,
@@ -1156,7 +1178,7 @@ function resetSettingsToDefault() {
   triggerHaptic();
   if (confirm(getTranslation("confirmResetSettings"))) {
     settings = {
-      language: 'en',
+      language: detectSystemLanguage(),
       autoPaste: false,
       autoAnalyze: false,
       autoClearInput: false,
