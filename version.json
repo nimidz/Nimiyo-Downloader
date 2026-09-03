@@ -3,10 +3,10 @@
   "versionName": "1.0.0",
   "minRequiredVersion": "1.0.0",
   "releaseDate": "2026-09-03",
-  "downloadUrl": "https://github.com/nimidz/Nimiyo-Downloader/releases/latest/download/app-release.apk",
+  "downloadUrl": "https://github.com/nimidz/Nimiyo-Downloader/releases/download/v1.0.0/Nimiyo%20v1.0.0.apk",
   "changelog": [
     "🚀 Initial Release of NIMIYO Downloader Lite",
-    "⚡ High-speed multi-platform media engine",
+    "🔁 Auto Update and System Permission for auto-install",
     "🎨 Neobrutalist UI/UX with full Dark Mode support",
     "🎵 Direct folder storage (AudioYo, VideoYo, ImageYo)",
     "🔄 Automatic server fallback & failure recovery",
