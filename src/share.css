@@ -1,0 +1,311 @@
+/* share.css — NIMIYO Quick Save Dialog Styles */
+
+html, body {
+  background: transparent !important;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: var(--font-main);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Backdrop Blur Overlay */
+#backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: fadeIn 0.2s ease-out forwards;
+  z-index: 10;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* Bottom Sheet Panel matching Nimiyo styling */
+.nimiyo-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  border-top: var(--border-width) solid var(--border-color);
+  border-left: var(--border-width) solid var(--border-color);
+  border-right: var(--border-width) solid var(--border-color);
+  border-radius: 20px 20px 0 0;
+  padding: 14px 18px 24px;
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: 0 -8px 0px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  z-index: 20;
+  box-sizing: border-box;
+}
+
+/* Drag Handle */
+.drag-handle {
+  width: 44px;
+  height: 5px;
+  background: var(--border-color);
+  border-radius: 4px;
+  margin: 0 auto 12px;
+  cursor: pointer;
+}
+
+/* Sheet Header */
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.logo-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sheet-header .logo {
+  font-family: var(--font-logo);
+  font-weight: 900;
+  font-size: 24px;
+  letter-spacing: -0.5px;
+}
+
+.quick-save-badge {
+  font-family: var(--font-bold);
+  font-size: 11px;
+  font-weight: 800;
+  background: var(--accent-color);
+  color: #121212;
+  border: 1.5px solid var(--border-color);
+  box-shadow: 2px 2px 0px var(--border-color);
+  border-radius: 6px;
+  padding: 2px 6px;
+  letter-spacing: 0.5px;
+}
+
+.close-btn {
+  padding: 6px;
+  width: 36px;
+  height: 36px;
+}
+
+/* Media Header Card (Platform | Title/Description | ⇄ Server) */
+.media-header-card {
+  background: var(--card-bg);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  padding: 10px 12px;
+  margin-bottom: 14px;
+}
+
+.media-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.platform-tag {
+  font-family: var(--font-bold);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-color);
+  color: #121212;
+  border: 1.5px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.media-title-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+/* Change Server Button */
+.server-switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-color);
+  color: var(--text-color);
+  border: 1.5px solid var(--border-color);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-family: var(--font-bold);
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px var(--border-color);
+  flex-shrink: 0;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  white-space: nowrap;
+}
+
+.server-switch-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px var(--border-color);
+}
+
+.server-icon {
+  font-size: 12px;
+  font-weight: 900;
+}
+
+/* Status Section */
+.status-section {
+  margin-bottom: 14px;
+}
+
+.status-box {
+  background: var(--card-bg);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-color);
+  flex: 1;
+}
+
+.cancel-btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+  box-shadow: 2px 2px 0px var(--border-color);
+}
+
+/* Skeleton Loading */
+.skeleton-options-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.skeleton-option-item {
+  height: 48px;
+  background: var(--card-bg);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: 2px 2px 0px var(--border-color);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.skeleton-text-group {
+  flex: 1;
+}
+
+.skeleton-line {
+  height: 8px;
+  background: linear-gradient(90deg, var(--tag-bg) 25%, var(--border-color) 50%, var(--tag-bg) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite linear;
+  border-radius: 4px;
+}
+
+.skeleton-line.title {
+  width: 55%;
+  margin-bottom: 6px;
+}
+
+.skeleton-line.short {
+  width: 30%;
+}
+
+.skeleton-badge {
+  width: 60px;
+  height: 24px;
+  background: linear-gradient(90deg, var(--tag-bg) 25%, var(--border-color) 50%, var(--tag-bg) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite linear;
+  border-radius: 4px;
+}
+
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Error Section */
+.error-section {
+  margin-bottom: 14px;
+}
+
+.error-box {
+  background: rgba(255, 94, 94, 0.15);
+  border: var(--border-width) solid var(--danger-color);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--danger-color);
+  font-weight: 700;
+}
+
+/* Download Section & Options */
+.result-section {
+  margin-bottom: 14px;
+}
+
+.download-container h3 {
+  font-size: 14px;
+  font-weight: 800;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.download-links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Download Action Row */
+.action-row {
+  display: flex;
+  gap: 10px;
+}
+
+.block-btn {
+  flex: 1;
+  width: 100%;
+}
+
+.sheet-footer {
+  margin-top: 14px;
+}
+
+.hidden {
+  display: none !important;
+}

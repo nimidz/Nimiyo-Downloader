@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>NIMIYO Downloader</title>
+  <link rel="stylesheet" href="index.css">
+  <!-- Import Inter & Outfit font families -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@500;700;900&display=swap" rel="stylesheet">
+</head>
+<body class="light-mode">
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <h1 class="logo">NIMIYO</h1>
+      <div class="header-actions">
+        <button id="historyBtn" class="icon-btn" aria-label="History" title="History">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </button>
+        <button id="settingsBtn" class="icon-btn" aria-label="Settings" title="Settings">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      <!-- Input Panel -->
+      <section class="input-section">
+        <div class="input-card">
+          <input type="text" id="urlInput" placeholder="Paste link here..." autocomplete="off" spellcheck="false">
+          <button id="clearInputBtn" class="clear-btn hidden" aria-label="Clear">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          <button id="pasteInputBtn" class="paste-btn" aria-label="Paste">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+            </svg>
+          </button>
+        </div>
+        <div class="analyze-group">
+          <button id="analyzeBtn" class="btn primary-btn block-btn">
+            <span class="btn-text">ANALYZE LINK</span>
+            <span class="loader hidden"></span>
+          </button>
+          <button id="cancelAnalyzeBtn" class="btn danger-btn hidden" aria-label="Cancel Analysis">
+            <span class="btn-text">CANCEL</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Scrape Result Section (Hidden initially) -->
+      <section id="resultSection" class="result-section hidden">
+        <div class="result-card">
+          <div class="result-preview">
+            <img id="resultThumbnail" src="" alt="Media Preview">
+            <div id="mediaTypeBadge" class="badge">VIDEO</div>
+          </div>
+          <div class="result-info">
+            <h2 id="resultTitle" class="result-title">Media Title</h2>
+            <div class="title-controls-row">
+              <button id="toggleTitleBtn" class="toggle-title-btn">See more</button>
+              <button id="copyTitleBtn" class="copy-title-btn" aria-label="Copy Title">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span>COPY</span>
+              </button>
+            </div>
+            <div class="result-meta">
+              <span id="platformTag" class="tag">youtube</span>
+              <!-- Server Selector -->
+              <div id="serverSelectorContainer" class="server-selector-container hidden">
+                <label for="serverSelect">Server:</label>
+                <select id="serverSelect" class="server-select"></select>
+              </div>
+            </div>
+            <!-- Description Container (Hidden if empty) -->
+            <div id="descriptionContainer" class="description-container hidden">
+              <div class="description-header-row">
+                <span class="description-label">Description</span>
+                <button id="copyDescBtn" class="copy-desc-btn" aria-label="Copy Description">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                  <span>COPY</span>
+                </button>
+              </div>
+              <p id="resultDescription" class="result-description"></p>
+              <button id="toggleDescBtn" class="toggle-desc-btn">See more</button>
+            </div>
+          </div>
+          
+          <hr class="divider">
+          
+          <!-- Download Links Grid -->
+          <div class="download-container">
+            <h3>Download Links</h3>
+            <div id="downloadLinksList" class="download-links-list">
+              <!-- Dynamically populated download options -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Supported Platforms Grid -->
+      <section class="platforms-section">
+        <h2>Supported Platforms</h2>
+        <div id="platformsGrid" class="platforms-grid">
+          <!-- Dynamically populated based on scrapr availability -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Floating Download Balloon with Circular Ring -->
+  <div id="downloadBalloon" class="download-balloon hidden">
+    <!-- Flyout detail card on balloon tap -->
+    <div id="balloonSheet" class="balloon-sheet hidden">
+      <div class="balloon-sheet-header">
+        <span class="balloon-sheet-title">Active Downloads</span>
+        <span id="balloonSheetCounter" class="balloon-sheet-counter">0/0</span>
+      </div>
+      <div id="balloonQueueList" class="balloon-queue-list">
+        <!-- Dynamically rendered list of downloading / pending tasks with per-item cancel button -->
+      </div>
+      <div class="balloon-sheet-footer">
+        <button id="balloonCancelAllBtn" class="btn danger-btn block-btn balloon-cancel-btn">
+          CANCEL ALL
+        </button>
+      </div>
+    </div>
+
+    <!-- Solid Fixed 54x54 Circular Button (Icon & Ring 100% locked) -->
+    <div id="balloonCircleBtn" class="balloon-circle">
+      <svg class="balloon-ring-svg" viewBox="0 0 54 54">
+        <circle class="balloon-ring-bg" cx="27" cy="27" r="24" />
+        <circle id="balloonProgressCircle" class="balloon-ring-progress" cx="27" cy="27" r="24" />
+      </svg>
+      <div class="balloon-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Downloads Progress Overlay (For single download / modal inspection) -->
+  <div id="downloadOverlay" class="overlay hidden">
+    <div class="modal-card download-modal">
+      <div class="modal-header">
+        <h2>Downloading...</h2>
+      </div>
+      <div class="modal-body">
+        <p id="downloadProgressTitle" class="download-title">file_name.mp4</p>
+        <div class="progress-bar-container">
+          <div id="downloadProgressBar" class="progress-bar" style="width: 0%"></div>
+        </div>
+        <div class="download-status-row">
+          <span id="downloadProgressPercent">0%</span>
+          <span id="downloadProgressSize">Connecting...</span>
+        </div>
+        <button id="cancelDownloadBtn" class="btn danger-btn block-btn">CANCEL</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Modal -->
+  <div id="historyModal" class="overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Download History</h2>
+        <button id="closeHistoryBtn" class="close-btn" aria-label="Close">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="historyList" class="history-list">
+          <!-- Dynamically populated -->
+        </div>
+        <button id="clearHistoryBtn" class="btn danger-btn block-btn">CLEAR HISTORY</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- In-App Media Player Modal -->
+  <div id="mediaPlayerModal" class="overlay hidden">
+    <div class="modal-card media-player-modal">
+      <div class="modal-header">
+        <h2 id="mediaPlayerTitle">Media Player</h2>
+        <button id="closeMediaPlayerBtn" class="close-btn" aria-label="Close">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body media-player-body">
+        <div id="mediaPlayerContainer" class="media-player-container">
+          <!-- Video or Audio injected here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="overlay hidden">
+    <div class="modal-card settings-modal-card">
+      <div class="modal-header">
+        <h2 id="settingsModalTitle">Settings</h2>
+        <button id="closeSettingsBtn" class="close-btn" aria-label="Close">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body scrollable settings-modal-body">
+        <!-- Main Category Menu -->
+        <div id="settingsMenuMain" class="settings-menu-grid">
+          <!-- 1. General -->
+          <div class="settings-menu-item" data-target="settingsSubGeneral">
+            <div class="menu-icon">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+              </svg>
+            </div>
+            <div class="menu-text">
+              <div class="menu-title" data-i18n="groupGeneral">General</div>
+              <div class="menu-desc" data-i18n="menuGeneralDesc">Language, Auto-Paste & Analyze</div>
+            </div>
+            <div class="menu-arrow">›</div>
+          </div>
+
+          <!-- 2. Appearance UIUX -->
+          <div class="settings-menu-item" data-target="settingsSubLookFeel">
+            <div class="menu-icon">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+              </svg>
+            </div>
+            <div class="menu-text">
+              <div class="menu-title" data-i18n="groupAppearance">Appearance UIUX</div>
+              <div class="menu-desc" data-i18n="menuAppearanceDesc">Dark Mode, Sound & Haptics</div>
+            </div>
+            <div class="menu-arrow">›</div>
+          </div>
+
+          <!-- 3. Storage & Download -->
+          <div class="settings-menu-item" data-target="settingsSubStorage">
+            <div class="menu-icon">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+              </svg>
+            </div>
+            <div class="menu-text">
+              <div class="menu-title" data-i18n="groupStorage">Storage & Download</div>
+              <div class="menu-desc" data-i18n="menuStorageDesc">Filename, Duplicates & Cache</div>
+            </div>
+            <div class="menu-arrow">›</div>
+          </div>
+
+          <!-- 4. Network & Performance -->
+          <div class="settings-menu-item" data-target="settingsSubNetwork">
+            <div class="menu-icon">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 4.5c2.97 0 5.67 1.12 7.74 2.97L12 18.24 4.26 11.47C6.33 9.62 9.03 8.5 12 8.5z"/>
+              </svg>
+            </div>
+            <div class="menu-text">
+              <div class="menu-title" data-i18n="groupNetwork">Network & Performance</div>
+              <div class="menu-desc" data-i18n="menuNetworkDesc">Auto-Retry, Wi-Fi & DNS</div>
+            </div>
+            <div class="menu-arrow">›</div>
+          </div>
+
+          <!-- 5. Advanced -->
+          <div class="settings-menu-item" data-target="settingsSubAdvanced">
+            <div class="menu-icon">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+              </svg>
+            </div>
+            <div class="menu-text">
+              <div class="menu-title" data-i18n="groupAdvanced">Advanced</div>
+              <div class="menu-desc" data-i18n="menuAdvancedDesc">Retention, Media Player & Reset</div>
+            </div>
+            <div class="menu-arrow">›</div>
+          </div>
+
+          <!-- Direct Standalone About Card (outside button, below Advanced) -->
+          <div class="about-card settings-about-standalone">
+            <img src="icon_untukdi_aboutthisapp.webp" alt="Nimiyo App Logo" class="about-logo">
+            <div class="about-info">
+              <h4>NIMIYO Downloader</h4>
+              <p class="about-version" data-i18n="aboutVersion">Version 1.0.0 (Lite)</p>
+              <p class="about-desc" data-i18n="aboutDesc">A premium, modern, and lightweight media downloader engine built on scrapr.</p>
+              <a href="https://github.com/nimidz" target="_blank" class="github-link">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.11.82-.26.82-.577v-2.234c-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22v3.293c0 .319.22.694.825.576C20.565 21.795 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
+                </svg>
+                <span>github.com/nimidz</span>
+              </a>
+              <div class="about-thanks">
+                <span data-i18n="aboutThanks">Thanks to:</span> coflyn for engine run on scrapr
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subpage: 1. General -->
+        <div id="settingsSubGeneral" class="settings-sub-page hidden">
+          <div class="sub-page-header">
+            <button class="settings-back-btn" aria-label="Back">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              <span data-i18n="btnBack">Back</span>
+            </button>
+            <h3 data-i18n="groupGeneral">General</h3>
+          </div>
+          <div class="settings-list">
+            <div class="setting-item">
+              <label for="settingLanguage" data-i18n="labelLanguage">Language</label>
+              <select id="settingLanguage">
+                <option value="en">English</option>
+                <option value="id">Bahasa Indonesia</option>
+                <option value="zh">简体中文</option>
+                <option value="ja">日本語</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <label for="settingAutoPaste" data-i18n="labelAutoPaste">Auto-Paste Link</label>
+              <input type="checkbox" id="settingAutoPaste" class="ios-switch">
+            </div>
+            <div class="setting-item">
+              <label for="settingAutoAnalyze" data-i18n="labelAutoAnalyze">Auto-Analyze on Paste</label>
+              <input type="checkbox" id="settingAutoAnalyze" class="ios-switch">
+            </div>
+            <div class="setting-item">
+              <label for="settingAutoClearInput" data-i18n="labelAutoClearInput">Auto-Clear Input</label>
+              <input type="checkbox" id="settingAutoClearInput" class="ios-switch">
+            </div>
+            <div class="setting-item">
+              <label for="settingIncognito" data-i18n="labelIncognito">Incognito Mode</label>
+              <input type="checkbox" id="settingIncognito" class="ios-switch">
+            </div>
+          </div>
+        </div>
+
+        <!-- Subpage: 2. Appearance UIUX -->
+        <div id="settingsSubLookFeel" class="settings-sub-page hidden">
+          <div class="sub-page-header">
+            <button class="settings-back-btn" aria-label="Back">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              <span data-i18n="btnBack">Back</span>
+            </button>
+            <h3 data-i18n="groupAppearance">Appearance UIUX</h3>
+          </div>
+          <div class="settings-list">
+            <div class="setting-item">
+              <label for="settingDarkMode" data-i18n="labelDarkMode">Dark Mode</label>
+              <input type="checkbox" id="settingDarkMode" class="ios-switch">
+            </div>
+            <div class="setting-item">
+              <label for="settingCompletionSound" data-i18n="labelCompletionSound">Completion Sound</label>
+              <input type="checkbox" id="settingCompletionSound" class="ios-switch" checked>
+            </div>
+            <div class="setting-item">
+              <label for="settingHaptic" data-i18n="labelHaptic">Vibration & Haptics</label>
+              <input type="checkbox" id="settingHaptic" class="ios-switch" checked>
+            </div>
+            <div class="setting-item">
+              <label for="settingAppFont" data-i18n="labelAppFont">App Font</label>
+              <select id="settingAppFont">
+                <option value="misans" data-i18n="optFontMisans">MiSans (Default)</option>
+                <option value="inter" data-i18n="optFontInter">Inter Modern</option>
+                <option value="outfit" data-i18n="optFontOutfit">Outfit Display</option>
+                <option value="mono" data-i18n="optFontMono">Space Mono</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subpage: 3. Storage & Download -->
+        <div id="settingsSubStorage" class="settings-sub-page hidden">
+          <div class="sub-page-header">
+            <button class="settings-back-btn" aria-label="Back">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              <span data-i18n="btnBack">Back</span>
+            </button>
+            <h3 data-i18n="groupStorage">Storage & Download</h3>
+          </div>
+          <div class="settings-list">
+            <div class="setting-item stacked">
+              <label data-i18n="labelStoragePaths">Storage Paths</label>
+              <div class="storage-info-chips">
+                <span class="info-chip">🎬 Downloads/Nimiyo/VideoYo</span>
+                <span class="info-chip">🎵 Downloads/Nimiyo/AudioYo</span>
+                <span class="info-chip">🖼️ Downloads/Nimiyo/ImageYo</span>
+              </div>
+            </div>
+            <div class="setting-item">
+              <label for="settingFilenameTemplate" data-i18n="labelFilenameTemplate">Filename Format</label>
+              <select id="settingFilenameTemplate">
+                <option value="title" data-i18n="optFilenameTitle">Title Only</option>
+                <option value="title-platform" data-i18n="optFilenameTitlePlatform">Title + Platform</option>
+                <option value="title-date" data-i18n="optFilenameTitleDate">Title + Date</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <label for="settingOverwriteMode" data-i18n="labelOverwriteMode">Duplicate Files</label>
+              <select id="settingOverwriteMode">
+                <option value="rename" data-i18n="optOverwriteRename">Auto-Rename (_1, _2)</option>
+                <option value="overwrite" data-i18n="optOverwriteOverwrite">Overwrite Existing</option>
+                <option value="skip" data-i18n="optOverwriteSkip">Skip if Exists</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <label for="settingConcurrentDl" data-i18n="labelConcurrentDl">Concurrent Downloads</label>
+              <select id="settingConcurrentDl">
+                <option value="1" data-i18n="optConcurrent1">1 (Sequential)</option>
+                <option value="2" data-i18n="optConcurrent2">2 at once</option>
+                <option value="3" data-i18n="optConcurrent3">3 at once</option>
+                <option value="5" data-i18n="optConcurrent5">5 at once</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <label for="settingBatchPhotoMode" data-i18n="labelBatchPhotoMode">Batch Photo Mode</label>
+              <select id="settingBatchPhotoMode">
+                <option value="all" data-i18n="optBatchPhotoAll">Download All Photos</option>
+                <option value="first" data-i18n="optBatchPhotoFirst">First Photo Only</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <label for="settingAutoDownload" data-i18n="labelAutoDownload">Auto-Download on Analyze</label>
+              <input type="checkbox" id="settingAutoDownload" class="ios-switch">
+            </div>
+            <div class="setting-item">
+              <label data-i18n="labelTotalStorage">Total Media Size</label>
+              <span class="info-val-badge" id="storageSizeDisplay">0 MB</span>
+            </div>
+            <div class="setting-item action-row">
+              <button id="clearCacheBtn" class="btn outline-btn full-btn" data-i18n="btnClearCache">CLEAR APP CACHE</button>
+            </div>
+            <div class="setting-item action-row">
+              <button id="wipeDataBtn" class="btn danger-btn full-btn" data-i18n="btnWipeData">WIPE ALL DATA & RESET</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subpage: 4. Network & Performance -->
+        <div id="settingsSubNetwork" class="settings-sub-page hidden">
+          <div class="sub-page-header">
+            <button class="settings-back-btn" aria-label="Back">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              <span data-i18n="btnBack">Back</span>
+            </button>
+            <h3 data-i18n="groupNetwork">Network & Performance</h3>
+          </div>
+          <div class="settings-list">
+            <div class="setting-item">
+              <label for="settingAutoRetry" data-i18n="labelAutoRetry">Auto-Retry Download</label>
+              <input type="checkbox" id="settingAutoRetry" class="ios-switch" checked>
+            </div>
+            <div class="setting-item">
+              <label for="settingMaxRetry" data-i18n="labelMaxRetry">Max Retry Count</label>
+              <select id="settingMaxRetry">
+                <option value="1" data-i18n="optRetry1">1 (No Retry)</option>
+                <option value="2" data-i18n="optRetry2">2 Attempts</option>
+                <option value="3" data-i18n="optRetry3" selected>3 Attempts</option>
+                <option value="5" data-i18n="optRetry5">5 Attempts</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <label for="settingWifiOnly" data-i18n="labelWifiOnly">Download via Wi-Fi Only</label>
+              <input type="checkbox" id="settingWifiOnly" class="ios-switch">
+            </div>
+            <div class="setting-item">
+              <label for="settingDoh" data-i18n="labelDoh">DNS over HTTPS</label>
+              <select id="settingDoh">
+                <option value="off" data-i18n="optDohOff">Off (System DNS)</option>
+                <option value="cloudflare">Cloudflare (1.1.1.1)</option>
+                <option value="google">Google (8.8.8.8)</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <label for="settingHeaderSpoofing" data-i18n="labelHeaderSpoofing">Anti-403 Header Guard</label>
+              <input type="checkbox" id="settingHeaderSpoofing" class="ios-switch" checked>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subpage: 5. Advanced -->
+        <div id="settingsSubAdvanced" class="settings-sub-page hidden">
+          <div class="sub-page-header">
+            <button class="settings-back-btn" aria-label="Back">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              <span data-i18n="btnBack">Back</span>
+            </button>
+            <h3 data-i18n="groupAdvanced">Advanced</h3>
+          </div>
+          <div class="settings-list">
+            <div class="setting-item">
+              <label for="settingHistoryLimit" data-i18n="labelHistoryLimit">History Retention Limit</label>
+              <select id="settingHistoryLimit">
+                <option value="unlimited" data-i18n="optUnlimited">Unlimited</option>
+                <option value="50" data-i18n="optHistory50">50 items</option>
+                <option value="100" data-i18n="optHistory100">100 items</option>
+                <option value="200" data-i18n="optHistory200">200 items</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <label for="settingAutoClearDays" data-i18n="labelAutoClearDays">Auto-Clear History</label>
+              <select id="settingAutoClearDays">
+                <option value="off" data-i18n="optDaysOff">Off</option>
+                <option value="1" data-i18n="optDays1">1 Day</option>
+                <option value="7" data-i18n="optDays7">7 Days</option>
+                <option value="30" data-i18n="optDays30">30 Days</option>
+                <option value="90" data-i18n="optDays90">90 Days</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <label for="settingAutoClearCacheDays" data-i18n="labelAutoClearCacheDays">Auto-Clear Cache</label>
+              <select id="settingAutoClearCacheDays">
+                <option value="off" data-i18n="optDaysOff">Off</option>
+                <option value="1" data-i18n="optDays1">1 Day</option>
+                <option value="7" data-i18n="optDays7">7 Days</option>
+                <option value="30" data-i18n="optDays30">30 Days</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <label for="settingAutoPlay" data-i18n="labelAutoPlay">Auto-Play Media Player</label>
+              <input type="checkbox" id="settingAutoPlay" class="ios-switch" checked>
+            </div>
+            <div class="setting-item">
+              <label for="settingAutoLoop" data-i18n="labelAutoLoop">Auto-Loop Media Player</label>
+              <input type="checkbox" id="settingAutoLoop" class="ios-switch" checked>
+            </div>
+            <div class="setting-item">
+              <label for="settingKeepAwake" data-i18n="labelKeepAwake">Keep Screen Awake</label>
+              <input type="checkbox" id="settingKeepAwake" class="ios-switch">
+            </div>
+            <div class="setting-item action-row">
+              <button id="resetSettingsBtn" class="btn danger-btn full-btn" data-i18n="btnResetSettings">RESET ALL SETTINGS TO DEFAULT</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Load bundled scrapr -->
+  <script src="js/scrapr.bundle.js"></script>
+  <!-- Load main app logic -->
+  <script src="app.js"></script>
+</body>
+</html>

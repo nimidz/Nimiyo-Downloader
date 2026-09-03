@@ -1,0 +1,13 @@
+{
+  "appId": "com.nimiyo.dllite",
+  "appName": "Nimiyo",
+  "webDir": "www",
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    },
+    "CapacitorCookies": {
+      "enabled": true
+    }
+  }
+}
