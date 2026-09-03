@@ -307,21 +307,79 @@
 
           <!-- Direct Standalone About Card (outside button, below Advanced) -->
           <div class="about-card settings-about-standalone">
-            <img src="icon_untukdi_aboutthisapp.webp" alt="Nimiyo App Logo" class="about-logo">
-            <div class="about-info">
-              <h4>NIMIYO Downloader</h4>
-              <p class="about-version" data-i18n="aboutVersion">Version 1.0.0 (Lite)</p>
-              <p class="about-desc" data-i18n="aboutDesc">A premium, modern, and lightweight media downloader engine built on scrapr.</p>
-              <a href="https://github.com/nimidz" target="_blank" class="github-link">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.11.82-.26.82-.577v-2.234c-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22v3.293c0 .319.22.694.825.576C20.565 21.795 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
-                </svg>
-                <span>github.com/nimidz</span>
-              </a>
-              <div class="about-thanks">
-                <span data-i18n="aboutThanks">Thanks to:</span> coflyn for engine run on scrapr
+            <div class="about-header-row">
+              <img src="icon_untukdi_aboutthisapp.webp" alt="Nimiyo App Logo" class="about-logo">
+              <div class="about-title-group">
+                <h4>NIMIYO Downloader</h4>
+                <div class="about-badge-pill" data-i18n="aboutVersion">v1.0.0 (Lite)</div>
               </div>
-              <button id="btnCheckUpdateManual" class="btn outline-btn check-update-btn">
+            </div>
+
+            <p class="about-desc" data-i18n="aboutDesc">Universal media downloader engine built on top of scrapr. Fast, clean, and ad-free.</p>
+
+            <!-- Social Media Grid (Follow Developer) -->
+            <div class="about-social-section">
+              <div class="about-social-heading" data-i18n="aboutFollowMe">Follow Developer:</div>
+              <div class="about-social-grid">
+                <!-- Instagram -->
+                <a href="https://instagram.com/nimidzy" target="_blank" class="social-chip ig-chip">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
+                  </svg>
+                  <span>@nimidzy</span>
+                </a>
+
+                <!-- TikTok -->
+                <a href="https://tiktok.com/@nimidz" target="_blank" class="social-chip tiktok-chip">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+                    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.01 1.63 4.14 1.13 1.2 2.67 1.95 4.3 2.11v3.83c-1.85-.07-3.66-.74-5.12-1.92-.09-.08-.18-.16-.26-.25v6.59c.02 1.83-.53 3.63-1.58 5.11-1.37 1.89-3.56 3.06-5.91 3.19-2.6.14-5.18-.89-6.9-2.85C.8 17.92-.07 14.93.18 12.01c.29-3.23 2.45-6.01 5.6-6.85 1.05-.28 2.15-.34 3.23-.2v3.74c-.95-.21-1.96-.09-2.81.41-1.25.72-2.02 2.06-2 3.5.03 1.81 1.34 3.39 3.12 3.73 1.25.24 2.57-.1 3.42-1.03.62-.68.96-1.57.96-2.5V.02z"/>
+                  </svg>
+                  <span>@nimidz</span>
+                </a>
+
+                <!-- YouTube -->
+                <a href="https://youtube.com/@nimidz" target="_blank" class="social-chip yt-chip">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+                    <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.108C19.524 3.545 12 3.545 12 3.545s-7.525 0-9.387.51A3.003 3.003 0 0 0 .502 6.163C0 8.07 0 12 0 12s0 3.93.502 5.837a3.003 3.003 0 0 0 2.11 2.108c1.862.51 9.387.51 9.387.51s7.525 0 9.387-.51a3.003 3.003 0 0 0 2.11-2.108C24 15.93 24 12 24 12s0-3.93-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                  </svg>
+                  <span>@nimidz</span>
+                </a>
+
+                <!-- GitHub -->
+                <a href="https://github.com/nimidz" target="_blank" class="social-chip gh-chip">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.11.82-.26.82-.577v-2.234c-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22v3.293c0 .319.22.694.825.576C20.565 21.795 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
+                  </svg>
+                  <span>nimidz</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Support / Trakteer Button -->
+            <a href="https://trakteer.id/nimidz" target="_blank" class="trakteer-btn">
+              <span class="trakteer-icon">☕</span>
+              <div class="trakteer-text-group">
+                <span class="trakteer-title" data-i18n="btnSupportMe">Dukung Saya (Trakteer)</span>
+                <span class="trakteer-sub" data-i18n="supportDesc">Bantu pengembangan NIMIYO agar terus update</span>
+              </div>
+              <span class="trakteer-arrow">➔</span>
+            </a>
+
+            <!-- Thanks To -->
+            <div class="about-thanks-box">
+              <span class="thanks-label" data-i18n="aboutThanks">Thanks to:</span>
+              <span class="thanks-name">coflyn</span> (scrapr media engine)
+            </div>
+
+            <!-- Action Buttons Row -->
+            <div class="about-actions-grid">
+              <button id="btnOpenRulesModal" class="btn outline-btn about-sub-btn">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                  <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 6h2v2h-2V7zm0 4h2v6h-2v-6z"/>
+                </svg>
+                <span data-i18n="btnRules">Ketentuan & Aturan</span>
+              </button>
+              <button id="btnCheckUpdateManual" class="btn outline-btn about-sub-btn">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                   <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
                 </svg>
@@ -631,6 +689,59 @@
         <div class="action-row update-action-row" id="updateActionRow">
           <button id="btnLaterUpdate" class="btn outline-btn" data-i18n="btnLater">Nanti</button>
           <button id="btnStartUpdate" class="btn primary-btn" data-i18n="btnUpdateNow">UPDATE SEKARANG</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rules & Community Guidelines Modal -->
+  <div id="rulesModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content rules-modal-content">
+      <div class="modal-header">
+        <div class="modal-header-icon-title">
+          <span class="rules-shield-icon">🛡️</span>
+          <h3 data-i18n="rulesModalTitle">Ketentuan & Aturan Aplikasi</h3>
+        </div>
+        <button id="closeRulesModalBtn" class="icon-btn" aria-label="Close">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body rules-modal-body">
+        <div class="rules-intro" data-i18n="rulesIntroText">
+          Selamat datang di NIMIYO Downloader. Dengan menggunakan aplikasi ini, Anda setuju untuk mematuhi aturan dan ketentuan berikut:
+        </div>
+
+        <div class="rules-section-box danger-box">
+          <div class="rules-box-heading">
+            <span class="rules-box-badge danger" data-i18n="rulesBadgeProhibited">❌ DILARANG KERAS</span>
+            <span class="rules-box-title" data-i18n="rulesProhibitedTitle">Konten yang Dilarang Diunduh:</span>
+          </div>
+          <ul class="rules-items-list" id="rulesProhibitedList">
+            <li data-i18n="rulesItemNsfw"><strong>Pornografi & NSFW (18+)</strong>: Segala bentuk konten dewasa, ketelanjangan, atau materi seksual eksplisit.</li>
+            <li data-i18n="rulesItemViolence"><strong>Kekerasan & Kebrutalan</strong>: Adegan kekerasan ekstrem, penyiksaan, darah/gore, atau tindakan berbahaya.</li>
+            <li data-i18n="rulesItemHate"><strong>Pelecehan & Kebencian</strong>: Ujaran kebencian (SARA), perundungan siber, atau tindakan intimidasi.</li>
+            <li data-i18n="rulesItemIllegal"><strong>Aktivitas Ilegal</strong>: Materi pelanggaran hukum, promosi senjata ilegal, atau narkotika.</li>
+          </ul>
+        </div>
+
+        <div class="rules-section-box info-box">
+          <div class="rules-box-heading">
+            <span class="rules-box-badge info" data-i18n="rulesBadgeDisclaimer">⚖️ KETENTUAN & HAK CIPTA</span>
+            <span class="rules-box-title" data-i18n="rulesDisclaimerTitle">Hak Cipta & Disclaimer:</span>
+          </div>
+          <ul class="rules-items-list" id="rulesDisclaimerList">
+            <li data-i18n="rulesItemPersonal">NIMIYO adalah utilitas bantu untuk keperluan arsip pribadi (<em>personal backup / offline consumption</em>).</li>
+            <li data-i18n="rulesItemCopyright">Hormati hak cipta kreator. Dilarang mengomersialkan hasil unduhan tanpa izin pemilik hak cipta resmi.</li>
+            <li data-i18n="rulesItemLegal">Pengembang tidak menyimpan file media apa pun. Pengguna bertanggung jawab penuh secara hukum atas segala konten yang diunduh.</li>
+          </ul>
+        </div>
+
+        <div class="rules-action-box">
+          <button id="btnAgreeRules" class="btn primary-btn full-btn" data-i18n="btnAgreeRules">SAYA SETUJU & MENGERTI</button>
         </div>
       </div>
     </div>

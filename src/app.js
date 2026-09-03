@@ -165,7 +165,25 @@ const translations = {
     btnUpdateNow: "UPDATE NOW",
     toastAppUpToDate: "You are using the latest version (v{version}).",
     toastUpdateChecking: "Checking for updates...",
-    toastUpdateCheckFailed: "Could not check for updates. Check internet connection."
+    toastUpdateCheckFailed: "Could not check for updates. Check internet connection.",
+    aboutFollowMe: "Follow Developer:",
+    btnSupportMe: "Support Me (Trakteer)",
+    supportDesc: "Support NIMIYO development & ongoing updates",
+    btnRules: "Rules & Terms",
+    rulesModalTitle: "Terms of Use & Guidelines",
+    rulesIntroText: "Welcome to NIMIYO Downloader. By accessing or using this app, you agree to comply with the following terms & guidelines:",
+    rulesBadgeProhibited: "❌ STRICTLY PROHIBITED",
+    rulesProhibitedTitle: "Prohibited Content:",
+    rulesItemNsfw: "Pornography & NSFW (18+): Any sexually explicit, nudity, or adult media.",
+    rulesItemViolence: "Violence & Gore: Extreme violence, physical harm, brutality, or dangerous acts.",
+    rulesItemHate: "Hate Speech & Harassment: Discrimination, hate speech, or cyberbullying.",
+    rulesItemIllegal: "Illegal Content: Unlawful acts, extremist propaganda, or narcotics.",
+    rulesBadgeDisclaimer: "⚖️ TERMS & COPYRIGHT",
+    rulesDisclaimerTitle: "Copyright & Disclaimer:",
+    rulesItemPersonal: "NIMIYO is a tool for personal offline archiving purposes only.",
+    rulesItemCopyright: "Respect creator copyright. Commercial redistribution without permission is strictly prohibited.",
+    rulesItemLegal: "Developers do not host any media files. Users assume full legal liability for submitted URLs.",
+    btnAgreeRules: "I AGREE & UNDERSTAND"
   },
   id: {
     appTitle: "NIMIYO",
@@ -324,7 +342,25 @@ const translations = {
     btnUpdateNow: "UPDATE SEKARANG",
     toastAppUpToDate: "Aplikasi sudah dalam versi terbaru (v{version}).",
     toastUpdateChecking: "Memeriksa pembaruan...",
-    toastUpdateCheckFailed: "Gagal memeriksa pembaruan. Periksa koneksi internet."
+    toastUpdateCheckFailed: "Gagal memeriksa pembaruan. Periksa koneksi internet.",
+    aboutFollowMe: "Ikuti Pengembang:",
+    btnSupportMe: "Dukung Saya (Trakteer)",
+    supportDesc: "Bantu pengembangan NIMIYO agar terus update",
+    btnRules: "Ketentuan & Aturan",
+    rulesModalTitle: "Ketentuan & Aturan Aplikasi",
+    rulesIntroText: "Selamat datang di NIMIYO Downloader. Dengan menggunakan aplikasi ini, Anda setuju untuk mematuhi aturan dan ketentuan berikut:",
+    rulesBadgeProhibited: "❌ DILARANG KERAS",
+    rulesProhibitedTitle: "Konten yang Dilarang Diunduh:",
+    rulesItemNsfw: "Pornografi & NSFW (18+): Segala bentuk konten dewasa, ketelanjangan, atau materi seksual eksplisit.",
+    rulesItemViolence: "Kekerasan & Kebrutalan: Adegan kekerasan ekstrem, penyiksaan, darah/gore, atau tindakan berbahaya.",
+    rulesItemHate: "Pelecehan & Kebencian: Ujaran kebencian (SARA), perundungan siber, atau tindakan intimidasi.",
+    rulesItemIllegal: "Aktivitas Ilegal: Materi pelanggaran hukum, promosi senjata ilegal, atau narkotika.",
+    rulesBadgeDisclaimer: "⚖️ KETENTUAN & HAK CIPTA",
+    rulesDisclaimerTitle: "Hak Cipta & Disclaimer:",
+    rulesItemPersonal: "NIMIYO adalah utilitas bantu untuk keperluan arsip pribadi (personal backup / offline consumption).",
+    rulesItemCopyright: "Hormati hak cipta kreator. Dilarang mengomersialkan hasil unduhan tanpa izin pemilik hak cipta resmi.",
+    rulesItemLegal: "Pengembang tidak menyimpan file media apa pun. Pengguna bertanggung jawab penuh secara hukum atas segala konten yang diunduh.",
+    btnAgreeRules: "SAYA SETUJU & MENGERTI"
   },
   zh: {
     appTitle: "NIMIYO",
@@ -483,7 +519,25 @@ const translations = {
     btnUpdateNow: "立即更新",
     toastAppUpToDate: "已是最新版本 (v{version})。",
     toastUpdateChecking: "正在检查更新...",
-    toastUpdateCheckFailed: "检查更新失败，请检查网络连接。"
+    toastUpdateCheckFailed: "检查更新失败，请检查网络连接。",
+    aboutFollowMe: "关注开发者:",
+    btnSupportMe: "赞助支持 (Trakteer)",
+    supportDesc: "助力 NIMIYO 持续更新与维护",
+    btnRules: "用户条款与规范",
+    rulesModalTitle: "使用条款与社区规范",
+    rulesIntroText: "欢迎使用 NIMIYO 下载器。使用本应用即表示您同意遵守以下规则与条款：",
+    rulesBadgeProhibited: "❌ 严禁下载",
+    rulesProhibitedTitle: "禁止下载的内容：",
+    rulesItemNsfw: "色情与成人内容 (18+)：任何形式的露骨色情、裸露或成人媒体。",
+    rulesItemViolence: "暴力与血腥：极端暴力、人身伤害、残虐行为或危险活动。",
+    rulesItemHate: "仇恨言论与骚扰：仇恨言论、歧视或网络霸凌。",
+    rulesItemIllegal: "违法活动：违法犯罪行为、极端主义宣传或违禁品。",
+    rulesBadgeDisclaimer: "⚖️ 版权与免责声明",
+    rulesDisclaimerTitle: "版权与责任归属：",
+    rulesItemPersonal: "NIMIYO 仅为个人离线归档的辅助工具。",
+    rulesItemCopyright: "请尊重创作者版权。严禁未经授权将下载内容用于商业盈利。",
+    rulesItemLegal: "开发者不存储或分发任何媒体文件。用户对其提交的下载链接承担全部法律责任。",
+    btnAgreeRules: "我同意并理解"
   },
   ja: {
     appTitle: "NIMIYO",
@@ -642,7 +696,25 @@ const translations = {
     btnUpdateNow: "今すぐ更新",
     toastAppUpToDate: "最新バージョンを使用しています (v{version})。",
     toastUpdateChecking: "更新を確認中...",
-    toastUpdateCheckFailed: "更新の確認に失敗しました。接続を確認してください。"
+    toastUpdateCheckFailed: "更新の確認に失敗しました。接続を確認してください。",
+    aboutFollowMe: "開発者をフォロー:",
+    btnSupportMe: "開発者を支援 (Trakteer)",
+    supportDesc: "NIMIYO の継続的な更新を支援",
+    btnRules: "利用規約とルール",
+    rulesModalTitle: "利用規約とガイドライン",
+    rulesIntroText: "NIMIYO ダウンローダーへようこそ。本アプリを使用することにより、以下の規約に同意したものとみなされます：",
+    rulesBadgeProhibited: "❌ 厳格な禁止事項",
+    rulesProhibitedTitle: "ダウンロード禁止コンテンツ：",
+    rulesItemNsfw: "ポルノおよび成人向け (18+)：あらゆる露骨な性的コンテンツ、ヌード、成人向けメディア。",
+    rulesItemViolence: "暴力および残虐表現：過激な暴力、身体的危害、残虐行為、危険な活動。",
+    rulesItemHate: "ヘイトスピーチおよび嫌がらせ：差別的表現やネットいじめ。",
+    rulesItemIllegal: "違法コンテンツ：法律違反、過激派の宣伝、違法薬物。",
+    rulesBadgeDisclaimer: "⚖️ 規約と免責事項",
+    rulesDisclaimerTitle: "著作権と免責事項：",
+    rulesItemPersonal: "NIMIYO は個人利用のオフライン保存専用ユーティリティです。",
+    rulesItemCopyright: "著作権を尊重してください。無断での商用再配布は禁止されています。",
+    rulesItemLegal: "開発者はメディアファイルを保存していません。ユーザーが利用に対して法的責任を負います。",
+    btnAgreeRules: "同意して続ける"
   }
 };
 
@@ -739,6 +811,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
   checkClipboardOnResume();
   checkInstallPermissionStatus();
+  checkRulesOnboarding();
   setTimeout(() => {
     checkForAppUpdates(false);
   }, 2500);
@@ -1534,6 +1607,34 @@ function setupEventListeners() {
     btnStartUpdate.addEventListener("click", () => {
       triggerHaptic();
       downloadAndInstallUpdate();
+    });
+  }
+
+  // Rules & Terms Modal Listeners
+  const btnOpenRulesModal = document.getElementById("btnOpenRulesModal");
+  if (btnOpenRulesModal) {
+    btnOpenRulesModal.addEventListener("click", () => {
+      triggerHaptic();
+      const modal = document.getElementById("rulesModal");
+      if (modal) modal.classList.remove("hidden");
+    });
+  }
+  const closeRulesModalBtn = document.getElementById("closeRulesModalBtn");
+  if (closeRulesModalBtn) {
+    closeRulesModalBtn.addEventListener("click", () => {
+      triggerHaptic();
+      const modal = document.getElementById("rulesModal");
+      if (modal) modal.classList.add("hidden");
+    });
+  }
+  const btnAgreeRules = document.getElementById("btnAgreeRules");
+  if (btnAgreeRules) {
+    btnAgreeRules.addEventListener("click", () => {
+      triggerHaptic();
+      localStorage.setItem("nimiyo_rules_accepted", "true");
+      const modal = document.getElementById("rulesModal");
+      if (modal) modal.classList.add("hidden");
+      showToast(getTranslation("toastSettingsSaved"), "success");
     });
   }
 
@@ -3783,5 +3884,21 @@ async function downloadAndInstallUpdate(apkUrl) {
     if (progressBox) progressBox.classList.add("hidden");
     if (actionRow) actionRow.classList.remove("hidden");
     showToast(`${getTranslation("toastDownloadFailManualServer")}: ${err.message}`, "error");
+  }
+}
+
+// -------------------------------------------------------------
+// First-Time Rules & Guidelines Onboarding Check
+// -------------------------------------------------------------
+function checkRulesOnboarding() {
+  const isAccepted = localStorage.getItem("nimiyo_rules_accepted");
+  if (isAccepted !== "true") {
+    setTimeout(() => {
+      const modal = document.getElementById("rulesModal");
+      if (modal) {
+        modal.classList.remove("hidden");
+        triggerHaptic();
+      }
+    }, 400);
   }
 }
