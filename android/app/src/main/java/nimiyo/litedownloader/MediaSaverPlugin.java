@@ -18,6 +18,8 @@ import android.os.Build;
 import android.os.Environment;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -1611,6 +1613,11 @@ public class MediaSaverPlugin extends Plugin {
                 }
 
                 conn = connectWithRedirects(url, "GET", null);
+                int responseCode = conn.getResponseCode();
+                if (responseCode >= 400) {
+                    throw new Exception("Server returned HTTP " + responseCode);
+                }
+
                 long contentLength = conn.getContentLengthLong();
 
                 is = conn.getInputStream();
@@ -1624,15 +1631,21 @@ public class MediaSaverPlugin extends Plugin {
                     fos.write(buffer, 0, len);
                     total += len;
                     long now = System.currentTimeMillis();
-                    if (now - lastNotify > 150 && contentLength > 0) {
+                    if (now - lastNotify > 150) {
                         lastNotify = now;
-                        int percent = (int) Math.min((total * 100) / contentLength, 99);
+                        int percent = contentLength > 0 ? (int) Math.min((total * 100) / contentLength, 99) : 50;
                         JSObject progressData = new JSObject();
                         progressData.put("progress", percent);
+                        progressData.put("bytesDownloaded", total);
+                        progressData.put("totalBytes", contentLength);
                         notifyListeners("onUpdateDownloadProgress", progressData);
                     }
                 }
                 fos.flush();
+                try { fos.close(); } catch (Exception ignored) {}
+                fos = null;
+
+                apkFile.setReadable(true, false);
 
                 JSObject ret = new JSObject();
                 ret.put("success", true);
@@ -1701,6 +1714,11 @@ public class MediaSaverPlugin extends Plugin {
                         File inExternal = new File(context.getExternalFilesDir(null), filePath);
                         if (inExternal.exists()) {
                             apkFile = inExternal;
+                        } else {
+                            File inDownloads = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), filePath);
+                            if (inDownloads.exists()) {
+                                apkFile = inDownloads;
+                            }
                         }
                     }
                 }
@@ -1710,6 +1728,8 @@ public class MediaSaverPlugin extends Plugin {
                 call.reject("APK file does not exist: " + filePath);
                 return;
             }
+
+            apkFile.setReadable(true, false);
 
             Uri apkUri;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -1726,6 +1746,16 @@ public class MediaSaverPlugin extends Plugin {
             intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            List<ResolveInfo> resInfoList = context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+            if (resInfoList != null) {
+                for (ResolveInfo resolveInfo : resInfoList) {
+                    if (resolveInfo.activityInfo != null && resolveInfo.activityInfo.packageName != null) {
+                        context.grantUriPermission(resolveInfo.activityInfo.packageName, apkUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    }
+                }
+            }
+
             context.startActivity(intent);
 
             JSObject ret = new JSObject();

@@ -4396,16 +4396,7 @@ function setupEventListeners() {
     if (document.visibilityState === "visible") {
       loadHistory();
       setTimeout(checkClipboardOnResume, 350);
-      checkInstallPermissionStatus().then(granted => {
-        if (granted && lastDownloadedUpdateApkPath) {
-          const apkToInstall = lastDownloadedUpdateApkPath;
-          lastDownloadedUpdateApkPath = null;
-          const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
-          if (MediaSaver && typeof MediaSaver.installApk === "function") {
-            MediaSaver.installApk({ filePath: apkToInstall });
-          }
-        }
-      });
+      checkAndResumePendingUpdateInstall();
       if (window.nimiyoMusicPlayer) window.nimiyoMusicPlayer.autoCheckPermissionOnResume().catch(() => {});
     }
   });
@@ -4413,16 +4404,7 @@ function setupEventListeners() {
   window.addEventListener("focus", () => {
     loadHistory();
     setTimeout(checkClipboardOnResume, 350);
-    checkInstallPermissionStatus().then(granted => {
-      if (granted && lastDownloadedUpdateApkPath) {
-        const apkToInstall = lastDownloadedUpdateApkPath;
-        lastDownloadedUpdateApkPath = null;
-        const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
-        if (MediaSaver && typeof MediaSaver.installApk === "function") {
-          MediaSaver.installApk({ filePath: apkToInstall });
-        }
-      }
-    });
+    checkAndResumePendingUpdateInstall();
     if (window.nimiyoMusicPlayer) window.nimiyoMusicPlayer.autoCheckPermissionOnResume().catch(() => {});
   });
 
@@ -4432,32 +4414,14 @@ function setupEventListeners() {
       if (isActive) {
         loadHistory();
         setTimeout(checkClipboardOnResume, 350);
-        checkInstallPermissionStatus().then(granted => {
-          if (granted && lastDownloadedUpdateApkPath) {
-            const apkToInstall = lastDownloadedUpdateApkPath;
-            lastDownloadedUpdateApkPath = null;
-            const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
-            if (MediaSaver && typeof MediaSaver.installApk === "function") {
-              MediaSaver.installApk({ filePath: apkToInstall });
-            }
-          }
-        });
+        checkAndResumePendingUpdateInstall();
         if (window.nimiyoMusicPlayer) window.nimiyoMusicPlayer.autoCheckPermissionOnResume().catch(() => {});
       }
     });
     AppPlugin.addListener("resume", () => {
       loadHistory();
       setTimeout(checkClipboardOnResume, 350);
-      checkInstallPermissionStatus().then(granted => {
-        if (granted && lastDownloadedUpdateApkPath) {
-          const apkToInstall = lastDownloadedUpdateApkPath;
-          lastDownloadedUpdateApkPath = null;
-          const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
-          if (MediaSaver && typeof MediaSaver.installApk === "function") {
-            MediaSaver.installApk({ filePath: apkToInstall });
-          }
-        }
-      });
+      checkAndResumePendingUpdateInstall();
       if (window.nimiyoMusicPlayer) window.nimiyoMusicPlayer.autoCheckPermissionOnResume().catch(() => {});
     });
   }
@@ -7256,7 +7220,27 @@ async function downloadManualUpdate(apkUrl) {
   }
 }
 
-let lastDownloadedUpdateApkPath = null;
+let lastDownloadedUpdateApkPath = localStorage.getItem("nimiyo_pending_apk_path") || null;
+
+// Check if install permission was just granted and resume APK installation
+async function checkAndResumePendingUpdateInstall() {
+  const granted = await checkInstallPermissionStatus();
+  const pendingPath = lastDownloadedUpdateApkPath || localStorage.getItem("nimiyo_pending_apk_path");
+  if (granted && pendingPath) {
+    lastDownloadedUpdateApkPath = null;
+    localStorage.removeItem("nimiyo_pending_apk_path");
+    const progressText = document.getElementById("updateProgressText");
+    if (progressText) progressText.innerText = "Memulai pemasangan pembaruan...";
+    const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
+    if (MediaSaver && typeof MediaSaver.installApk === "function") {
+      try {
+        await MediaSaver.installApk({ filePath: pendingPath });
+      } catch (err) {
+        console.error("Install pending APK error:", err);
+      }
+    }
+  }
+}
 
 // Download and Install APK Update directly inside the app
 async function downloadAndInstallUpdate(apkUrl) {
@@ -7278,48 +7262,91 @@ async function downloadAndInstallUpdate(apkUrl) {
   if (progressText) progressText.innerText = getTranslation("updateDownloading", "Mengunduh pembaruan...");
 
   const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
-
   let progressListener = null;
-  if (MediaSaver && typeof MediaSaver.addListener === "function") {
-    progressListener = MediaSaver.addListener("onUpdateDownloadProgress", (data) => {
-      if (data && typeof data.progress === "number") {
-        const pct = Math.min(Math.max(data.progress, 0), 99);
-        if (progressBarFill) progressBarFill.style.width = `${pct}%`;
-        if (progressPercentText) progressPercentText.innerText = `${pct}%`;
-      }
-    });
-  }
+  let simInterval = null;
 
   try {
+    let apkFilePath = null;
+
     if (MediaSaver && typeof MediaSaver.downloadUpdateApk === "function" && window.Capacitor?.isNativePlatform()) {
-      const res = await MediaSaver.downloadUpdateApk({ url: apkUrl });
-      if (progressListener) {
-        try { progressListener.remove(); } catch (_) {}
+      if (typeof MediaSaver.addListener === "function") {
+        progressListener = MediaSaver.addListener("onUpdateDownloadProgress", (data) => {
+          if (data && typeof data.progress === "number") {
+            const pct = Math.min(Math.max(data.progress, 0), 99);
+            if (progressBarFill) progressBarFill.style.width = `${pct}%`;
+            if (progressPercentText) progressPercentText.innerText = `${pct}%`;
+          }
+        });
       }
 
+      const res = await MediaSaver.downloadUpdateApk({ url: apkUrl });
       if (res && res.success && res.filePath) {
-        lastDownloadedUpdateApkPath = res.filePath;
-        if (progressBarFill) progressBarFill.style.width = "100%";
-        if (progressPercentText) progressPercentText.innerText = "100%";
-        if (progressText) progressText.innerText = "Memulai pemasangan...";
-
-        // Trigger native package install prompt immediately
-        const installRes = await MediaSaver.installApk({ filePath: res.filePath });
-        if (installRes && installRes.permissionRequired) {
-          if (progressText) progressText.innerText = "Aktifkan izin instalasi untuk melanjutkan...";
-          showToast("Aktifkan izin instalasi aplikasi tidak dikenal untuk melanjutkan", "info");
-        }
+        apkFilePath = res.filePath;
       } else {
         throw new Error(res?.error || "Gagal mengunduh berkas pembaruan");
       }
+    } else if (MediaSaver && typeof MediaSaver.downloadFile === "function" && window.Capacitor?.isNativePlatform()) {
+      // In-app fallback using downloadFile if downloadUpdateApk is not present
+      const version = latestUpdateInfo?.versionName || latestUpdateInfo?.versionCode || "latest";
+      const fileName = `Nimiyo_v${version}.apk`;
+
+      let downloadPercent = 0;
+      simInterval = setInterval(() => {
+        if (downloadPercent < 90) {
+          downloadPercent += Math.floor(Math.random() * 8) + 3;
+          if (downloadPercent > 90) downloadPercent = 90;
+          if (progressBarFill) progressBarFill.style.width = `${downloadPercent}%`;
+          if (progressPercentText) progressPercentText.innerText = `${downloadPercent}%`;
+        }
+      }, 250);
+
+      const res = await MediaSaver.downloadFile({
+        url: apkUrl,
+        fileName: fileName,
+        fileType: "apk",
+        overwriteMode: "overwrite"
+      });
+
+      if (res && res.success && (res.filePath || res.fileName)) {
+        apkFilePath = res.filePath || res.fileName;
+      } else {
+        throw new Error("Gagal mengunduh berkas pembaruan");
+      }
     } else {
-      // Browser fallback
+      // Only fallback to browser if not running on native platform
       window.open(apkUrl, "_blank");
       showToast(getTranslation("toastDownloadSuccess"), "success");
       if (progressBox) progressBox.classList.add("hidden");
       if (actionRow) actionRow.classList.remove("hidden");
+      return;
+    }
+
+    if (simInterval) clearInterval(simInterval);
+    if (progressListener) {
+      try { progressListener.remove(); } catch (_) {}
+    }
+
+    if (apkFilePath) {
+      lastDownloadedUpdateApkPath = apkFilePath;
+      localStorage.setItem("nimiyo_pending_apk_path", apkFilePath);
+
+      if (progressBarFill) progressBarFill.style.width = "100%";
+      if (progressPercentText) progressPercentText.innerText = "100%";
+      if (progressText) progressText.innerText = "Memulai pemasangan...";
+
+      // Trigger native package install prompt immediately
+      if (MediaSaver && typeof MediaSaver.installApk === "function") {
+        const installRes = await MediaSaver.installApk({ filePath: apkFilePath });
+        if (installRes && installRes.permissionRequired) {
+          if (progressText) progressText.innerText = "Aktifkan izin instalasi aplikasi tidak dikenal untuk melanjutkan...";
+          showToast("Aktifkan izin 'Install aplikasi tidak dikenal' lalu kembali ke aplikasi", "info");
+        } else if (installRes && installRes.success) {
+          if (progressText) progressText.innerText = "Silakan konfirmasi pembaruan di layar...";
+        }
+      }
     }
   } catch (err) {
+    if (simInterval) clearInterval(simInterval);
     if (progressListener) {
       try { progressListener.remove(); } catch (_) {}
     }
