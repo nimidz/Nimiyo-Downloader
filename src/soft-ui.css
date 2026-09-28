@@ -107,17 +107,16 @@ body.theme-softui .logo {
 
 body.theme-softui .icon-btn {
   background: var(--soft-surface);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--soft-border) !important;
   border-radius: var(--soft-radius-md) !important;
   box-shadow: var(--soft-shadow-card-sm) !important;
   color: var(--soft-text);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transform: translateZ(0);
 }
 
 body.theme-softui .icon-btn:active {
-  transform: scale(0.94);
+  transform: scale(0.94) translateZ(0);
   box-shadow: var(--soft-shadow-inset) !important;
 }
 
@@ -126,12 +125,13 @@ body.theme-softui .icon-btn:active {
    -------------------------------------------------------------------------- */
 body.theme-softui .input-card {
   background: var(--soft-surface);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--soft-border) !important;
   border-radius: var(--soft-radius-md) !important;
   box-shadow: var(--soft-shadow-card) !important;
   padding: 10px 14px;
+  transform: translateZ(0);
 }
 
 body.theme-softui .input-card input {
@@ -196,12 +196,13 @@ body.theme-softui .danger-btn:active {
    -------------------------------------------------------------------------- */
 body.theme-softui .result-card {
   background: var(--soft-surface);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--soft-border) !important;
   border-radius: var(--soft-radius-lg) !important;
   box-shadow: var(--soft-shadow-card) !important;
   padding: 16px;
+  transform: translateZ(0);
 }
 
 body.theme-softui .result-preview {
@@ -270,16 +271,15 @@ body.theme-softui .platforms-section h2 {
 
 body.theme-softui .platform-card {
   background: var(--soft-surface);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--soft-border) !important;
   border-radius: var(--soft-radius-md) !important;
   box-shadow: var(--soft-shadow-card-sm) !important;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transform: translateZ(0);
 }
 
 body.theme-softui .platform-card:active {
-  transform: scale(0.97);
+  transform: scale(0.97) translateZ(0);
   box-shadow: var(--soft-shadow-inset) !important;
 }
 
@@ -293,12 +293,12 @@ body.theme-softui .platform-name {
    -------------------------------------------------------------------------- */
 body.theme-softui .history-item {
   background: var(--soft-surface);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--soft-border) !important;
   border-radius: var(--soft-radius-md) !important;
   box-shadow: var(--soft-shadow-card-sm) !important;
   margin-bottom: 12px;
+  contain: content;
+  transform: translateZ(0);
 }
 
 body.theme-softui .history-thumb {
@@ -322,17 +322,17 @@ body.theme-softui .history-item-btn:active {
    -------------------------------------------------------------------------- */
 body.theme-softui .settings-menu-item {
   background: var(--soft-surface);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--soft-border) !important;
   border-radius: var(--soft-radius-md) !important;
   box-shadow: var(--soft-shadow-card-sm) !important;
   margin-bottom: 10px;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  contain: content;
+  transform: translateZ(0);
 }
 
 body.theme-softui .settings-menu-item:active {
-  transform: scale(0.98);
+  transform: scale(0.98) translateZ(0);
   box-shadow: var(--soft-shadow-inset) !important;
 }
 
@@ -354,12 +354,13 @@ body.theme-softui .menu-desc {
 
 body.theme-softui .settings-list {
   background: var(--soft-surface);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--soft-border) !important;
   border-radius: var(--soft-radius-lg) !important;
   box-shadow: var(--soft-shadow-card) !important;
   overflow: hidden;
+  transform: translateZ(0);
 }
 
 body.theme-softui .setting-item {
@@ -385,12 +386,11 @@ body.theme-softui .sub-page-header {
 
 body.theme-softui .settings-back-btn {
   background: var(--soft-surface);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--soft-border) !important;
   border-radius: var(--soft-radius-sm) !important;
   box-shadow: var(--soft-shadow-card-sm) !important;
   color: var(--soft-text);
+  transform: translateZ(0);
 }
 
 /* --------------------------------------------------------------------------
@@ -398,10 +398,11 @@ body.theme-softui .settings-back-btn {
    -------------------------------------------------------------------------- */
 body.theme-softui .tab-bar {
   background: var(--soft-surface) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
   border-top: 1px solid var(--soft-border) !important;
   box-shadow: 0 -4px 24px rgba(180, 168, 140, 0.22) !important;
+  transform: translateX(-50%) translateZ(0) !important;
 }
 
 body.theme-softui.dark-mode .tab-bar {
@@ -443,8 +444,8 @@ body.theme-softui.dark-mode .balloon-sheet {
 
 body.theme-softui .toast {
   background: var(--soft-surface) !important;
-  backdrop-filter: blur(18px) !important;
-  -webkit-backdrop-filter: blur(18px) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
   border: 1px solid var(--soft-border) !important;
   border-radius: var(--soft-radius-md) !important;
   box-shadow: var(--soft-shadow-floating) !important;
@@ -499,11 +500,12 @@ html.theme-softui .quick-save-badge {
 body.theme-softui .media-header-card,
 html.theme-softui .media-header-card {
   background: var(--soft-surface) !important;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--soft-border) !important;
   border-radius: var(--soft-radius-md) !important;
   box-shadow: var(--soft-shadow-card-sm) !important;
+  transform: translateZ(0);
 }
 
 body.theme-softui .server-switch-btn,
@@ -518,11 +520,12 @@ html.theme-softui .server-switch-btn {
 body.theme-softui .status-box,
 html.theme-softui .status-box {
   background: var(--soft-surface) !important;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--soft-border) !important;
   border-radius: var(--soft-radius-md) !important;
   box-shadow: var(--soft-shadow-card-sm) !important;
+  transform: translateZ(0);
 }
 
 body.theme-softui .skeleton-option-item,
@@ -663,14 +666,14 @@ body.theme-softui.dark-mode .song-card {
 
 body.theme-softui .song-card.now-playing {
   border-color: var(--soft-primary) !important;
-  background: rgba(245, 158, 11, 0.08) !important;
-  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.2) !important;
+  background: var(--accent-subtle, rgba(245, 158, 11, 0.08)) !important;
+  box-shadow: 0 4px 14px var(--accent-shadow, rgba(245, 158, 11, 0.2)) !important;
 }
 
 body.theme-softui.dark-mode .song-card.now-playing {
   border-color: var(--soft-primary) !important;
-  background: rgba(251, 191, 36, 0.12) !important;
-  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25) !important;
+  background: var(--accent-subtle, rgba(251, 191, 36, 0.12)) !important;
+  box-shadow: 0 4px 16px var(--accent-shadow, rgba(245, 158, 11, 0.25)) !important;
 }
 
 body.theme-softui .song-art-wrapper,
@@ -697,18 +700,30 @@ body.theme-softui.dark-mode .album-card {
 
 /* Mini Player Soft UI */
 body.theme-softui .mini-player {
-  background: rgba(255, 253, 247, 0.88) !important;
-  backdrop-filter: blur(20px) !important;
+  background: rgba(255, 253, 247, 0.92) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
   border: 1px solid var(--soft-border) !important;
   border-radius: var(--soft-radius-lg) !important;
   box-shadow: var(--soft-shadow-floating) !important;
+  transform: translateX(-50%) translateZ(0) !important;
+}
+
+body.theme-softui .mini-player.is-compact {
+  transform: translateX(0) translateZ(0) !important;
 }
 
 body.theme-softui.dark-mode .mini-player {
-  background: rgba(24, 24, 31, 0.88) !important;
-  backdrop-filter: blur(20px) !important;
+  background: rgba(24, 24, 31, 0.92) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
   border-color: var(--soft-border) !important;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6) !important;
+  transform: translateX(-50%) translateZ(0) !important;
+}
+
+body.theme-softui.dark-mode .mini-player.is-compact {
+  transform: translateX(0) translateZ(0) !important;
 }
 
 body.theme-softui .mini-player-art {
@@ -776,7 +791,7 @@ body.theme-softui.dark-mode .full-player-art-card {
 }
 
 body.theme-softui .flowing-lyric-line.active {
-  background: rgba(255, 204, 0, 0.22) !important;
+  background: var(--accent-subtle, rgba(255, 204, 0, 0.22)) !important;
   color: var(--soft-text) !important;
   border-radius: 14px !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
@@ -784,9 +799,9 @@ body.theme-softui .flowing-lyric-line.active {
 
 body.theme-softui.dark-mode .flowing-lyric-line.active {
   color: #FFFFFF !important;
-  background: rgba(255, 204, 0, 0.22) !important;
+  background: var(--accent-subtle, rgba(255, 204, 0, 0.22)) !important;
   border-radius: 14px !important;
-  text-shadow: 0 0 16px rgba(255, 204, 0, 0.6) !important;
+  text-shadow: 0 0 16px var(--accent-glow, rgba(255, 204, 0, 0.6)) !important;
 }
 
 body.theme-softui .control-btn {
@@ -918,6 +933,14 @@ body.theme-softui[data-accent="yellow"] {
   --accent-color: #FACC15;
   --accent-hover: #EAB308;
   --accent-text: #18181B;
+  --bg-color: #FAF7EE;
+  --soft-bg: #FAF7EE;
+  --soft-surface: rgba(255, 255, 255, 0.88);
+  --soft-surface-solid: #FFFFFF;
+  --soft-surface-subtle: rgba(245, 240, 225, 0.85);
+  --accent-subtle: rgba(250, 204, 21, 0.18);
+  --accent-glow: rgba(250, 204, 21, 0.4);
+  --tag-bg: rgba(245, 240, 225, 0.9);
   --soft-primary: #FACC15;
   --soft-accent-primary: #FACC15;
   --soft-accent-gradient: linear-gradient(135deg, #FEF08A 0%, #FACC15 100%);
@@ -929,6 +952,14 @@ body.theme-softui.dark-mode[data-accent="yellow"] {
   --accent-color: #F59E0B;
   --accent-hover: #D97706;
   --accent-text: #18181B;
+  --bg-color: #14130E;
+  --soft-bg: #14130E;
+  --soft-surface: rgba(28, 26, 18, 0.85);
+  --soft-surface-solid: #1E1C14;
+  --soft-surface-subtle: rgba(38, 35, 25, 0.8);
+  --accent-subtle: rgba(245, 158, 11, 0.22);
+  --accent-glow: rgba(245, 158, 11, 0.45);
+  --tag-bg: rgba(38, 35, 25, 0.8);
   --soft-primary: #F59E0B;
   --soft-accent-primary: #F59E0B;
   --soft-accent-gradient: linear-gradient(135deg, #FBBF24 0%, #D97706 100%);
@@ -941,6 +972,14 @@ body.theme-softui[data-accent="blue"] {
   --accent-color: #2563EB;
   --accent-hover: #1D4ED8;
   --accent-text: #FFFFFF;
+  --bg-color: #EEF4FF;
+  --soft-bg: #EEF4FF;
+  --soft-surface: rgba(255, 255, 255, 0.88);
+  --soft-surface-solid: #FFFFFF;
+  --soft-surface-subtle: rgba(224, 237, 255, 0.7);
+  --accent-subtle: rgba(37, 99, 235, 0.16);
+  --accent-glow: rgba(37, 99, 235, 0.4);
+  --tag-bg: rgba(224, 237, 255, 0.85);
   --soft-primary: #2563EB;
   --soft-accent-primary: #2563EB;
   --soft-accent-gradient: linear-gradient(135deg, #60A5FA 0%, #2563EB 100%);
@@ -952,6 +991,14 @@ body.theme-softui.dark-mode[data-accent="blue"] {
   --accent-color: #3B82F6;
   --accent-hover: #2563EB;
   --accent-text: #FFFFFF;
+  --bg-color: #0A0F1D;
+  --soft-bg: #0A0F1D;
+  --soft-surface: rgba(18, 25, 46, 0.85);
+  --soft-surface-solid: #141C33;
+  --soft-surface-subtle: rgba(25, 35, 62, 0.8);
+  --accent-subtle: rgba(59, 130, 246, 0.22);
+  --accent-glow: rgba(59, 130, 246, 0.45);
+  --tag-bg: rgba(25, 35, 62, 0.8);
   --soft-primary: #3B82F6;
   --soft-accent-primary: #3B82F6;
   --soft-accent-gradient: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
@@ -964,6 +1011,14 @@ body.theme-softui[data-accent="red"] {
   --accent-color: #EF4444;
   --accent-hover: #DC2626;
   --accent-text: #FFFFFF;
+  --bg-color: #FFF0F2;
+  --soft-bg: #FFF0F2;
+  --soft-surface: rgba(255, 255, 255, 0.88);
+  --soft-surface-solid: #FFFFFF;
+  --soft-surface-subtle: rgba(254, 226, 230, 0.7);
+  --accent-subtle: rgba(239, 68, 68, 0.16);
+  --accent-glow: rgba(239, 68, 68, 0.4);
+  --tag-bg: rgba(254, 226, 230, 0.85);
   --soft-primary: #EF4444;
   --soft-accent-primary: #EF4444;
   --soft-accent-gradient: linear-gradient(135deg, #F87171 0%, #EF4444 100%);
@@ -975,6 +1030,14 @@ body.theme-softui.dark-mode[data-accent="red"] {
   --accent-color: #F87171;
   --accent-hover: #EF4444;
   --accent-text: #FFFFFF;
+  --bg-color: #170B0E;
+  --soft-bg: #170B0E;
+  --soft-surface: rgba(36, 18, 22, 0.85);
+  --soft-surface-solid: #261317;
+  --soft-surface-subtle: rgba(50, 24, 30, 0.8);
+  --accent-subtle: rgba(248, 113, 113, 0.22);
+  --accent-glow: rgba(248, 113, 113, 0.45);
+  --tag-bg: rgba(50, 24, 30, 0.8);
   --soft-primary: #F87171;
   --soft-accent-primary: #F87171;
   --soft-accent-gradient: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%);
@@ -987,6 +1050,14 @@ body.theme-softui[data-accent="gray"] {
   --accent-color: #64748B;
   --accent-hover: #475569;
   --accent-text: #FFFFFF;
+  --bg-color: #F1F5F9;
+  --soft-bg: #F1F5F9;
+  --soft-surface: rgba(255, 255, 255, 0.88);
+  --soft-surface-solid: #FFFFFF;
+  --soft-surface-subtle: rgba(226, 232, 240, 0.7);
+  --accent-subtle: rgba(100, 116, 139, 0.16);
+  --accent-glow: rgba(100, 116, 139, 0.4);
+  --tag-bg: rgba(226, 232, 240, 0.85);
   --soft-primary: #64748B;
   --soft-accent-primary: #64748B;
   --soft-accent-gradient: linear-gradient(135deg, #94A3B8 0%, #64748B 100%);
@@ -998,6 +1069,14 @@ body.theme-softui.dark-mode[data-accent="gray"] {
   --accent-color: #94A3B8;
   --accent-hover: #64748B;
   --accent-text: #FFFFFF;
+  --bg-color: #0F172A;
+  --soft-bg: #0F172A;
+  --soft-surface: rgba(30, 41, 59, 0.85);
+  --soft-surface-solid: #1E293B;
+  --soft-surface-subtle: rgba(43, 58, 82, 0.8);
+  --accent-subtle: rgba(148, 163, 184, 0.22);
+  --accent-glow: rgba(148, 163, 184, 0.45);
+  --tag-bg: rgba(43, 58, 82, 0.8);
   --soft-primary: #94A3B8;
   --soft-accent-primary: #94A3B8;
   --soft-accent-gradient: linear-gradient(135deg, #94A3B8 0%, #475569 100%);
@@ -1008,6 +1087,154 @@ body.theme-softui.dark-mode[data-accent="gray"] {
 body.theme-softui .accent-color-dot {
   border: 1px solid var(--soft-border) !important;
   box-shadow: var(--soft-shadow-card-sm) !important;
+}
+
+/* ==========================================================================
+   Hardware GPU Compositing & VSync Layer Optimization
+   Eliminates Layout Reflows & Scroll Frame Drops in WebView
+   ========================================================================== */
+.tab-content,
+.player-tab-pane,
+.drilldown-body,
+#historyList,
+#downloadList,
+.settings-subpage,
+.full-player-lyrics-scroll {
+  -webkit-overflow-scrolling: touch;
+  transform: translateZ(0);
+  will-change: scroll-position;
+}
+
+.song-card,
+.artist-card,
+.album-card,
+.history-item,
+.download-item,
+.track-item,
+.library-track-card {
+  contain: content;
+  transform: translateZ(0);
+}
+
+/* ==========================================================================
+   Full Player Full-Screen Window & Accent Progress Slider (Soft UI)
+   ========================================================================== */
+body.theme-softui .full-player-overlay,
+html.theme-softui .full-player-overlay {
+  background: var(--soft-bg) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.theme-softui.dark-mode .full-player-overlay,
+html.theme-softui.dark-mode .full-player-overlay {
+  background: var(--soft-bg) !important;
+}
+
+body.theme-softui .full-player-container,
+html.theme-softui .full-player-container {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+body.theme-softui .progress-slider {
+  background: linear-gradient(
+    to right,
+    var(--accent-color) 0%,
+    var(--accent-color) var(--progress, 0%),
+    var(--soft-surface-subtle) var(--progress, 0%),
+    var(--soft-surface-subtle) 100%
+  ) !important;
+  border: 1px solid var(--soft-border) !important;
+  box-shadow: var(--soft-shadow-inset) !important;
+}
+
+body.theme-softui.dark-mode .progress-slider {
+  background: linear-gradient(
+    to right,
+    var(--accent-color) 0%,
+    var(--accent-color) var(--progress, 0%),
+    rgba(255, 255, 255, 0.12) var(--progress, 0%),
+    rgba(255, 255, 255, 0.12) 100%
+  ) !important;
+  border: 1px solid var(--soft-border) !important;
+}
+
+body.theme-softui .progress-slider::-webkit-slider-thumb {
+  background: var(--accent-color) !important;
+  border: 2.5px solid #FFFFFF !important;
+  box-shadow: 0 2px 8px var(--accent-glow) !important;
+}
+
+body.theme-softui .volume-slider {
+  background: linear-gradient(
+    to right,
+    var(--accent-color) 0%,
+    var(--accent-color) var(--progress, 100%),
+    var(--soft-surface-subtle) var(--progress, 100%),
+    var(--soft-surface-subtle) 100%
+  ) !important;
+  border: 1px solid var(--soft-border) !important;
+  box-shadow: var(--soft-shadow-inset) !important;
+}
+
+body.theme-softui.dark-mode .volume-slider {
+  background: linear-gradient(
+    to right,
+    var(--accent-color) 0%,
+    var(--accent-color) var(--progress, 100%),
+    rgba(255, 255, 255, 0.12) var(--progress, 100%),
+    rgba(255, 255, 255, 0.12) 100%
+  ) !important;
+  border: 1px solid var(--soft-border) !important;
+}
+
+body.theme-softui .volume-slider::-webkit-slider-thumb {
+  background: var(--accent-color) !important;
+  border: 2px solid #FFFFFF !important;
+  box-shadow: 0 2px 6px var(--accent-glow) !important;
+}
+
+body.theme-softui .speed-toggle-row {
+  border-bottom: 1px solid var(--soft-border-subtle) !important;
+}
+
+body.theme-softui .switch-slider {
+  background-color: var(--soft-surface-subtle) !important;
+  border: 1px solid var(--soft-border) !important;
+  box-shadow: var(--soft-shadow-inset) !important;
+}
+
+body.theme-softui .switch-toggle input:checked + .switch-slider {
+  background: var(--soft-accent-gradient) !important;
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 2px 8px var(--accent-glow) !important;
+}
+
+body.theme-softui .reset-bpm-btn,
+body.theme-softui .mini-reset-btn {
+  background: var(--soft-surface-subtle) !important;
+  border: 1px solid var(--soft-border-subtle) !important;
+  color: var(--soft-text) !important;
+  box-shadow: var(--soft-shadow-card-sm) !important;
+}
+
+body.theme-softui .reverb-xy-pad-wrapper {
+  background: var(--soft-surface-subtle) !important;
+  border: 1px solid var(--soft-border-subtle) !important;
+  box-shadow: var(--soft-shadow-card-sm) !important;
+}
+
+body.theme-softui .reverb-xy-pad {
+  background: var(--soft-surface) !important;
+  border: 1px solid var(--soft-border) !important;
+  box-shadow: var(--soft-shadow-inset) !important;
+}
+
+body.theme-softui .puck-core {
+  box-shadow: 0 2px 6px var(--accent-glow) !important;
 }
 
 

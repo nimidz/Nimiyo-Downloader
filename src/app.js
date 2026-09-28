@@ -127,6 +127,8 @@ const translations = {
     musicEmptyQueue: "Queue is empty",
     musicLyricsBtn: "LYRICS",
     musicShowCover: "Cover",
+    musicLyricsTranslation: "Translation",
+    toastNoTranslationAvailable: "No lyrics translation available for this track",
     musicTapForLyrics: "Lyrics",
     musicTapToFlip: "Tap to view album cover",
     musicFetchingLyrics: "Searching lyrics online...",
@@ -165,9 +167,22 @@ const translations = {
     musicTimerOffToast: "Sleep timer turned off",
     musicTimerEndSongToast: "Will stop after current track finishes",
     musicSleepTimerSet: "Sleep timer set",
-    musicSleepTimerFinished: "Sleep timer finished",
     musicSpeedTitle: "Playback Speed",
-    btnSet: "Set",
+    mixtoolsTitle: "MixTools",
+    mixtoolsResetAll: "Reset All",
+    mixtoolsSpeedTitle: "Speed FX",
+    mixtoolsSpeedDesc: "Adjust playback tempo",
+    mixtoolsGuideSlowed: "Slowed",
+    mixtoolsGuideNormal: "Normal",
+    mixtoolsGuideSpeedUp: "SpeedUp",
+    mixtoolsReverbTitle: "Reverb FX",
+    mixtoolsReverbDesc: "3D spatial echo effect",
+    mixtoolsReverbStadium: "▲ Wide",
+    mixtoolsReverbClub: "▼ Tight",
+    mixtoolsReverbDry: "◀ Dry",
+    mixtoolsReverbWet: "Wet ▶",
+    mixtoolsReverbHint: "Up = Wide • Right = Wet",
+    btnReset: "Reset",
     musicSongInfoTitle: "Song Details",
     musicLabelTitle: "Title",
     musicLabelArtist: "Artist",
@@ -256,7 +271,7 @@ const translations = {
     btnResetSettings: "RESET ALL SETTINGS TO DEFAULT",
     groupAbout: "About & Help",
     menuAboutDesc: "Version, Info & Developer",
-    aboutVersion: "Version 2.1.1 (Lite)",
+    aboutVersion: "Version 2.2.0 (Lite)",
     aboutDesc: "A premium, modern, and lightweight media downloader engine built on scrapr.",
     aboutThanks: "Thanks to:",
     toastClipboardEmpty: "Clipboard is empty or does not contain a text link.",
@@ -265,7 +280,19 @@ const translations = {
     toastScraping: "Running scraper ({scraper})...",
     toastScrapeSuccess: "Analysis complete!",
     toastScrapeFail: "Scraper {scraper} failed: {message}",
-    toastScrapeAllFailed: "Server is busy",
+    toastScrapeAllFailed: "Failed to analyze link. Please check URL or switch server in Settings.",
+    toastUnsupportedPlatform: "Unsupported platform link or unrecognized URL format.",
+    toastErrorOffline: "No internet connection. Please check your data or Wi-Fi.",
+    toastErrorTimeout: "Connection timed out. Server or network is slow.",
+    toastErrorSpotifyPlaylistPrivate: "Spotify playlist is private or not found. Make sure the playlist is set to Public on Spotify.",
+    toastErrorSpotifyTrackNotFound: "Spotify track or album not found, private, or region-restricted.",
+    toastErrorInstagramPrivate: "Instagram post or Reel is private, restricted, or has been deleted.",
+    toastErrorTikTokPrivate: "TikTok video is private or has been removed by the creator.",
+    toastErrorYouTubeUnavailable: "YouTube video or playlist is private, age-restricted, or unavailable.",
+    toastErrorTwitterPrivate: "X (Twitter) post not found or the account is private.",
+    toastErrorFacebookPrivate: "Facebook post is private, restricted, or requires login.",
+    toastErrorMediaNotFound: "Media not found or content has been deleted/private.",
+    toastErrorServerBlocked: "Scraper server is busy or protected. Please switch server in Settings.",
     toastAnalysisCancelled: "Analysis cancelled",
     toastCopiedTitle: "Title copied successfully!",
     toastCopiedDesc: "Description copied successfully!",
@@ -815,6 +842,8 @@ const translations = {
     musicEmptyQueue: "Antrean kosong",
     musicLyricsBtn: "LIRIK",
     musicShowCover: "Cover",
+    musicLyricsTranslation: "Terjemahan",
+    toastNoTranslationAvailable: "Terjemahan lirik belum tersedia untuk lagu ini",
     musicTapForLyrics: "Lirik Lagu",
     musicTapToFlip: "Ketuk untuk kembali ke cover",
     musicFetchingLyrics: "Mencari lirik lagu online...",
@@ -853,9 +882,22 @@ const translations = {
     musicTimerOffToast: "Sleep timer dinonaktifkan",
     musicTimerEndSongToast: "Akan berhenti setelah lagu selesai",
     musicSleepTimerSet: "Sleep timer diatur",
-    musicSleepTimerFinished: "Sleep timer selesai",
     musicSpeedTitle: "Kecepatan Putar",
-    btnSet: "Atur",
+    mixtoolsTitle: "MixTools",
+    mixtoolsResetAll: "Reset Semua",
+    mixtoolsSpeedTitle: "Speed FX",
+    mixtoolsSpeedDesc: "Ubah kecepatan tempo musik",
+    mixtoolsGuideSlowed: "Slowed",
+    mixtoolsGuideNormal: "Normal",
+    mixtoolsGuideSpeedUp: "SpeedUp",
+    mixtoolsReverbTitle: "Reverb FX",
+    mixtoolsReverbDesc: "Efek gema akustik 3D",
+    mixtoolsReverbStadium: "▲ Luas",
+    mixtoolsReverbClub: "▼ Rapat",
+    mixtoolsReverbDry: "◀ Dry",
+    mixtoolsReverbWet: "Wet ▶",
+    mixtoolsReverbHint: "Atas = Luas • Kanan = Gema",
+    btnReset: "Reset",
     musicSongInfoTitle: "Rincian Lagu",
     musicLabelTitle: "Judul",
     musicLabelArtist: "Artis",
@@ -944,7 +986,7 @@ const translations = {
     btnResetSettings: "KEMBALIKAN SEMUA SETELAN KE DEFAULT",
     groupAbout: "Tentang & Bantuan",
     menuAboutDesc: "Versi, Info & Pengembang",
-    aboutVersion: "Versi 2.1.1 (Lite)",
+    aboutVersion: "Versi 2.2.0 (Lite)",
     aboutDesc: "Mesin pengunduh media premium, modern, dan ringan yang dibangun di atas scrapr.",
     aboutThanks: "Terima kasih kepada:",
     toastClipboardEmpty: "Papan klip kosong atau tidak berisi tautan teks.",
@@ -953,7 +995,19 @@ const translations = {
     toastScraping: "Menjalankan scraper ({scraper})...",
     toastScrapeSuccess: "Analisis selesai!",
     toastScrapeFail: "Scraper {scraper} gagal: {message}",
-    toastScrapeAllFailed: "Server sedang sibuk",
+    toastScrapeAllFailed: "Gagal menganalisis tautan. Periksa link atau coba server lain di Setelan.",
+    toastUnsupportedPlatform: "Platform tautan belum didukung atau format tautan tidak dikenali.",
+    toastErrorOffline: "Tidak ada koneksi internet. Periksa koneksi data atau Wi-Fi Anda.",
+    toastErrorTimeout: "Koneksi batas waktu (timeout). Server atau jaringan lambat.",
+    toastErrorSpotifyPlaylistPrivate: "Playlist Spotify bersifat privat atau tidak ditemukan. Pastikan playlist disetel Publik di Spotify.",
+    toastErrorSpotifyTrackNotFound: "Lagu atau album Spotify tidak ditemukan atau dibatasi wilayah/privat.",
+    toastErrorInstagramPrivate: "Postingan/Reel Instagram bersifat privat, dibatasi, atau telah dihapus.",
+    toastErrorTikTokPrivate: "Video TikTok bersifat privat atau telah dihapus oleh pengunggah.",
+    toastErrorYouTubeUnavailable: "Video/Playlist YouTube bersifat privat, dibatasi usia, atau tidak tersedia.",
+    toastErrorTwitterPrivate: "Postingan X (Twitter) tidak ditemukan atau akun digembok (privat).",
+    toastErrorFacebookPrivate: "Postingan Facebook bersifat privat atau membutuhkan login.",
+    toastErrorMediaNotFound: "Media tidak ditemukan atau konten telah dihapus/bersifat privat.",
+    toastErrorServerBlocked: "Server scraper sedang padat atau terproteksi. Coba ganti server di Setelan.",
     toastAnalysisCancelled: "Analisis dibatalkan",
     toastCopiedTitle: "Judul berhasil disalin!",
     toastCopiedDesc: "Deskripsi berhasil disalin!",
@@ -1501,6 +1555,8 @@ const translations = {
     musicEmptyQueue: "播放队列为空",
     musicLyricsBtn: "歌词",
     musicShowCover: "封面",
+    musicLyricsTranslation: "翻译",
+    toastNoTranslationAvailable: "此歌曲暂无歌词翻译",
     musicTapForLyrics: "歌词",
     musicTapToFlip: "点击返回封面",
     musicFetchingLyrics: "正在获取在线歌词...",
@@ -1539,9 +1595,22 @@ const translations = {
     musicTimerOffToast: "睡眠定时器已关闭",
     musicTimerEndSongToast: "将在当前歌曲结束后停止播放",
     musicSleepTimerSet: "睡眠定时器已设置",
-    musicSleepTimerFinished: "睡眠定时结束",
     musicSpeedTitle: "播放速度",
-    btnSet: "确定",
+    mixtoolsTitle: "混音工具 (MixTools)",
+    mixtoolsResetAll: "全部重置",
+    mixtoolsSpeedTitle: "Speed FX",
+    mixtoolsSpeedDesc: "调节播放速度与节奏",
+    mixtoolsGuideSlowed: "Slowed",
+    mixtoolsGuideNormal: "Normal",
+    mixtoolsGuideSpeedUp: "SpeedUp",
+    mixtoolsReverbTitle: "Reverb FX",
+    mixtoolsReverbDesc: "3D空间立体回声",
+    mixtoolsReverbStadium: "▲ 开阔",
+    mixtoolsReverbClub: "▼ 紧凑",
+    mixtoolsReverbDry: "◀ Dry",
+    mixtoolsReverbWet: "Wet ▶",
+    mixtoolsReverbHint: "向上 = 开阔 • 向右 = 混响",
+    btnReset: "重置",
     musicSongInfoTitle: "歌曲详情",
     musicLabelTitle: "标题",
     musicLabelArtist: "艺术家",
@@ -1630,7 +1699,7 @@ const translations = {
     btnResetSettings: "恢复所有设置到默认值",
     groupAbout: "关于与帮助",
     menuAboutDesc: "版本信息、开源与开发团队",
-    aboutVersion: "版本 2.1.1 (Lite)",
+    aboutVersion: "版本 2.2.0 (Lite)",
     aboutDesc: "基于 scrapr 构建的高级、现代且轻量级的媒体下载引擎。",
     aboutThanks: "致谢:",
     toastClipboardEmpty: "剪贴板为空或不包含文本链接。",
@@ -1639,7 +1708,19 @@ const translations = {
     toastScraping: "正在运行解析器 ({scraper})...",
     toastScrapeSuccess: "解析完成！",
     toastScrapeFail: "解析器 {scraper} 失败：{message}",
-    toastScrapeAllFailed: "服务器繁忙",
+    toastScrapeAllFailed: "解析链接失败。请检查链接或在设置中更换服务器。",
+    toastUnsupportedPlatform: "不支持该平台链接或链接格式无法识别。",
+    toastErrorOffline: "无网络连接。请检查您的移动数据或 Wi-Fi 连接。",
+    toastErrorTimeout: "连接超时。服务器或网络响应缓慢。",
+    toastErrorSpotifyPlaylistPrivate: "Spotify 歌单为私密或未找到。请确保该歌单在 Spotify 上已设为公开。",
+    toastErrorSpotifyTrackNotFound: "Spotify 歌曲或专辑未找到、私密或受地区限制。",
+    toastErrorInstagramPrivate: "Instagram 帖子或 Reel 属于私密、受限或已被删除。",
+    toastErrorTikTokPrivate: "TikTok 视频属于私密或已被创作者删除。",
+    toastErrorYouTubeUnavailable: "YouTube 视频或播放列表属于私密、年龄受限或不可用。",
+    toastErrorTwitterPrivate: "X (Twitter) 推文未找到或该账号为私密账号。",
+    toastErrorFacebookPrivate: "Facebook 帖子为私密或需要登录访问。",
+    toastErrorMediaNotFound: "未找到媒体，或内容已被删除/设为私密。",
+    toastErrorServerBlocked: "解析服务器繁忙或受到保护。请在设置中切换服务器。",
     toastAnalysisCancelled: "已取消解析",
     toastCopiedTitle: "标题复制成功！",
     toastCopiedDesc: "描述复制成功！",
@@ -2189,6 +2270,8 @@ const translations = {
     musicEmptyQueue: "キューが空です",
     musicLyricsBtn: "歌詞",
     musicShowCover: "カバー",
+    musicLyricsTranslation: "翻訳",
+    toastNoTranslationAvailable: "この曲の歌詞の翻訳はまだありません",
     musicTapForLyrics: "歌詞",
     musicTapToFlip: "タップしてカバーに戻る",
     musicFetchingLyrics: "オンライン歌詞を取得中...",
@@ -2227,9 +2310,22 @@ const translations = {
     musicTimerOffToast: "スリープタイマーをオフにしました",
     musicTimerEndSongToast: "現在の曲が終わったら停止します",
     musicSleepTimerSet: "タイマーを設定しました",
-    musicSleepTimerFinished: "スリープタイマーが終了しました",
     musicSpeedTitle: "再生速度",
-    btnSet: "設定",
+    mixtoolsTitle: "MixTools",
+    mixtoolsResetAll: "すべてリセット",
+    mixtoolsSpeedTitle: "Speed FX",
+    mixtoolsSpeedDesc: "再生テンポを調整",
+    mixtoolsGuideSlowed: "Slowed",
+    mixtoolsGuideNormal: "Normal",
+    mixtoolsGuideSpeedUp: "SpeedUp",
+    mixtoolsReverbTitle: "Reverb FX",
+    mixtoolsReverbDesc: "3D空間残響エフェクト",
+    mixtoolsReverbStadium: "▲ 広大",
+    mixtoolsReverbClub: "▼ タイト",
+    mixtoolsReverbDry: "◀ Dry",
+    mixtoolsReverbWet: "Wet ▶",
+    mixtoolsReverbHint: "上 = 空間 • 右 = 残響",
+    btnReset: "リセット",
     musicSongInfoTitle: "楽曲の詳細情報",
     musicLabelTitle: "曲名",
     musicLabelArtist: "アーティスト",
@@ -2318,7 +2414,7 @@ const translations = {
     btnResetSettings: "すべての設定を初期値に戻す",
     groupAbout: "アプリについてとヘルプ",
     menuAboutDesc: "バージョン、情報と開発チーム",
-    aboutVersion: "バージョン 2.1.1 (Lite)",
+    aboutVersion: "バージョン 2.2.0 (Lite)",
     aboutDesc: "scrapr をベースに構築されたプレミアムでモダン、軽量なメディアダウンローダー。",
     aboutThanks: "スペシャルサンクス:",
     toastClipboardEmpty: "クリップボードが空か、有効なテキストリンクが含まれていません。",
@@ -2327,7 +2423,19 @@ const translations = {
     toastScraping: "スクレイパーを実行中 ({scraper})...",
     toastScrapeSuccess: "解析が完了しました！",
     toastScrapeFail: "スクレイパー {scraper} でエラーが発生しました: {message}",
-    toastScrapeAllFailed: "サーバーが混雑しています",
+    toastScrapeAllFailed: "リンクの解析に失敗しました。URLを確認するか、設定でサーバーを変更してください。",
+    toastUnsupportedPlatform: "サポートされていないプラットフォームのリンクか、形式が無効です。",
+    toastErrorOffline: "インターネット接続がありません。データ通信または Wi-Fi を確認してください。",
+    toastErrorTimeout: "接続がタイムアウトしました。サーバーまたはネットワークが遅延しています。",
+    toastErrorSpotifyPlaylistPrivate: "Spotify プレイリストが非公開か見つかりません。公開設定になっているか確認してください。",
+    toastErrorSpotifyTrackNotFound: "Spotify の楽曲またはアルバムが見つからないか、非公開または地域制限されています。",
+    toastErrorInstagramPrivate: "Instagram の投稿または Reel は非公開、制限されているか、削除されています。",
+    toastErrorTikTokPrivate: "TikTok 動画は非公開か、投稿者によって削除されています。",
+    toastErrorYouTubeUnavailable: "YouTube 動画または再生リストが非公開、年齢制限、または利用できません。",
+    toastErrorTwitterPrivate: "X (Twitter) の投稿が見つからないか、アカウントが非公開です。",
+    toastErrorFacebookPrivate: "Facebook の投稿は非公開か、ログインが必要です。",
+    toastErrorMediaNotFound: "メディアが見つからないか、非公開または削除されています。",
+    toastErrorServerBlocked: "スクレイパーサーバーが混雑または保護されています。設定でサーバーを変更してください。",
     toastAnalysisCancelled: "解析をキャンセルしました",
     toastCopiedTitle: "タイトルをコピーしました！",
     toastCopiedDesc: "説明をコピーしました！",
@@ -2935,8 +3043,8 @@ const fallbackChains = {
 };
 
 // App Version Constants & GitHub Auto-Update Engine
-const APP_VERSION_NAME = "2.1.1";
-const APP_VERSION_CODE = 4;
+const APP_VERSION_NAME = "2.2.0";
+const APP_VERSION_CODE = 5;
 const UPDATE_MANIFEST_URL = "https://raw.githubusercontent.com/nimidz/Nimiyo-Downloader/main/version.json";
 let latestUpdateInfo = null;
 
@@ -3062,6 +3170,14 @@ function applyAccentColor(accent) {
       gray: '#64748B'
     };
     preview.style.backgroundColor = colorMap[currentAccent] || colorMap.yellow;
+  }
+  // Refresh music player glow and tab indicator if active
+  if (window.musicPlayer && typeof window.musicPlayer.resetDynamicColor === "function") {
+    window.musicPlayer.resetDynamicColor();
+  }
+  const activeBtn = document.querySelector(".tab-btn.active");
+  if (activeBtn && typeof updateTabIndicator === "function") {
+    requestAnimationFrame(() => updateTabIndicator(activeBtn));
   }
 }
 
@@ -4280,7 +4396,16 @@ function setupEventListeners() {
     if (document.visibilityState === "visible") {
       loadHistory();
       setTimeout(checkClipboardOnResume, 350);
-      checkInstallPermissionStatus();
+      checkInstallPermissionStatus().then(granted => {
+        if (granted && lastDownloadedUpdateApkPath) {
+          const apkToInstall = lastDownloadedUpdateApkPath;
+          lastDownloadedUpdateApkPath = null;
+          const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
+          if (MediaSaver && typeof MediaSaver.installApk === "function") {
+            MediaSaver.installApk({ filePath: apkToInstall });
+          }
+        }
+      });
       if (window.nimiyoMusicPlayer) window.nimiyoMusicPlayer.autoCheckPermissionOnResume().catch(() => {});
     }
   });
@@ -4288,6 +4413,16 @@ function setupEventListeners() {
   window.addEventListener("focus", () => {
     loadHistory();
     setTimeout(checkClipboardOnResume, 350);
+    checkInstallPermissionStatus().then(granted => {
+      if (granted && lastDownloadedUpdateApkPath) {
+        const apkToInstall = lastDownloadedUpdateApkPath;
+        lastDownloadedUpdateApkPath = null;
+        const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
+        if (MediaSaver && typeof MediaSaver.installApk === "function") {
+          MediaSaver.installApk({ filePath: apkToInstall });
+        }
+      }
+    });
     if (window.nimiyoMusicPlayer) window.nimiyoMusicPlayer.autoCheckPermissionOnResume().catch(() => {});
   });
 
@@ -4297,14 +4432,32 @@ function setupEventListeners() {
       if (isActive) {
         loadHistory();
         setTimeout(checkClipboardOnResume, 350);
-        checkInstallPermissionStatus();
+        checkInstallPermissionStatus().then(granted => {
+          if (granted && lastDownloadedUpdateApkPath) {
+            const apkToInstall = lastDownloadedUpdateApkPath;
+            lastDownloadedUpdateApkPath = null;
+            const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
+            if (MediaSaver && typeof MediaSaver.installApk === "function") {
+              MediaSaver.installApk({ filePath: apkToInstall });
+            }
+          }
+        });
         if (window.nimiyoMusicPlayer) window.nimiyoMusicPlayer.autoCheckPermissionOnResume().catch(() => {});
       }
     });
     AppPlugin.addListener("resume", () => {
       loadHistory();
       setTimeout(checkClipboardOnResume, 350);
-      checkInstallPermissionStatus();
+      checkInstallPermissionStatus().then(granted => {
+        if (granted && lastDownloadedUpdateApkPath) {
+          const apkToInstall = lastDownloadedUpdateApkPath;
+          lastDownloadedUpdateApkPath = null;
+          const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
+          if (MediaSaver && typeof MediaSaver.installApk === "function") {
+            MediaSaver.installApk({ filePath: apkToInstall });
+          }
+        }
+      });
       if (window.nimiyoMusicPlayer) window.nimiyoMusicPlayer.autoCheckPermissionOnResume().catch(() => {});
     });
   }
@@ -4401,6 +4554,118 @@ function cancelAnalysis() {
   showToast(getTranslation("toastAnalysisCancelled"), "info");
 }
 
+// Format detailed, user-friendly error messages based on diagnosis
+async function formatAnalysisErrorMessage(url, platform, failureDetails = []) {
+  const lowerUrl = (url || "").toLowerCase();
+  const allErrorsText = failureDetails
+    .map(f => (f.message || ""))
+    .join(" ")
+    .toLowerCase();
+
+  // 1. Comprehensive Network / Offline detection
+  // Covers Android CapacitorHttp, OkHttp, Java net exceptions, Chromium WebView, and standard Fetch
+  const isNetworkFailure =
+    (typeof navigator !== "undefined" && navigator.onLine === false) ||
+    /unable to resolve host|no address associated|network is unreachable|unreachable|failed to connect|failed to fetch|networkerror|network error|unknownhost|unknown host|connectexception|socketexception|sockettimeout|connection refused|connection reset|route to host|no route|ehostunreach|enotfound|econnrefused|econnreset|net::err|internet_disconnected|name_not_resolved|network request failed/i.test(allErrorsText);
+
+  if (isNetworkFailure) {
+    return getTranslation("toastErrorOffline");
+  }
+
+  // 2. Check if ANY scraper managed to reach an HTTP server
+  const hadAnyHttpContact = failureDetails.some(f => f.statusCode && f.statusCode > 0);
+
+  // If no scraper ever reached any HTTP endpoint, do a quick non-blocking probe (max 600ms)
+  // This adds ZERO latency to normal usage because it ONLY runs when ALL scrapers have failed
+  if (!hadAnyHttpContact) {
+    try {
+      await Promise.race([
+        fetch("https://www.google.com/generate_204", { method: "HEAD", mode: "no-cors", cache: "no-store" }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("probe_timeout")), 600))
+      ]);
+    } catch (_) {
+      return getTranslation("toastErrorOffline");
+    }
+  }
+
+  // 3. Timeout detection
+  const isTimeout = /timed out|timeout|request timeout/i.test(allErrorsText);
+  if (isTimeout && failureDetails.length > 0 && failureDetails.every(f => /timed out|timeout/i.test(f.message || ""))) {
+    return getTranslation("toastErrorTimeout");
+  }
+
+  // 4. Platform-specific diagnostics ONLY IF content/server was actually reached or error explicitly mentions private/deleted
+  if (platform === "spotify") {
+    if (lowerUrl.includes("/playlist/")) {
+      return getTranslation("toastErrorSpotifyPlaylistPrivate");
+    }
+    return getTranslation("toastErrorSpotifyTrackNotFound");
+  }
+
+  if (platform === "instagram") {
+    if (/private|login|checkpoint|restricted|not found|404|removed|deleted|empty/i.test(allErrorsText) || hadAnyHttpContact) {
+      return getTranslation("toastErrorInstagramPrivate");
+    }
+  }
+
+  if (platform === "tiktok") {
+    if (/private|deleted|removed|not found|404|unavailable/i.test(allErrorsText) || hadAnyHttpContact) {
+      return getTranslation("toastErrorTikTokPrivate");
+    }
+  }
+
+  if (platform === "youtube") {
+    if (/private|age|restricted|not available|unavailable|removed|deleted|404|playlist/i.test(allErrorsText) || hadAnyHttpContact) {
+      return getTranslation("toastErrorYouTubeUnavailable");
+    }
+  }
+
+  if (platform === "twitter") {
+    if (/private|suspended|not found|404|protected|empty/i.test(allErrorsText) || hadAnyHttpContact) {
+      return getTranslation("toastErrorTwitterPrivate");
+    }
+  }
+
+  if (platform === "facebook") {
+    if (/private|login|permission|not found|404/i.test(allErrorsText) || hadAnyHttpContact) {
+      return getTranslation("toastErrorFacebookPrivate");
+    }
+  }
+
+  // 5. Rate-limit / Cloudflare protection block
+  if (/cloudflare|rate-limit|rate limited|blocked|429|503|502|html error page/i.test(allErrorsText)) {
+    return getTranslation("toastErrorServerBlocked");
+  }
+
+  // 6. Clean, human-readable scraper message if available
+  for (const f of failureDetails) {
+    const msg = (f.message || "").trim();
+    if (
+      msg &&
+      msg.length > 8 &&
+      !msg.startsWith("<") &&
+      !msg.includes("Error:") &&
+      !msg.includes("SyntaxError") &&
+      !msg.includes("TypeError") &&
+      !msg.includes("JSON.parse") &&
+      !msg.includes("returned failure") &&
+      !msg.includes("dummy")
+    ) {
+      return msg;
+    }
+  }
+
+  if (/not found|404|empty|removed|deleted/i.test(allErrorsText)) {
+    return getTranslation("toastErrorMediaNotFound");
+  }
+
+  if (isTimeout) {
+    return getTranslation("toastErrorTimeout");
+  }
+
+  return getTranslation("toastScrapeAllFailed");
+}
+
 // Main Analyze Link Function
 async function analyzeLink(url, specificScraper = null) {
   const platform = getPlatformFromUrl(url);
@@ -4412,7 +4677,7 @@ async function analyzeLink(url, specificScraper = null) {
   currentPlatform = platform;
   const scrapers = fallbackChains[platform];
   if (!scrapers || scrapers.length === 0) {
-    showToast(getTranslation("toastScrapeAllFailed"), "error");
+    showToast(getTranslation("toastUnsupportedPlatform"), "error");
     return;
   }
 
@@ -4451,6 +4716,7 @@ async function analyzeLink(url, specificScraper = null) {
 
   let success = false;
   let allFailed = true;
+  const failureDetails = [];
 
   for (const scraperMethod of orderedScrapers) {
     if (analysisCancelled) {
@@ -4524,6 +4790,7 @@ async function analyzeLink(url, specificScraper = null) {
       } else {
         const errorMsg = response?.message || "Unknown error";
         console.warn(`Scraper ${scraperMethod} failed: ${errorMsg}`);
+        failureDetails.push({ scraper: scraperMethod, message: errorMsg, statusCode: response?.statusCode });
       }
     } catch (error) {
       clearTimeout(timeoutId);
@@ -4533,6 +4800,7 @@ async function analyzeLink(url, specificScraper = null) {
         break; // Instant break on user cancel
       }
       console.error(`Scraper ${scraperMethod} crashed or timed out: `, error);
+      failureDetails.push({ scraper: scraperMethod, message: error?.message || String(error) });
     }
   }
 
@@ -4541,9 +4809,10 @@ async function analyzeLink(url, specificScraper = null) {
     return;
   }
 
-  // If all scrapers failed
+  // If all scrapers failed, format a specific, informative toast message
   if (!success && allFailed) {
-    showToast(getTranslation("toastScrapeAllFailed"), "error");
+    const errorMsg = await formatAnalysisErrorMessage(url, platform, failureDetails);
+    showToast(errorMsg, "error");
   }
 
   // Hide Loading state once at the very end
@@ -6987,7 +7256,9 @@ async function downloadManualUpdate(apkUrl) {
   }
 }
 
-// Download and Install APK Update
+let lastDownloadedUpdateApkPath = null;
+
+// Download and Install APK Update directly inside the app
 async function downloadAndInstallUpdate(apkUrl) {
   if (!apkUrl) {
     apkUrl = latestUpdateInfo?.downloadUrl;
@@ -7002,76 +7273,60 @@ async function downloadAndInstallUpdate(apkUrl) {
 
   if (progressBox) progressBox.classList.remove("hidden");
   if (actionRow) actionRow.classList.add("hidden");
+  if (progressBarFill) progressBarFill.style.width = "0%";
+  if (progressPercentText) progressPercentText.innerText = "0%";
+  if (progressText) progressText.innerText = getTranslation("updateDownloading", "Mengunduh pembaruan...");
 
-  let downloadPercent = 0;
-  const simInterval = setInterval(() => {
-    if (downloadPercent < 90) {
-      downloadPercent += Math.floor(Math.random() * 8) + 3;
-      if (downloadPercent > 90) downloadPercent = 90;
-      if (progressBarFill) progressBarFill.style.width = `${downloadPercent}%`;
-      if (progressPercentText) progressPercentText.innerText = `${downloadPercent}%`;
-    }
-  }, 250);
+  const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
+
+  let progressListener = null;
+  if (MediaSaver && typeof MediaSaver.addListener === "function") {
+    progressListener = MediaSaver.addListener("onUpdateDownloadProgress", (data) => {
+      if (data && typeof data.progress === "number") {
+        const pct = Math.min(Math.max(data.progress, 0), 99);
+        if (progressBarFill) progressBarFill.style.width = `${pct}%`;
+        if (progressPercentText) progressPercentText.innerText = `${pct}%`;
+      }
+    });
+  }
 
   try {
-    const fileName = "nimiyo_update.apk";
-    const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
-
-    if (Filesystem && window.Capacitor?.isNativePlatform()) {
-      let apkPath = "";
-      try {
-        const dlRes = await Filesystem.downloadFile({
-          url: apkUrl,
-          path: fileName,
-          directory: "CACHE"
-        });
-        apkPath = dlRes?.path || fileName;
-      } catch (dlErr) {
-        const CapHttp = window.Capacitor?.Plugins?.CapacitorHttp;
-        if (CapHttp) {
-          const res = await CapHttp.request({
-            method: "GET",
-            url: apkUrl,
-            responseType: "base64"
-          });
-          const writeRes = await Filesystem.writeFile({
-            path: fileName,
-            data: res.data,
-            directory: "CACHE"
-          });
-          apkPath = writeRes?.uri || fileName;
-        } else {
-          throw dlErr;
-        }
+    if (MediaSaver && typeof MediaSaver.downloadUpdateApk === "function" && window.Capacitor?.isNativePlatform()) {
+      const res = await MediaSaver.downloadUpdateApk({ url: apkUrl });
+      if (progressListener) {
+        try { progressListener.remove(); } catch (_) {}
       }
 
-      clearInterval(simInterval);
-      if (progressBarFill) progressBarFill.style.width = "100%";
-      if (progressPercentText) progressPercentText.innerText = "100%";
-      if (progressText) progressText.innerText = getTranslation("btnPermissionGranted");
+      if (res && res.success && res.filePath) {
+        lastDownloadedUpdateApkPath = res.filePath;
+        if (progressBarFill) progressBarFill.style.width = "100%";
+        if (progressPercentText) progressPercentText.innerText = "100%";
+        if (progressText) progressText.innerText = "Memulai pemasangan...";
 
-      const uriRes = await Filesystem.getUri({
-        path: fileName,
-        directory: "CACHE"
-      });
-
-      if (MediaSaver) {
-        await MediaSaver.installApk({
-          filePath: uriRes?.uri || fileName
-        });
+        // Trigger native package install prompt immediately
+        const installRes = await MediaSaver.installApk({ filePath: res.filePath });
+        if (installRes && installRes.permissionRequired) {
+          if (progressText) progressText.innerText = "Aktifkan izin instalasi untuk melanjutkan...";
+          showToast("Aktifkan izin instalasi aplikasi tidak dikenal untuk melanjutkan", "info");
+        }
+      } else {
+        throw new Error(res?.error || "Gagal mengunduh berkas pembaruan");
       }
     } else {
-      clearInterval(simInterval);
+      // Browser fallback
       window.open(apkUrl, "_blank");
       showToast(getTranslation("toastDownloadSuccess"), "success");
+      if (progressBox) progressBox.classList.add("hidden");
+      if (actionRow) actionRow.classList.remove("hidden");
     }
-
   } catch (err) {
-    clearInterval(simInterval);
+    if (progressListener) {
+      try { progressListener.remove(); } catch (_) {}
+    }
     console.error("downloadAndInstallUpdate error:", err);
     if (progressBox) progressBox.classList.add("hidden");
     if (actionRow) actionRow.classList.remove("hidden");
-    showToast(`${getTranslation("toastDownloadFailManualServer")}: ${err.message}`, "error");
+    showToast(`Gagal mengunduh pembaruan: ${err.message}`, "error");
   }
 }
 

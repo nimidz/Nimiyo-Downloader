@@ -43,12 +43,15 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -260,6 +263,8 @@ public class MediaSaverPlugin extends Plugin {
         } catch (Exception ignored) {}
 
         boolean isPlaying = call.getBoolean("isPlaying", true);
+        Double dSpeed = call.getDouble("playbackSpeed", 1.0);
+        float playbackSpeed = (dSpeed != null && dSpeed > 0.0) ? dSpeed.floatValue() : 1.0f;
 
         // Store artwork in memory cache to bypass Android Binder 1MB IPC limit
         if (artwork != null) {
@@ -275,15 +280,16 @@ public class MediaSaverPlugin extends Plugin {
             final long fDuration = duration;
             final long fPosition = position;
             final boolean fIsPlaying = isPlaying;
+            final float fPlaybackSpeed = playbackSpeed;
             try {
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         try {
-                            runningService.updateDirectly(fTitle, fArtist, fAlbum, fDuration, fPosition, fIsPlaying);
+                            runningService.updateDirectly(fTitle, fArtist, fAlbum, fDuration, fPosition, fIsPlaying, fPlaybackSpeed);
                         } catch (Exception ignored) {}
                     });
                 } else {
-                    runningService.updateDirectly(fTitle, fArtist, fAlbum, fDuration, fPosition, fIsPlaying);
+                    runningService.updateDirectly(fTitle, fArtist, fAlbum, fDuration, fPosition, fIsPlaying, fPlaybackSpeed);
                 }
                 call.resolve(new JSObject().put("success", true));
                 return;
@@ -304,6 +310,7 @@ public class MediaSaverPlugin extends Plugin {
             intent.putExtra(MusicPlaybackService.EXTRA_DURATION, duration);
             intent.putExtra(MusicPlaybackService.EXTRA_POSITION, position);
             intent.putExtra(MusicPlaybackService.EXTRA_IS_PLAYING, isPlaying);
+            intent.putExtra(MusicPlaybackService.EXTRA_PLAYBACK_SPEED, playbackSpeed);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isPlaying) {
                 try {
@@ -1583,6 +1590,66 @@ public class MediaSaverPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void downloadUpdateApk(PluginCall call) {
+        String url = call.getString("url");
+        if (url == null || url.isEmpty()) {
+            call.reject("url is required");
+            return;
+        }
+
+        downloadExecutor.execute(() -> {
+            acquireDownloadWakeLock();
+            HttpURLConnection conn = null;
+            InputStream is = null;
+            FileOutputStream fos = null;
+            try {
+                Context context = getContext();
+                File cacheDir = context.getExternalCacheDir() != null ? context.getExternalCacheDir() : context.getCacheDir();
+                File apkFile = new File(cacheDir, "nimiyo_update.apk");
+                if (apkFile.exists()) {
+                    apkFile.delete();
+                }
+
+                conn = connectWithRedirects(url, "GET", null);
+                long contentLength = conn.getContentLengthLong();
+
+                is = conn.getInputStream();
+                fos = new FileOutputStream(apkFile);
+                byte[] buffer = new byte[8192];
+                int len;
+                long total = 0;
+                long lastNotify = 0;
+
+                while ((len = is.read(buffer)) != -1) {
+                    fos.write(buffer, 0, len);
+                    total += len;
+                    long now = System.currentTimeMillis();
+                    if (now - lastNotify > 150 && contentLength > 0) {
+                        lastNotify = now;
+                        int percent = (int) Math.min((total * 100) / contentLength, 99);
+                        JSObject progressData = new JSObject();
+                        progressData.put("progress", percent);
+                        notifyListeners("onUpdateDownloadProgress", progressData);
+                    }
+                }
+                fos.flush();
+
+                JSObject ret = new JSObject();
+                ret.put("success", true);
+                ret.put("filePath", apkFile.getAbsolutePath());
+                call.resolve(ret);
+            } catch (Exception e) {
+                call.reject("Download update failed: " + e.getMessage());
+            } finally {
+                if (fos != null) { try { fos.close(); } catch (Exception ignored) {} }
+                if (is != null) { try { is.close(); } catch (Exception ignored) {} }
+                if (conn != null) { try { conn.disconnect(); } catch (Exception ignored) {} }
+                releaseDownloadWakeLock();
+            }
+        });
+    }
+
+    @PluginMethod
     public void installApk(PluginCall call) {
         String filePath = call.getString("filePath");
         if (filePath == null || filePath.isEmpty()) {
@@ -1592,6 +1659,28 @@ public class MediaSaverPlugin extends Plugin {
 
         try {
             Context context = getContext();
+
+            // Auto-check unknown app installation permission on Android 8.0+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (!context.getPackageManager().canRequestPackageInstalls()) {
+                    try {
+                        Intent manageIntent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
+                        manageIntent.setData(Uri.parse("package:" + context.getPackageName()));
+                        manageIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(manageIntent);
+                    } catch (Exception e) {
+                        Intent fallbackIntent = new Intent(Settings.ACTION_SECURITY_SETTINGS);
+                        fallbackIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(fallbackIntent);
+                    }
+                    JSObject ret = new JSObject();
+                    ret.put("success", false);
+                    ret.put("permissionRequired", true);
+                    call.resolve(ret);
+                    return;
+                }
+            }
+
             File apkFile;
             if (filePath.startsWith("content://") || filePath.startsWith("file://")) {
                 Uri parsed = Uri.parse(filePath);
@@ -1605,9 +1694,14 @@ public class MediaSaverPlugin extends Plugin {
                 if (inCache.exists()) {
                     apkFile = inCache;
                 } else {
-                    File inExternal = new File(context.getExternalFilesDir(null), filePath);
-                    if (inExternal.exists()) {
-                        apkFile = inExternal;
+                    File inExtCache = context.getExternalCacheDir() != null ? new File(context.getExternalCacheDir(), filePath) : null;
+                    if (inExtCache != null && inExtCache.exists()) {
+                        apkFile = inExtCache;
+                    } else {
+                        File inExternal = new File(context.getExternalFilesDir(null), filePath);
+                        if (inExternal.exists()) {
+                            apkFile = inExternal;
+                        }
                     }
                 }
             }
@@ -2114,14 +2208,67 @@ public class MediaSaverPlugin extends Plugin {
         });
     }
 
+    private File getLyricsYoDir() {
+        File downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File dir = new File(downloads, "Nimiyo/LyricsYo");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        return dir;
+    }
+
+    private File getFallbackLyricsYoDir() {
+        File ext = Environment.getExternalStorageDirectory();
+        File dir = new File(ext, "Nimiyo/LyricsYo");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        return dir;
+    }
+
     @PluginMethod
     public void getAudioLyrics(PluginCall call) {
         String filePath = call.getString("filePath");
+        String trackTitle = call.getString("trackTitle");
+        String trackArtist = call.getString("trackArtist");
         downloadExecutor.execute(() -> {
             try {
                 String lyrics = null;
 
+                // 1. Check Nimiyo/LyricsYo directory first
+                File dir1 = getLyricsYoDir();
+                File dir2 = getFallbackLyricsYoDir();
+
+                List<String> names = new ArrayList<>();
                 if (filePath != null && !filePath.isEmpty()) {
+                    File af = new File(filePath);
+                    names.add(af.getName().replaceFirst("[.][^.]+$", ""));
+                }
+                if (trackTitle != null && !trackTitle.isEmpty()) {
+                    String cleanT = trackTitle.replaceAll("[\\\\/:*?\"<>|]", "_").trim();
+                    names.add(cleanT);
+                    if (trackArtist != null && !trackArtist.isEmpty() && !trackArtist.equalsIgnoreCase("Unknown Artist")) {
+                        String cleanA = trackArtist.replaceAll("[\\\\/:*?\"<>|]", "_").trim();
+                        names.add(cleanT + " - " + cleanA);
+                        names.add(cleanA + " - " + cleanT);
+                    }
+                }
+
+                for (String nm : names) {
+                    if (nm.isEmpty()) continue;
+                    File f1 = new File(dir1, nm + ".lrc");
+                    if (f1.exists() && f1.isFile()) {
+                        lyrics = readTextFile(f1);
+                        if (lyrics != null && !lyrics.trim().isEmpty()) break;
+                    }
+                    File f2 = new File(dir2, nm + ".lrc");
+                    if (f2.exists() && f2.isFile()) {
+                        lyrics = readTextFile(f2);
+                        if (lyrics != null && !lyrics.trim().isEmpty()) break;
+                    }
+                }
+
+                if (lyrics == null && filePath != null && !filePath.isEmpty()) {
                     File audioFile = new File(filePath);
                     if (audioFile.exists() && audioFile.isFile()) {
                         File parent = audioFile.getParentFile();
@@ -2192,6 +2339,96 @@ public class MediaSaverPlugin extends Plugin {
                 JSObject ret = new JSObject();
                 ret.put("hasLyrics", false);
                 call.resolve(ret);
+            }
+        });
+    }
+
+    @PluginMethod
+    public void saveLyricsFile(PluginCall call) {
+        String lyricsContent = call.getString("lyricsContent");
+        String trackTitle = call.getString("trackTitle");
+        String trackArtist = call.getString("trackArtist");
+        String filePath = call.getString("filePath");
+        String customFileName = call.getString("fileName");
+
+        if (lyricsContent == null || lyricsContent.trim().isEmpty()) {
+            call.reject("Lyrics content is empty");
+            return;
+        }
+
+        downloadExecutor.execute(() -> {
+            try {
+                String baseName = null;
+                if (customFileName != null && !customFileName.trim().isEmpty()) {
+                    baseName = customFileName.trim().replaceFirst("[.][^.]+$", "");
+                } else if (filePath != null && !filePath.isEmpty()) {
+                    File af = new File(filePath);
+                    baseName = af.getName().replaceFirst("[.][^.]+$", "");
+                } else if (trackTitle != null && !trackTitle.isEmpty()) {
+                    baseName = trackTitle.trim();
+                    if (trackArtist != null && !trackArtist.isEmpty() && !trackArtist.equalsIgnoreCase("Unknown Artist")) {
+                        baseName = baseName + " - " + trackArtist.trim();
+                    }
+                } else {
+                    baseName = "Lyrics_" + System.currentTimeMillis();
+                }
+
+                String safeName = baseName.replaceAll("[\\\\/:*?\"<>|]", "_").trim();
+                if (safeName.isEmpty()) safeName = "Lyrics_" + System.currentTimeMillis();
+
+                File lyricsDir = getLyricsYoDir();
+                File targetFile = new File(lyricsDir, safeName + ".lrc");
+
+                try (FileOutputStream fos = new FileOutputStream(targetFile);
+                     OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
+                    osw.write(lyricsContent.trim());
+                    osw.flush();
+                }
+
+                // Companion next to audio file
+                if (filePath != null && !filePath.isEmpty()) {
+                    try {
+                        File af = new File(filePath);
+                        File parent = af.getParentFile();
+                        if (parent != null && parent.canWrite()) {
+                            File companionLrc = new File(parent, af.getName().replaceFirst("[.][^.]+$", "") + ".lrc");
+                            try (FileOutputStream fos = new FileOutputStream(companionLrc);
+                                 OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
+                                osw.write(lyricsContent.trim());
+                                osw.flush();
+                            }
+                        }
+                    } catch (Exception ignored) {}
+                }
+
+                // Fallback directory sync
+                try {
+                    File fallbackDir = getFallbackLyricsYoDir();
+                    File fallbackTarget = new File(fallbackDir, safeName + ".lrc");
+                    try (FileOutputStream fos = new FileOutputStream(fallbackTarget);
+                         OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
+                        osw.write(lyricsContent.trim());
+                        osw.flush();
+                    }
+                } catch (Exception ignored) {}
+
+                // Scan file so Android media library discovers it
+                try {
+                    android.media.MediaScannerConnection.scanFile(
+                        getContext(),
+                        new String[]{ targetFile.getAbsolutePath() },
+                        new String[]{ "text/plain" },
+                        null
+                    );
+                } catch (Exception ignored) {}
+
+                JSObject ret = new JSObject();
+                ret.put("success", true);
+                ret.put("filePath", targetFile.getAbsolutePath());
+                ret.put("fileName", targetFile.getName());
+                call.resolve(ret);
+            } catch (Exception e) {
+                call.reject("Gagal menyimpan file lirik: " + e.getMessage(), e);
             }
         });
     }

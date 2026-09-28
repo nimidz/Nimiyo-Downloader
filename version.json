@@ -1,14 +1,15 @@
 {
-  "versionCode": 4,
-  "versionName": "2.1.1",
+  "versionCode": 5,
+  "versionName": "2.2.0",
   "minRequiredVersion": "2.0.0",
-  "releaseDate": "2026-09-23",
-  "downloadUrl": "https://github.com/nimidz/Nimiyo-Downloader/releases/download/v2.1.1/Nimiyo.v2.1.1.apk",
+  "releaseDate": "2026-09-28",
+  "downloadUrl": "https://github.com/nimidz/Nimiyo-Downloader/releases/download/v2.2.0/Nimiyo.v2.2.0.apk",
   "changelog": [
-    "⚡ Perbaikan sinkronisasi dan transisi notifikasi pemutar musik antar lagu",
-    "🛡️ Proteksi album art resolusi tinggi dari batas IPC Binder latar belakang",
-    "📱 Kompatibilitas sistem penyimpanan ganda Android 9 & Android 11",
-    "🔋 WakeLock CPU background unduhan & ID notifikasi dinamis per file",
-    "💾 Proteksi kuota penyimpanan riwayat & cache lirik musik"
+    "🎛️ MixTools: Atur tempo BPM musik (Slowed & SpeedUp) & efek Reverb FX 3D",
+    "📝 Edit Lirik Baru: Edit lirik, Import file .lrc lokal, Simpan & Refresh lirik",
+    "📂 Penyimpanan Lirik Lokal otomatis di folder Nimiyo/LyricsYO",
+    "🎨 Sinkronisasi Accent Color dinamis menyeluruh di seluruh UI",
+    "🔔 Peningkatan notifikasi Toast lebih informatif & deteksi Spotify Playlist",
+    "🌐 Deteksi koneksi offline & dukungan multi-bahasa lebih akurat"
   ]
 }

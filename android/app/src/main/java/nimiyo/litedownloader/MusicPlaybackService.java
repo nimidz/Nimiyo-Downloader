@@ -39,6 +39,7 @@ public class MusicPlaybackService extends Service {
     public static final String EXTRA_DURATION = "duration";
     public static final String EXTRA_POSITION = "position";
     public static final String EXTRA_IS_PLAYING = "isPlaying";
+    public static final String EXTRA_PLAYBACK_SPEED = "playbackSpeed";
 
     public static final String MUSIC_CHANNEL_ID = "nimiyo_media_channel";
     public static final int MUSIC_NOTIFICATION_ID = 8803;
@@ -47,6 +48,7 @@ public class MusicPlaybackService extends Service {
     private static volatile String pendingArtworkData = null;
     private MediaSession mediaSession = null;
     private boolean isPlaying = false;
+    private float currentPlaybackSpeed = 1.0f;
     private long currentDurationMs = 0;
     private long currentPositionMs = 0;
     private String currentTitle = "NIMIYO";
@@ -198,6 +200,8 @@ public class MusicPlaybackService extends Service {
         isPlaying = intent.getBooleanExtra(EXTRA_IS_PLAYING, true);
         currentDurationMs = intent.getLongExtra(EXTRA_DURATION, 0);
         currentPositionMs = intent.getLongExtra(EXTRA_POSITION, 0);
+        currentPlaybackSpeed = intent.getFloatExtra(EXTRA_PLAYBACK_SPEED, 1.0f);
+        if (currentPlaybackSpeed <= 0f) currentPlaybackSpeed = 1.0f;
 
         String artworkData = intent.getStringExtra(EXTRA_ARTWORK);
         if (artworkData == null || artworkData.isEmpty()) {
@@ -206,7 +210,25 @@ public class MusicPlaybackService extends Service {
         currentArtwork = loadArtworkBitmap(artworkData);
 
         updateMediaMetadata();
-        updatePlaybackState(isPlaying, currentPositionMs);
+        updatePlaybackState(isPlaying, currentPositionMs, currentPlaybackSpeed);
+        buildAndShowNotification();
+    }
+
+    public void updateDirectly(String title, String artist, String album, long duration, long position, boolean playing, float playbackSpeed) {
+        if (title != null && !title.isEmpty()) currentTitle = title;
+        if (artist != null) currentArtist = artist;
+        if (album != null) currentAlbum = album;
+        isPlaying = playing;
+        currentDurationMs = duration;
+        currentPositionMs = position;
+        currentPlaybackSpeed = playbackSpeed > 0f ? playbackSpeed : 1.0f;
+
+        if (pendingArtworkData != null) {
+            currentArtwork = loadArtworkBitmap(pendingArtworkData);
+        }
+
+        updateMediaMetadata();
+        updatePlaybackState(isPlaying, currentPositionMs, currentPlaybackSpeed);
         buildAndShowNotification();
     }
 
@@ -263,6 +285,10 @@ public class MusicPlaybackService extends Service {
     }
 
     private void updatePlaybackState(boolean playing, long position) {
+        updatePlaybackState(playing, position, currentPlaybackSpeed);
+    }
+
+    private void updatePlaybackState(boolean playing, long position, float playbackSpeed) {
         if (mediaSession == null) return;
 
         long actions = PlaybackState.ACTION_PLAY |
@@ -274,7 +300,7 @@ public class MusicPlaybackService extends Service {
             PlaybackState.ACTION_STOP;
 
         int state = playing ? PlaybackState.STATE_PLAYING : PlaybackState.STATE_PAUSED;
-        float speed = playing ? 1.0f : 0.0f;
+        float speed = playing ? (playbackSpeed > 0f ? playbackSpeed : 1.0f) : 0.0f;
 
         PlaybackState playbackState = new PlaybackState.Builder()
             .setActions(actions)

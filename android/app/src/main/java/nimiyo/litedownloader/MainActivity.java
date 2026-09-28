@@ -2,6 +2,11 @@ package nimiyo.litedownloader;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Display;
+import android.view.View;
+import android.view.WindowManager;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -9,6 +14,18 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(MediaSaverPlugin.class);
         super.onCreate(savedInstanceState);
+
+        // 1. Force Hardware Acceleration on Window
+        getWindow().setFlags(
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+        );
+
+        // 2. Lock to Highest Display Refresh Rate (VSync synchronization for 90Hz/120Hz/144Hz screens)
+        applyHighRefreshRate();
+
+        // 3. Optimize WebView GPU rasterization and pre-rastering
+        optimizeWebView();
 
         // Auto request notification permission on Android 13+ (API 33+)
         if (Build.VERSION.SDK_INT >= 33) {
@@ -24,6 +41,54 @@ public class MainActivity extends BridgeActivity {
                 }, 102);
             }
         }
+    }
+
+    private void applyHighRefreshRate() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            try {
+                Display display = getWindowManager().getDefaultDisplay();
+                Display.Mode[] modes = display.getSupportedModes();
+                Display.Mode maxMode = null;
+                float maxRefresh = 60.0f;
+                for (Display.Mode mode : modes) {
+                    if (mode.getRefreshRate() > maxRefresh) {
+                        maxRefresh = mode.getRefreshRate();
+                        maxMode = mode;
+                    }
+                }
+                if (maxMode != null) {
+                    WindowManager.LayoutParams params = getWindow().getAttributes();
+                    params.preferredDisplayModeId = maxMode.getModeId();
+                    getWindow().setAttributes(params);
+                }
+            } catch (Exception ignored) {}
+        }
+    }
+
+    private void optimizeWebView() {
+        try {
+            if (bridge != null && bridge.getWebView() != null) {
+                WebView webView = bridge.getWebView();
+                webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+                WebSettings settings = webView.getSettings();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    settings.setOffscreenPreRaster(true);
+                }
+                settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
+                settings.setEnableSmoothTransition(true);
+                settings.setAllowFileAccess(true);
+                settings.setAllowContentAccess(true);
+                settings.setAllowFileAccessFromFileURLs(true);
+                settings.setAllowUniversalAccessFromFileURLs(true);
+            }
+        } catch (Exception ignored) {}
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        applyHighRefreshRate();
+        optimizeWebView();
     }
 
     @Override

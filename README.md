@@ -6,7 +6,7 @@
 
   **A Premium, Ultra-Fast & Lightweight Universal Media Downloader for Android**
 
-  [![Release](https://img.shields.io/badge/Release-v2.1.1--Lite-00C48C.svg?style=for-the-badge&logo=android&logoColor=white)](https://github.com/nimidz/Nimiyo-Downloader/releases)
+  [![Release](https://img.shields.io/badge/Release-v2.2.0--Lite-00C48C.svg?style=for-the-badge&logo=android&logoColor=white)](https://github.com/nimidz/Nimiyo-Downloader/releases)
   [![Design](https://img.shields.io/badge/Design-Neobrutalism_%26_SoftUI-FFE500.svg?style=for-the-badge&logoColor=black)](https://github.com/nimidz/Nimiyo-Downloader)
   [![License](https://img.shields.io/badge/License-GPL--3.0-black.svg?style=for-the-badge)](LICENSE)
   [![Trakteer](https://img.shields.io/badge/Support-Trakteer-be1e2d.svg?style=for-the-badge&logo=ko-fi&logoColor=white)](https://trakteer.id/nimidz)
@@ -56,21 +56,24 @@
 
 ## ✨ Key Features
 
-- ⚡ **All-In-One Universal Downloader**: Support for videos, audio tracks, covers, slideshows, and photo carousels.
-- 🎨 **Neobrutalism & Soft UI Aesthetics**: Distinctive bold borders or smooth modern Soft UI styles, customizable from Settings. Includes fluid Dark Mode and custom typography (*MiSans, Inter, Outfit, Space Mono*).
-- 🎵 **Built-In Music Player**: Offline audio playback from `Download/Nimiyo/AudioYo/`, playlist creation, interactive artist/album explorer, synced lyrics, and native media controls.
+- ⚡ **All-In-One Universal Downloader**: Support for videos, audio tracks, covers, slideshows, and photo carousels from 15+ major platforms.
+- 🎛️ **MixTools Audio Studio**: Real-time playback speed control (**Speed FX**) for Slowed & Speed Up listening, paired with an interactive 2D XY Soundstage Pad for **Spatial Reverb FX**.
+- 📝 **Advanced Lyrics Engine & Editor**: Synced lyrics (LRC) auto-fetch, interactive tap-to-seek, built-in manual lyrics editor, local `.lrc` import/export, and offline lyric cache storage at `Nimiyo/LyricsYO/`.
+- 🎨 **Dynamic Accent Color & UI Aesthetics**: Automatic vibrant color extraction from active album art synchronized across the entire player UI, background radial glow, and controls. Choose between distinctive Neobrutalism or sleek Soft UI themes.
+- 🎵 **Built-In Music Player**: Offline audio playback from `Download/Nimiyo/AudioYo/`, custom playlist creation, interactive artist/album explorer, and native Android media session notifications.
 - 📲 **Quick Save Share Sheet**: Share links from any app (TikTok, YouTube, Instagram, Shopee) directly into NIMIYO's floating bottom sheet without leaving your current app.
 - 🎬 **Integrated Video & Photo Viewer**: Smooth in-app playback for history items with full-screen, looping, and native sharing.
 - 🗂️ **Organized Media Storage**:
   - 🎬 `Download/Nimiyo/VideoYo/`
   - 🎵 `Download/Nimiyo/AudioYo/`
+  - 📝 `Download/Nimiyo/LyricsYO/`
   - 🖼️ `Download/Nimiyo/ImageYo/`
 - 📁 **Direct Folder Opener**: One-tap direct folder navigation into Xiaomi File Explorer, Samsung My Files, Google Files, and ZArchiver.
 - 🔄 **Smart Concurrent Downloads & Auto-Retry**: Download up to 5 items simultaneously in parallel with smart automatic retries on connection hiccups.
-- 🚀 **In-App Auto Update**: Effortlessly check and install new APK updates directly inside the app with native install permission integration.
+- 🚀 **In-App Auto Update**: Effortlessly check, download, and install new APK updates directly inside the app with native install permission integration.
 - 🌍 **Multilingual Localization**: Complete native language parity for **English**, **Bahasa Indonesia**, **简体中文**, and **日本語**.
 - 🛡️ **Community Guidelines & Rules**: Built-in Terms of Use modal prohibiting harmful, violent, and NSFW content.
-- 🔒 **Privacy First**: Built-in Incognito Mode, zero tracking, and local history management.
+- 🔒 **Privacy First**: Built-in Incognito Mode, zero tracking, and strictly local history management.
 
 ---
 

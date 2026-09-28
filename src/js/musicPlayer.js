@@ -4,6 +4,182 @@
  * Full feature parity with Flow music app adapted to NIMIYO design language.
  */
 
+class NimiyoReverbFX {
+  constructor(audioElement) {
+    this.audioElement = audioElement;
+    this.audioCtx = null;
+    this.source = null;
+    this.dryGain = null;
+    this.wetGain = null;
+    this.fxSendGain = null;
+
+    // Filters: DJ Low-Cut (keeps bass clean) & Dynamic Tone/Air Lowpass
+    this.lowCutFilter = null;
+    this.toneFilter = null;
+    this.convolver = null;
+
+    this.isEnabled = false;
+    this.dryWet = 0.5;
+    this.depth = 0.5;
+    this.isInitialized = false;
+  }
+
+  generateDattorroImpulse(durationSec = 1.4, damping = 0.45) {
+    if (!this.audioCtx) return null;
+    const rate = this.audioCtx.sampleRate;
+    const len = Math.floor(rate * durationSec);
+    const buf = this.audioCtx.createBuffer(2, len, rate);
+    const l = buf.getChannelData(0);
+    const r = buf.getChannelData(1);
+
+    // Warm exponential decay with 1-pole high-frequency air absorption
+    let lpL = 0;
+    let lpR = 0;
+    const decayRate = 3.6; // Smooth 1.4s natural tail
+
+    for (let i = 0; i < len; i++) {
+      const t = i / rate;
+      const env = Math.exp(-t * decayRate);
+      const whiteL = (Math.random() * 2 - 1) * env;
+      const whiteR = (Math.random() * 2 - 1) * env;
+
+      lpL = lpL * damping + whiteL * (1 - damping);
+      lpR = lpR * damping + whiteR * (1 - damping);
+
+      l[i] = lpL * 0.85;
+      r[i] = lpR * 0.85;
+    }
+
+    // Dattorro early reflections / stereo spatial diffusers
+    const earlyTaps = [
+      { t: 0.0047, g: 0.65, p: -0.6 },
+      { t: 0.0083, g: 0.55, p:  0.6 },
+      { t: 0.0127, g: 0.45, p: -0.4 },
+      { t: 0.0225, g: 0.38, p:  0.4 },
+      { t: 0.0359, g: 0.32, p: -0.3 },
+      { t: 0.0604, g: 0.25, p:  0.3 },
+    ];
+
+    earlyTaps.forEach(tap => {
+      const idx = Math.floor(tap.t * rate);
+      if (idx < len) {
+        l[idx] += tap.g * (1 - tap.p) * 0.5;
+        r[idx] += tap.g * (1 + tap.p) * 0.5;
+      }
+    });
+
+    return buf;
+  }
+
+  ensureInitialized() {
+    if (this.isInitialized) {
+      this.resumeIfNeeded();
+      return true;
+    }
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return false;
+      this.audioCtx = new AudioCtx();
+
+      this.source = this.audioCtx.createMediaElementSource(this.audioElement);
+      this.dryGain = this.audioCtx.createGain();
+      this.wetGain = this.audioCtx.createGain();
+      this.fxSendGain = this.audioCtx.createGain();
+
+      // 1. DJ Low-Cut Highpass (250Hz): Guarantees kick drum & bass 100% punchy without mud
+      this.lowCutFilter = this.audioCtx.createBiquadFilter();
+      this.lowCutFilter.type = "highpass";
+      this.lowCutFilter.frequency.value = 250;
+      this.lowCutFilter.Q.value = 0.707;
+
+      // 2. Dynamic Tone / Air Shimmer Filter (Lowpass 2800Hz - 9500Hz controlled by Y-axis)
+      this.toneFilter = this.audioCtx.createBiquadFilter();
+      this.toneFilter.type = "lowpass";
+      this.toneFilter.frequency.value = 5500;
+      this.toneFilter.Q.value = 0.707;
+
+      // 3. Stable 1.4s Dattorro Plate Convolver (Zero feedback, zero howling, 100% warm & silky)
+      this.convolver = this.audioCtx.createConvolver();
+      this.convolver.buffer = this.generateDattorroImpulse(1.4, 0.42);
+
+      // Clean dry path: source -> dryGain -> destination
+      this.source.connect(this.dryGain);
+      this.dryGain.connect(this.audioCtx.destination);
+
+      // Wet FX path: source -> fxSendGain -> lowCutFilter -> convolver -> toneFilter -> wetGain -> destination
+      this.source.connect(this.fxSendGain);
+      this.fxSendGain.connect(this.lowCutFilter);
+      this.lowCutFilter.connect(this.convolver);
+      this.convolver.connect(this.toneFilter);
+      this.toneFilter.connect(this.wetGain);
+      this.wetGain.connect(this.audioCtx.destination);
+
+      this.applyParameters();
+      this.isInitialized = true;
+      this.resumeIfNeeded();
+      return true;
+    } catch (e) {
+      console.warn("[REVERB] Web Audio initialization notice:", e);
+      return false;
+    }
+  }
+
+  applyParameters() {
+    if (!this.audioCtx || !this.dryGain || !this.wetGain || !this.fxSendGain) return;
+    const now = this.audioCtx.currentTime;
+
+    if (!this.isEnabled) {
+      // 100% HARD BYPASS: Mutes FX input completely, 0% CPU, pure dry audio
+      this.dryGain.gain.setValueAtTime(1.0, now);
+      this.wetGain.gain.setValueAtTime(0.0, now);
+      this.fxSendGain.gain.setValueAtTime(0.0, now);
+      return;
+    }
+
+    // Active FX send
+    this.fxSendGain.gain.setTargetAtTime(1.0, now, 0.015);
+
+    // Spatial Reverb X-axis (Dry / Wet):
+    // 0 = 100% dry, 0% wet
+    // 0.5 = 85% dry, 80% wet (sweet spot: punchy vocal with lush airy space)
+    // 1.0 = 45% dry, 130% wet (DJ drop wash-out)
+    const effectiveWet = Math.pow(this.dryWet, 0.85) * 1.3;
+    const effectiveDry = 1.0 - (this.dryWet * 0.55);
+
+    // Spatial Reverb Y-axis (Tone / Acoustic Space):
+    // Bottom (Y=0): Warm, intimate, mellow club space (Cutoff ~2800 Hz)
+    // Top (Y=1): Open, airy, expansive stadium sizzle (Cutoff ~9500 Hz)
+    const cutoff = 2800 + (this.depth * 6700);
+    if (this.toneFilter) {
+      this.toneFilter.frequency.setTargetAtTime(cutoff, now, 0.02);
+    }
+
+    this.dryGain.gain.setTargetAtTime(effectiveDry, now, 0.02);
+    this.wetGain.gain.setTargetAtTime(effectiveWet, now, 0.02);
+  }
+
+  resumeIfNeeded() {
+    if (this.audioCtx && this.audioCtx.state === "suspended") {
+      this.audioCtx.resume().catch(() => {});
+    }
+  }
+
+  setEnabled(enabled) {
+    this.isEnabled = Boolean(enabled);
+    if (this.isEnabled) {
+      this.ensureInitialized();
+      this.resumeIfNeeded();
+    }
+    this.applyParameters();
+  }
+
+  setXY(xNorm, yNorm) {
+    this.dryWet = Math.max(0, Math.min(1, xNorm));
+    this.depth = Math.max(0, Math.min(1, yNorm));
+    this.applyParameters();
+  }
+}
+
 class NimiyoMusicPlayer {
   constructor() {
     // Playback Engine
@@ -80,6 +256,13 @@ class NimiyoMusicPlayer {
     // Permission State
     this.permissionGranted = true;
     this.isCompactMiniPlayer = false;
+
+    // MixTools BPM & Reverb State
+    this.bpmRate = 100;
+    this.isReverbEnabled = false;
+    this.reverbDryWet = 0.5;
+    this.reverbDepth = 0.5;
+    this.reverbEngine = null;
 
     // DOM Elements Cache
     this.elements = {};
@@ -213,15 +396,44 @@ class NimiyoMusicPlayer {
       lyricsModalArtist: document.getElementById("lyricsModalArtist"),
       lyricsContent: document.getElementById("lyricsContent"),
 
+      // Edit Lyrics & Reset / Import Modal Elements
+      openEditLyricsBtn: document.getElementById("openEditLyricsBtn"),
+      editLyricsModal: document.getElementById("editLyricsModal"),
+      closeEditLyricsModalBtn: document.getElementById("closeEditLyricsModalBtn"),
+      cancelEditLyricsBtn: document.getElementById("cancelEditLyricsBtn"),
+      saveEditLyricsBtn: document.getElementById("saveEditLyricsBtn"),
+      downloadLyricsFileBtn: document.getElementById("downloadLyricsFileBtn"),
+      editLyricsTextarea: document.getElementById("editLyricsTextarea"),
+      editLyricsTrackTitle: document.getElementById("editLyricsTrackTitle"),
+      refreshLyricsBtn: document.getElementById("refreshLyricsBtn"),
+      importLyricsBtn: document.getElementById("importLyricsBtn"),
+      importLrcFileInput: document.getElementById("importLrcFileInput"),
+      resetLyricsModal: document.getElementById("resetLyricsModal"),
+      closeResetLyricsModalBtn: document.getElementById("closeResetLyricsModalBtn"),
+      resetLyricsTrackTitle: document.getElementById("resetLyricsTrackTitle"),
+      resetLyricsDefaultBtn: document.getElementById("resetLyricsDefaultBtn"),
+      resetLyricsLyricsifyBtn: document.getElementById("resetLyricsLyricsifyBtn"),
+      resetLyricsImportBtn: document.getElementById("resetLyricsImportBtn"),
+
       // Sleep Timer Modal
       sleepTimerModal: document.getElementById("musicSleepTimerModal"),
       closeSleepTimerModalBtn: document.getElementById("closeSleepTimerModalBtn"),
       customTimerInput: document.getElementById("customTimerInput"),
       setCustomTimerBtn: document.getElementById("setCustomTimerBtn"),
 
-      // Speed Modal
+      // MixTools Modal Elements
       speedModal: document.getElementById("musicSpeedModal"),
       closeSpeedModalBtn: document.getElementById("closeSpeedModalBtn"),
+      resetAllMixToolsBtn: document.getElementById("resetAllMixToolsBtn"),
+      slowedBpmSlider: document.getElementById("slowedBpmSlider"),
+      slowedBpmValueLabel: document.getElementById("slowedBpmValueLabel"),
+      resetSlowedBpmBtn: document.getElementById("resetSlowedBpmBtn"),
+      reverbToggle: document.getElementById("reverbToggle"),
+      reverbPadContainer: document.getElementById("reverbPadContainer"),
+      reverbStatusLabel: document.getElementById("reverbStatusLabel"),
+      resetReverbBtn: document.getElementById("resetReverbBtn"),
+      reverbXyPad: document.getElementById("reverbXyPad"),
+      reverbPadPuck: document.getElementById("reverbPadPuck"),
 
       // Song Info Modal
       songInfoModal: document.getElementById("musicSongInfoModal"),
@@ -329,16 +541,21 @@ class NimiyoMusicPlayer {
         }
         if (prefs.sortMode) this.sortMode = prefs.sortMode;
         if (prefs.durationDisplayMode) this.durationDisplayMode = prefs.durationDisplayMode;
-        if (typeof prefs.playbackRate === "number") this.playbackRate = prefs.playbackRate;
+        if (typeof prefs.bpmRate === "number") this.bpmRate = prefs.bpmRate;
+        else if (typeof prefs.slowedBpm === "number") this.bpmRate = prefs.slowedBpm;
+        if (typeof prefs.playbackRate === "number" && !prefs.bpmRate) this.bpmRate = Math.round(prefs.playbackRate * 100);
+        if (typeof prefs.isReverbEnabled === "boolean") this.isReverbEnabled = prefs.isReverbEnabled;
+        if (typeof prefs.reverbDryWet === "number") this.reverbDryWet = prefs.reverbDryWet;
+        if (typeof prefs.reverbDepth === "number") this.reverbDepth = prefs.reverbDepth;
         this.lastTrackId = prefs.lastTrackId || null;
       }
       this.audio.volume = this.volume;
-      this.audio.playbackRate = this.playbackRate;
+      this.setBpmRate(this.bpmRate, false);
       if (this.elements.fullPlayerVolumeSlider) {
         this.elements.fullPlayerVolumeSlider.value = Math.round(this.volume * 100);
       }
-      if (this.elements.fullPlayerSpeedLabel) {
-        this.elements.fullPlayerSpeedLabel.innerText = `${this.playbackRate}x`;
+      if (this.isReverbEnabled) {
+        this.toggleReverbMode(true);
       }
       this.updateControlStatesUi();
       this.updateSortLabelUi();
@@ -356,6 +573,10 @@ class NimiyoMusicPlayer {
         sortMode: this.sortMode,
         durationDisplayMode: this.durationDisplayMode,
         playbackRate: this.playbackRate,
+        bpmRate: this.bpmRate,
+        isReverbEnabled: this.isReverbEnabled,
+        reverbDryWet: this.reverbDryWet,
+        reverbDepth: this.reverbDepth,
         lastTrackId: this.currentTrack ? this.currentTrack.id : this.lastTrackId
       };
       localStorage.setItem("nimiyo_music_prefs", JSON.stringify(prefs));
@@ -677,10 +898,35 @@ class NimiyoMusicPlayer {
 
     this.audio.addEventListener("play", () => {
       this.isPlaying = true;
+      if (this.bpmRate !== 100) {
+        this.setPreservesPitch(false);
+      } else {
+        this.setPreservesPitch(true);
+      }
+      this.audio.playbackRate = this.bpmRate / 100;
+      if (this.isReverbEnabled) {
+        if (!this.reverbEngine) {
+          this.reverbEngine = new NimiyoReverbFX(this.audio);
+        }
+        this.reverbEngine.setEnabled(true);
+        this.reverbEngine.setXY(this.reverbDryWet, this.reverbDepth);
+        this.reverbEngine.resumeIfNeeded();
+      }
       this.updatePlaybackUiState(true);
       this.startVisualizer();
       this.updateMediaSessionState("playing");
       this.updateNativeNotification(true);
+    });
+
+    this.audio.addEventListener("playing", () => {
+      if (this.isReverbEnabled) {
+        if (!this.reverbEngine) {
+          this.reverbEngine = new NimiyoReverbFX(this.audio);
+        }
+        this.reverbEngine.setEnabled(true);
+        this.reverbEngine.setXY(this.reverbDryWet, this.reverbDepth);
+        this.reverbEngine.resumeIfNeeded();
+      }
     });
 
     this.audio.addEventListener("pause", () => {
@@ -821,7 +1067,12 @@ class NimiyoMusicPlayer {
     }
 
     this.audio.src = sourceUrl;
-    this.audio.playbackRate = this.playbackRate;
+    if (this.bpmRate !== 100) {
+      this.setPreservesPitch(false);
+    } else {
+      this.setPreservesPitch(true);
+    }
+    this.audio.playbackRate = this.bpmRate / 100;
     this.audio.load();
 
     // Immediately reset lyrics scroll & state to top on new song
@@ -853,6 +1104,15 @@ class NimiyoMusicPlayer {
     this.updateNativeNotification(this.isPlaying, 0);
     this.fetchAndApplyArtwork(track);
     this.fetchLyrics(track);
+
+    if (this.isReverbEnabled) {
+      if (!this.reverbEngine) {
+        this.reverbEngine = new NimiyoReverbFX(this.audio);
+      }
+      this.reverbEngine.setEnabled(true);
+      this.reverbEngine.setXY(this.reverbDryWet, this.reverbDepth);
+      this.reverbEngine.resumeIfNeeded();
+    }
 
     if (autoPlay) {
       try {
@@ -1036,7 +1296,9 @@ class NimiyoMusicPlayer {
 
   updateVolumeUi() {
     if (this.elements.fullPlayerVolumeSlider) {
-      this.elements.fullPlayerVolumeSlider.value = Math.round(this.volume * 100);
+      const volPct = Math.round(this.volume * 100);
+      this.elements.fullPlayerVolumeSlider.value = volPct;
+      this.elements.fullPlayerVolumeSlider.style.setProperty("--progress", `${volPct}%`);
     }
     if (this.elements.fullPlayerVolumeIcon) {
       if (this.volume === 0 || this.isMuted) {
@@ -1059,22 +1321,153 @@ class NimiyoMusicPlayer {
     }
   }
 
-  setPlaybackRate(speed) {
+  setPreservesPitch(preserve) {
+    try {
+      if ("preservesPitch" in this.audio) {
+        this.audio.preservesPitch = preserve;
+      }
+      if ("webkitPreservesPitch" in this.audio) {
+        this.audio.webkitPreservesPitch = preserve;
+      }
+      if ("mozPreservesPitch" in this.audio) {
+        this.audio.mozPreservesPitch = preserve;
+      }
+    } catch (_) {}
+  }
+
+  setBpmRate(bpm, shouldToast = false) {
+    const clamped = Math.max(60, Math.min(140, bpm));
+    this.bpmRate = clamped;
+    const speed = clamped / 100;
     this.playbackRate = speed;
+
+    if (clamped !== 100) {
+      this.setPreservesPitch(false);
+    } else {
+      this.setPreservesPitch(true);
+    }
     this.audio.playbackRate = speed;
-    this.savePreferences();
+
+    // Symmetrical range: min 60, max 140 -> 100 is EXACTLY at 50% (dead center)
+    const pct = ((clamped - 60) / (140 - 60)) * 100;
+    if (this.elements.slowedBpmSlider) {
+      this.elements.slowedBpmSlider.style.setProperty("--progress", `${pct.toFixed(1)}%`);
+      this.elements.slowedBpmSlider.value = clamped;
+    }
+
+    let tag = "Normal";
+    if (clamped < 100) tag = "Slowed";
+    else if (clamped > 100) tag = "SpeedUp";
+
+    if (this.elements.slowedBpmValueLabel) {
+      this.elements.slowedBpmValueLabel.innerText = `${clamped}% • ${tag}`;
+    }
     if (this.elements.fullPlayerSpeedLabel) {
-      this.elements.fullPlayerSpeedLabel.innerText = `${speed}x`;
+      this.elements.fullPlayerSpeedLabel.innerText = clamped === 100 ? "MixTools" : `${clamped}%`;
     }
-    if (this.elements.speedModal) {
-      this.elements.speedModal.querySelectorAll(".option-pill-btn").forEach(btn => {
-        btn.classList.toggle("active", parseFloat(btn.getAttribute("data-speed")) === speed);
-      });
+    this.savePreferences();
+
+    if (this.currentTrack) {
+      this.updateNativeNotification(this.isPlaying);
     }
-    this.closeSpeedModal();
+
+    if (shouldToast && window.showToast) {
+      window.showToast(`BPM: ${clamped}% (${tag})`, "info");
+    }
+  }
+
+  toggleReverbMode(enabled) {
+    this.isReverbEnabled = Boolean(enabled);
+    if (this.elements.reverbPadContainer) {
+      this.elements.reverbPadContainer.classList.toggle("hidden", !this.isReverbEnabled);
+    }
+    if (this.isReverbEnabled) {
+      if (!this.reverbEngine) {
+        this.reverbEngine = new NimiyoReverbFX(this.audio);
+      }
+      this.reverbEngine.setEnabled(true);
+      this.setReverbXY(this.reverbDryWet, this.reverbDepth);
+      if (window.showToast) {
+        window.showToast("Reverb FX Aktif", "info");
+      }
+    } else {
+      if (this.reverbEngine) {
+        this.reverbEngine.setEnabled(false);
+      }
+    }
+    this.savePreferences();
+  }
+
+  setReverbXY(xNorm, yNorm) {
+    this.reverbDryWet = Math.max(0, Math.min(1, xNorm));
+    this.reverbDepth = Math.max(0, Math.min(1, yNorm));
+
+    if (this.elements.reverbPadPuck) {
+      this.elements.reverbPadPuck.style.left = `${(this.reverbDryWet * 100).toFixed(1)}%`;
+      this.elements.reverbPadPuck.style.top = `${((1 - this.reverbDepth) * 100).toFixed(1)}%`;
+    }
+
+    if (this.elements.reverbStatusLabel) {
+      this.elements.reverbStatusLabel.innerText = `Dry/Wet: ${Math.round(this.reverbDryWet * 100)}% • Decay: ${Math.round(this.reverbDepth * 100)}%`;
+    }
+
+    if (this.reverbEngine) {
+      this.reverbEngine.setXY(this.reverbDryWet, this.reverbDepth);
+    }
+    this.savePreferences();
+  }
+
+  resetAllMixTools() {
+    this.setBpmRate(100, false);
+    this.toggleReverbMode(false);
+    this.setReverbXY(0.5, 0.5);
+    if (this.elements.reverbToggle) {
+      this.elements.reverbToggle.checked = false;
+    }
+    if (this.elements.reverbPadContainer) {
+      this.elements.reverbPadContainer.classList.add("hidden");
+    }
+    this.savePreferences();
     if (window.showToast) {
-      window.showToast(`${this.t("musicSpeedTitle", "Kecepatan")}: ${speed}x`, "info");
+      window.showToast("MixTools di-reset ke default", "info");
     }
+  }
+
+  setupReverbPadEvents() {
+    const pad = this.elements.reverbXyPad;
+    if (!pad) return;
+
+    let isDragging = false;
+
+    const updateFromCoord = (clientX, clientY) => {
+      const rect = pad.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      const y = Math.max(0, Math.min(1, 1 - (clientY - rect.top) / rect.height));
+      this.setReverbXY(x, y);
+    };
+
+    pad.addEventListener("pointerdown", (e) => {
+      isDragging = true;
+      try { pad.setPointerCapture(e.pointerId); } catch (_) {}
+      updateFromCoord(e.clientX, e.clientY);
+    });
+
+    pad.addEventListener("pointermove", (e) => {
+      if (isDragging) {
+        updateFromCoord(e.clientX, e.clientY);
+      }
+    });
+
+    const stopDragging = (e) => {
+      if (isDragging) {
+        isDragging = false;
+        try { pad.releasePointerCapture(e.pointerId); } catch (_) {}
+      }
+    };
+
+    pad.addEventListener("pointerup", stopDragging);
+    pad.addEventListener("pointercancel", stopDragging);
   }
 
   toggleDurationDisplayMode() {
@@ -1601,6 +1994,27 @@ class NimiyoMusicPlayer {
     }
   }
 
+  async saveLyricsToStorage(track, lyrics, notify = false) {
+    if (!track || !lyrics) return;
+    const trackKey = `nimiyo_lrc_${track.id || track.filePath || (track.displayTitle + "_" + track.displayArtist)}`;
+    this.saveLyricsToCache(trackKey, lyrics);
+
+    // Save to physical storage directory Nimiyo/LyricsYo (silent background save, no toast)
+    const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
+    if (MediaSaver && typeof MediaSaver.saveLyricsFile === "function") {
+      try {
+        await MediaSaver.saveLyricsFile({
+          lyricsContent: lyrics,
+          trackTitle: track.displayTitle,
+          trackArtist: track.displayArtist,
+          filePath: track.filePath
+        });
+      } catch (e) {
+        console.warn("[LYRICS] Save to LyricsYo directory error:", e);
+      }
+    }
+  }
+
   async fetchLyrics(track) {
     if (!track) return;
     const trackKey = `nimiyo_lrc_${track.id || track.filePath || (track.displayTitle + "_" + track.displayArtist)}`;
@@ -1616,28 +2030,15 @@ class NimiyoMusicPlayer {
       this.elements.lyricsContent.scrollTop = 0;
     }
 
-    // 1. Check LocalStorage Cache
-    try {
-      const cached = localStorage.getItem(trackKey);
-      if (cached && cached.trim()) {
-        this.currentLyrics = cached.trim();
-        this.parseLrcString(this.currentLyrics);
-        // If cached lyrics have real timestamps, we are good to go!
-        if (this.parsedLrc.length > 0 && /\[\d{1,2}:\d{2}/.test(cached)) {
-          this.updateLyricsBadgesAndRender();
-          return;
-        } else {
-          // If cached lyrics are only plain text, render them immediately but continue online fetch to upgrade!
-          this.updateLyricsBadgesAndRender();
-        }
-      }
-    } catch (_) {}
-
-    // 2. Check Native MediaSaver (Embedded ID3/MP4/LRC companion file)
+    // 1. Check Native MediaSaver & Nimiyo/LyricsYo directory first
     const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
-    if (MediaSaver && typeof MediaSaver.getAudioLyrics === "function" && track.filePath) {
+    if (MediaSaver && typeof MediaSaver.getAudioLyrics === "function") {
       try {
-        const res = await MediaSaver.getAudioLyrics({ filePath: track.filePath });
+        const res = await MediaSaver.getAudioLyrics({
+          filePath: track.filePath,
+          trackTitle: track.displayTitle,
+          trackArtist: track.displayArtist
+        });
         if (res && res.hasLyrics && res.lyrics) {
           this.currentLyrics = res.lyrics.trim();
           this.parseLrcString(this.currentLyrics);
@@ -1650,6 +2051,22 @@ class NimiyoMusicPlayer {
       } catch (_) {}
     }
 
+    // 2. Check LocalStorage Cache
+    try {
+      const cached = localStorage.getItem(trackKey);
+      if (cached && cached.trim()) {
+        this.currentLyrics = cached.trim();
+        this.parseLrcString(this.currentLyrics);
+        // If cached lyrics have real timestamps, use them!
+        if (this.parsedLrc.length > 0 && /\[\d{1,2}:\d{2}/.test(cached)) {
+          this.updateLyricsBadgesAndRender();
+          return;
+        } else {
+          this.updateLyricsBadgesAndRender();
+        }
+      }
+    } catch (_) {}
+
     // 3. Online Fetch from LRCLIB & Fallback
     this.isFetchingLyrics = true;
     if (this.isLyricsModeActive) {
@@ -1659,9 +2076,13 @@ class NimiyoMusicPlayer {
     try {
       const onlineLyrics = await this.fetchOnlineLyrics(track);
       if (onlineLyrics && this.currentTrack && (this.currentTrack.id === track.id || this.currentTrack.filePath === track.filePath)) {
-        this.currentLyrics = onlineLyrics.trim();
-        this.parseLrcString(this.currentLyrics);
-        this.saveLyricsToCache(trackKey, this.currentLyrics);
+        const lyrStr = typeof onlineLyrics === "string" ? onlineLyrics : onlineLyrics.lyrics;
+        if (lyrStr) {
+          this.currentLyrics = lyrStr.trim();
+          this.parseLrcString(this.currentLyrics);
+          // Automatically save newly detected lyrics into Nimiyo/LyricsYo directory silently (no popup)!
+          await this.saveLyricsToStorage(track, this.currentLyrics, false);
+        }
       }
     } catch (err) {
       console.warn("[LYRICS] Fetch online error:", err);
@@ -1671,6 +2092,278 @@ class NimiyoMusicPlayer {
     }
   }
 
+  openEditLyricsModal() {
+    if (!this.currentTrack) {
+      if (window.showToast) window.showToast("Pilih lagu terlebih dahulu", "info");
+      return;
+    }
+    if (this.elements.editLyricsTrackTitle) {
+      this.elements.editLyricsTrackTitle.innerText = `${this.currentTrack.displayTitle || "Track"} • ${this.currentTrack.displayArtist || "Artist"}`;
+    }
+
+    let content = this.currentLyrics || "";
+    if (!content && this.parsedLrc && this.parsedLrc.length > 0) {
+      content = this.parsedLrc.map(item => {
+        const mins = Math.floor(item.time / 60);
+        const secs = item.time % 60;
+        const mm = String(mins).padStart(2, "0");
+        const ss = secs.toFixed(2).padStart(5, "0");
+        return `[${mm}:${ss}] ${item.text || ""}`;
+      }).join("\n");
+    }
+
+    if (this.elements.editLyricsTextarea) {
+      this.elements.editLyricsTextarea.value = content;
+    }
+
+    if (this.elements.editLyricsModal) {
+      this.elements.editLyricsModal.classList.remove("hidden");
+    }
+  }
+
+  closeEditLyricsModal() {
+    if (this.elements.editLyricsModal) {
+      this.elements.editLyricsModal.classList.add("hidden");
+    }
+  }
+
+  openResetLyricsModal() {
+    if (!this.currentTrack) {
+      if (window.showToast) window.showToast("Pilih lagu terlebih dahulu", "info");
+      return;
+    }
+    if (this.elements.resetLyricsTrackTitle) {
+      this.elements.resetLyricsTrackTitle.innerText = `${this.currentTrack.displayTitle || "Track"} • ${this.currentTrack.displayArtist || "Artist"}`;
+    }
+    if (this.elements.resetLyricsModal) {
+      this.elements.resetLyricsModal.classList.remove("hidden");
+    }
+  }
+
+  closeResetLyricsModal() {
+    if (this.elements.resetLyricsModal) {
+      this.elements.resetLyricsModal.classList.add("hidden");
+    }
+  }
+
+  async handleResetLyricsDefault() {
+    if (!this.currentTrack) return;
+    const track = this.currentTrack;
+    const trackKey = `nimiyo_lrc_${track.id || track.filePath || (track.displayTitle + "_" + track.displayArtist)}`;
+
+    // Saat user tekan refresh: lirik otomatis dihapus lebih dulu
+    this.currentLyrics = "";
+    this.parsedLrc = [];
+    if (this.elements.editLyricsTextarea) {
+      this.elements.editLyricsTextarea.value = "";
+    }
+    try {
+      localStorage.removeItem(trackKey);
+      localStorage.removeItem(trackKey + "_trans");
+    } catch (_) {}
+    this.updateLyricsBadgesAndRender();
+
+    if (window.showToast) {
+      window.showToast("Mencari lirik otomatis (LRCLIB)...", "info");
+    }
+
+    try {
+      const onlineLyrics = await this.fetchOnlineLyrics(track);
+      const lyrStr = typeof onlineLyrics === "string" ? onlineLyrics : (onlineLyrics?.lyrics || null);
+      if (lyrStr && lyrStr.trim()) {
+        this.currentLyrics = lyrStr.trim();
+        this.parseLrcString(this.currentLyrics);
+        if (this.elements.editLyricsTextarea) {
+          this.elements.editLyricsTextarea.value = this.currentLyrics;
+        }
+        this.saveLyricsToCache(trackKey, this.currentLyrics);
+        await this.saveLyricsToStorage(track, this.currentLyrics, false);
+        this.updateLyricsBadgesAndRender();
+        this.syncIntegratedLyrics(this.audio.currentTime || 0, true);
+        this.closeResetLyricsModal();
+        if (window.showToast) {
+          window.showToast("Lirik berhasil di-reset dari database online!", "success");
+        }
+      } else {
+        this.closeResetLyricsModal();
+        if (window.showToast) {
+          window.showToast("Lirik tidak ditemukan di database online", "info");
+        }
+      }
+    } catch (err) {
+      this.closeResetLyricsModal();
+      if (window.showToast) {
+        window.showToast("Gagal mengambil lirik online", "error");
+      }
+    }
+  }
+
+  handleResetLyricsLyricsify() {
+    if (!this.currentTrack) return;
+    const track = this.currentTrack;
+    const trackKey = `nimiyo_lrc_${track.id || track.filePath || (track.displayTitle + "_" + track.displayArtist)}`;
+
+    // Saat user tekan refresh: lirik otomatis dihapus
+    this.currentLyrics = "";
+    this.parsedLrc = [];
+    if (this.elements.editLyricsTextarea) {
+      this.elements.editLyricsTextarea.value = "";
+    }
+    try {
+      localStorage.removeItem(trackKey);
+      localStorage.removeItem(trackKey + "_trans");
+    } catch (_) {}
+    this.updateLyricsBadgesAndRender();
+
+    const { title, primaryArtist } = this.cleanTitleAndArtist(track.displayTitle || track.title, track.displayArtist || track.artist);
+    const query = primaryArtist ? `${primaryArtist} ${title}` : title;
+    const searchUrl = `https://lyricsify.com/search?q=${encodeURIComponent(query.trim())}`;
+
+    this.closeResetLyricsModal();
+    window.open(searchUrl, "_blank");
+
+    if (window.showToast) {
+      window.showToast("Lirik di-reset. Salin lirik .LRC dari Lyricsify lalu tempel di sini", "info");
+    }
+  }
+
+  handleImportLyricsFile(e) {
+    const file = e.target?.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result;
+      if (typeof content === "string") {
+        if (this.elements.editLyricsTextarea) {
+          this.elements.editLyricsTextarea.value = content.trim();
+        }
+        this.closeResetLyricsModal();
+        if (window.showToast) {
+          window.showToast(`Lirik ${file.name} berhasil di-import`, "success");
+        }
+      }
+    };
+    reader.onerror = () => {
+      if (window.showToast) {
+        window.showToast("Gagal membaca file lirik", "error");
+      }
+    };
+    reader.readAsText(file, "UTF-8");
+    e.target.value = "";
+  }
+
+  async saveEditedLyrics() {
+    if (!this.currentTrack) return;
+    const textarea = this.elements.editLyricsTextarea;
+    const content = textarea ? textarea.value.trim() : "";
+
+    if (!content) {
+      if (window.showToast) window.showToast("Lirik tidak boleh kosong", "warning");
+      return;
+    }
+
+    this.currentLyrics = content;
+    this.parseLrcString(this.currentLyrics);
+
+    // Automatically save .lrc to directory nimiyo/LyricsYo and keep it permanently
+    await this.saveLyricsToStorage(this.currentTrack, this.currentLyrics, false);
+
+    // Update UI immediately
+    this.updateLyricsBadgesAndRender();
+    this.syncIntegratedLyrics(this.audio.currentTime || 0, true);
+
+    this.closeEditLyricsModal();
+
+    if (window.showToast) {
+      window.showToast("Edit Lirik berhasil, dan disimpan Lokal", "success");
+    }
+  }
+
+  async downloadLyricsFile() {
+    if (!this.currentTrack) return;
+    const textarea = this.elements.editLyricsTextarea;
+    const content = (textarea && textarea.value.trim()) ? textarea.value.trim() : (this.currentLyrics || "");
+
+    if (!content) {
+      if (window.showToast) window.showToast("Belum ada lirik untuk di-download", "warning");
+      return;
+    }
+
+    const cleanTitle = (this.currentTrack.displayTitle || "lyrics").replace(/[\\/:*?"<>|]/g, "_").trim();
+    const cleanArtist = (this.currentTrack.displayArtist || "").replace(/[\\/:*?"<>|]/g, "_").trim();
+    const fileName = cleanArtist && !cleanArtist.toLowerCase().includes("unknown") ? `${cleanTitle} - ${cleanArtist}.lrc` : `${cleanTitle}.lrc`;
+
+    const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
+    if (MediaSaver && typeof MediaSaver.saveLyricsFile === "function") {
+      try {
+        const res = await MediaSaver.saveLyricsFile({
+          lyricsContent: content,
+          fileName: fileName,
+          trackTitle: this.currentTrack.displayTitle,
+          trackArtist: this.currentTrack.displayArtist,
+          filePath: this.currentTrack.filePath
+        });
+        if (res && res.success) {
+          if (window.showToast) {
+            window.showToast(`Lirik tersimpan: ${res.fileName || fileName} di Nimiyo/LyricsYo`, "success");
+          }
+          return;
+        }
+      } catch (err) {
+        console.warn("[LYRICS] Native saveLyricsFile error:", err);
+      }
+    }
+
+    // Web fallback blob download
+    try {
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      if (window.showToast) {
+        window.showToast(`Lirik ${fileName} berhasil diunduh`, "success");
+      }
+    } catch (e) {
+      if (window.showToast) {
+        window.showToast("Gagal mendownload lirik", "error");
+      }
+    }
+  }
+
+
+
+  getConsolidatedLrc() {
+    if (!this.parsedLrc || this.parsedLrc.length === 0) return [];
+    const consolidated = [];
+
+    for (let i = 0; i < this.parsedLrc.length; i++) {
+      const cur = this.parsedLrc[i];
+      const next = this.parsedLrc[i + 1];
+
+      // Anti double-lyrics: jika ada baris berikutnya yang berada di timestamp sama / berdekatan (< 0.35s),
+      // buang baris kedua (terjemahan / baris duplikat lama) dan hanya simpan baris pertama!
+      if (next && Math.abs(next.time - cur.time) < 0.35) {
+        consolidated.push({
+          time: cur.time,
+          text: cur.text ? cur.text.trim() : ""
+        });
+        i++; // skip baris kedua (terjemahan)
+      } else {
+        consolidated.push({
+          time: cur.time,
+          text: cur.text ? cur.text.trim() : ""
+        });
+      }
+    }
+    return consolidated;
+  }
+
   updateLyricsBadgesAndRender() {
     if (this.elements.fullPlayerLyricsBadge) {
       this.elements.fullPlayerLyricsBadge.classList.toggle("hidden", !this.currentLyrics);
@@ -1678,6 +2371,9 @@ class NimiyoMusicPlayer {
     if (this.isLyricsModeActive) {
       this.renderIntegratedLyrics();
       this.syncIntegratedLyrics(this.audio.currentTime || 0, true);
+    }
+    if (this.elements.lyricsModal && !this.elements.lyricsModal.classList.contains("hidden")) {
+      this.renderLyricsModal();
     }
   }
 
@@ -1705,10 +2401,15 @@ class NimiyoMusicPlayer {
   renderIntegratedLyrics() {
     if (!this.elements.fullPlayerLyricsScroll) return;
 
-    if (this.parsedLrc.length > 0) {
+    const consolidated = this.getConsolidatedLrc();
+    if (consolidated.length > 0) {
       // Synchronized LRC lines with full stage presentation & tap-to-seek
-      const html = this.parsedLrc.map((item, idx) => {
-        return `<div class="flowing-lyric-line" id="flowing-lyric-${idx}" data-line-idx="${idx}" data-time="${item.time}">${this.escapeHtml(item.text || "•••")}</div>`;
+      const html = consolidated.map((item, idx) => {
+        return `
+          <div class="flowing-lyric-line" id="flowing-lyric-${idx}" data-line-idx="${idx}" data-time="${item.time}">
+            <div class="flowing-lyric-primary">${this.escapeHtml(item.text || "•••")}</div>
+          </div>
+        `;
       }).join("");
       this.elements.fullPlayerLyricsScroll.innerHTML = html;
 
@@ -1795,8 +2496,9 @@ class NimiyoMusicPlayer {
         }
       }
 
-      if (closestIdx >= 0 && this.parsedLrc[closestIdx]) {
-        targetTime = this.parsedLrc[closestIdx].time;
+      const consolidated = this.getConsolidatedLrc();
+      if (closestIdx >= 0 && consolidated[closestIdx]) {
+        targetTime = consolidated[closestIdx].time;
 
         for (let i = 0; i < lines.length; i++) {
           lines[i].classList.toggle("seeking-highlight", i === closestIdx);
@@ -1881,13 +2583,14 @@ class NimiyoMusicPlayer {
   }
 
   syncIntegratedLyrics(currentTime, forceScroll = false) {
-    if (this.parsedLrc.length === 0 || !this.isLyricsModeActive || !this.elements.fullPlayerLyricsScroll) {
+    const consolidated = this.getConsolidatedLrc();
+    if (consolidated.length === 0 || !this.isLyricsModeActive || !this.elements.fullPlayerLyricsScroll) {
       return;
     }
 
     let activeIdx = -1;
-    for (let i = 0; i < this.parsedLrc.length; i++) {
-      if (this.parsedLrc[i].time <= currentTime) {
+    for (let i = 0; i < consolidated.length; i++) {
+      if (consolidated[i].time <= currentTime) {
         activeIdx = i;
       } else {
         break;
@@ -1970,10 +2673,15 @@ class NimiyoMusicPlayer {
     if (this.elements.lyricsModalArtist) this.elements.lyricsModalArtist.innerText = this.currentTrack.displayArtist;
 
     if (this.elements.lyricsContent) {
-      if (this.parsedLrc.length > 0) {
+      const consolidated = this.getConsolidatedLrc();
+      if (consolidated.length > 0) {
         // Synchronized LRC with tap-to-seek
-        const html = this.parsedLrc.map((item, idx) => {
-          return `<p class="lyrics-line synced-line" id="lyric-line-${idx}" data-lyric-idx="${idx}" data-time="${item.time}">${this.escapeHtml(item.text || "•••")}</p>`;
+        const html = consolidated.map((item, idx) => {
+          return `
+            <div class="lyrics-line synced-line" id="lyric-line-${idx}" data-lyric-idx="${idx}" data-time="${item.time}">
+              <div class="lyrics-line-primary">${this.escapeHtml(item.text || "•••")}</div>
+            </div>
+          `;
         }).join("");
         this.elements.lyricsContent.innerHTML = html;
 
@@ -2012,13 +2720,14 @@ class NimiyoMusicPlayer {
   }
 
   syncActiveLyric(currentTime, forceScroll = false) {
-    if (this.parsedLrc.length === 0 || !this.elements.lyricsModal || this.elements.lyricsModal.classList.contains("hidden")) {
+    const consolidated = this.getConsolidatedLrc();
+    if (consolidated.length === 0 || !this.elements.lyricsModal || this.elements.lyricsModal.classList.contains("hidden")) {
       return;
     }
 
     let activeIdx = -1;
-    for (let i = 0; i < this.parsedLrc.length; i++) {
-      if (this.parsedLrc[i].time <= currentTime) {
+    for (let i = 0; i < consolidated.length; i++) {
+      if (consolidated[i].time <= currentTime) {
         activeIdx = i;
       } else {
         break;
@@ -2057,8 +2766,8 @@ class NimiyoMusicPlayer {
       this.visualizerInterval = setInterval(() => {
         if (!this.isPlaying) return;
         bars.forEach(bar => {
-          const h = Math.floor(Math.random() * 85) + 15;
-          bar.style.height = `${h}%`;
+          const scale = ((Math.floor(Math.random() * 85) + 15) / 100).toFixed(2);
+          bar.style.transform = `scaleY(${scale})`;
         });
       }, 120);
     }
@@ -2072,7 +2781,7 @@ class NimiyoMusicPlayer {
     this.elements.miniPlayerVisualizer?.classList.remove("playing");
     this.elements.fullPlayerVisualizer?.classList.remove("playing");
     const bars = document.querySelectorAll(".visualizer-bar");
-    bars.forEach(bar => bar.style.height = "25%");
+    bars.forEach(bar => bar.style.transform = "scaleY(0.25)");
   }
 
   // -------------------------------------------------------------
@@ -2646,6 +3355,7 @@ class NimiyoMusicPlayer {
     if (this.elements.fullPlayerProgressBar) {
       this.elements.fullPlayerProgressBar.value = curSec;
       this.elements.fullPlayerProgressBar.max = durSec || 100;
+      this.elements.fullPlayerProgressBar.style.setProperty("--progress", `${pct.toFixed(2)}%`);
     }
     if (this.elements.fullPlayerCurrentTime) {
       this.elements.fullPlayerCurrentTime.innerText = this.formatTime(curSec);
@@ -2721,6 +3431,10 @@ class NimiyoMusicPlayer {
           ? Math.round(overridePosition * 1000)
           : Math.round((this.audio.currentTime || 0) * 1000);
 
+        const playbackSpeed = (this.bpmRate && typeof this.bpmRate === "number")
+          ? (this.bpmRate / 100)
+          : 1.0;
+
         await MediaSaver.showMusicPlaybackNotification({
           title: title,
           artist: artist,
@@ -2728,7 +3442,8 @@ class NimiyoMusicPlayer {
           artwork: artwork,
           duration: duration,
           position: position,
-          isPlaying: Boolean(isPlaying)
+          isPlaying: Boolean(isPlaying),
+          playbackSpeed: playbackSpeed
         });
       } catch (_) {}
     }
@@ -2840,6 +3555,7 @@ class NimiyoMusicPlayer {
     }
   }
 
+
   openSleepTimerModal() {
     if (this.elements.sleepTimerModal) {
       this.elements.sleepTimerModal.classList.remove("hidden");
@@ -2854,6 +3570,30 @@ class NimiyoMusicPlayer {
 
   openSpeedModal() {
     if (this.elements.speedModal) {
+      if (this.elements.slowedBpmSlider) {
+        this.elements.slowedBpmSlider.value = this.bpmRate;
+        const pct = ((this.bpmRate - 60) / (140 - 60)) * 100;
+        this.elements.slowedBpmSlider.style.setProperty("--progress", `${pct.toFixed(1)}%`);
+      }
+      if (this.elements.slowedBpmValueLabel) {
+        let tag = "Normal";
+        if (this.bpmRate < 100) tag = "Slowed";
+        else if (this.bpmRate > 100) tag = "SpeedUp";
+        this.elements.slowedBpmValueLabel.innerText = `${this.bpmRate}% • ${tag}`;
+      }
+      if (this.elements.reverbToggle) {
+        this.elements.reverbToggle.checked = Boolean(this.isReverbEnabled);
+      }
+      if (this.elements.reverbPadContainer) {
+        this.elements.reverbPadContainer.classList.toggle("hidden", !this.isReverbEnabled);
+      }
+      if (this.elements.reverbPadPuck) {
+        this.elements.reverbPadPuck.style.left = `${(this.reverbDryWet * 100).toFixed(1)}%`;
+        this.elements.reverbPadPuck.style.top = `${((1 - this.reverbDepth) * 100).toFixed(1)}%`;
+      }
+      if (this.elements.reverbStatusLabel) {
+        this.elements.reverbStatusLabel.innerText = `Dry/Wet: ${Math.round(this.reverbDryWet * 100)}% • Decay: ${Math.round(this.reverbDepth * 100)}%`;
+      }
       this.elements.speedModal.classList.remove("hidden");
     }
   }
@@ -4596,6 +5336,9 @@ class NimiyoMusicPlayer {
     if (this.elements.fullPlayerProgressBar) {
       this.elements.fullPlayerProgressBar.addEventListener("input", (e) => {
         const val = parseFloat(e.target.value);
+        const max = parseFloat(e.target.max) || 100;
+        const pct = max > 0 ? (val / max) * 100 : 0;
+        e.target.style.setProperty("--progress", `${pct.toFixed(2)}%`);
         if (!isNaN(val)) this.seek(val);
       });
     }
@@ -4611,6 +5354,7 @@ class NimiyoMusicPlayer {
     if (this.elements.fullPlayerVolumeSlider) {
       this.elements.fullPlayerVolumeSlider.addEventListener("input", (e) => {
         const val = parseFloat(e.target.value) / 100;
+        e.target.style.setProperty("--progress", `${Math.round(val * 100)}%`);
         this.setVolume(val);
       });
     }
@@ -4645,6 +5389,98 @@ class NimiyoMusicPlayer {
     if (this.elements.lyricsMiniTrackInfo) {
       this.elements.lyricsMiniTrackInfo.addEventListener("click", () => {
         this.toggleLyricsMode(false);
+      });
+    }
+
+    // Edit Lyrics Modal Action Listeners
+    if (this.elements.openEditLyricsBtn) {
+      this.elements.openEditLyricsBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.openEditLyricsModal();
+      });
+    }
+
+    if (this.elements.closeEditLyricsModalBtn) {
+      this.elements.closeEditLyricsModalBtn.addEventListener("click", () => {
+        this.closeEditLyricsModal();
+      });
+    }
+
+    if (this.elements.cancelEditLyricsBtn) {
+      this.elements.cancelEditLyricsBtn.addEventListener("click", () => {
+        this.closeEditLyricsModal();
+      });
+    }
+
+    if (this.elements.saveEditLyricsBtn) {
+      this.elements.saveEditLyricsBtn.addEventListener("click", () => {
+        this.saveEditedLyrics();
+      });
+    }
+
+    if (this.elements.downloadLyricsFileBtn) {
+      this.elements.downloadLyricsFileBtn.addEventListener("click", () => {
+        this.downloadLyricsFile();
+      });
+    }
+
+    if (this.elements.editLyricsModal) {
+      this.elements.editLyricsModal.addEventListener("click", (e) => {
+        if (e.target === this.elements.editLyricsModal) {
+          this.closeEditLyricsModal();
+        }
+      });
+    }
+
+    // Refresh & Reset Lyrics Actions
+    if (this.elements.refreshLyricsBtn) {
+      this.elements.refreshLyricsBtn.addEventListener("click", () => {
+        this.openResetLyricsModal();
+      });
+    }
+
+    if (this.elements.closeResetLyricsModalBtn) {
+      this.elements.closeResetLyricsModalBtn.addEventListener("click", () => {
+        this.closeResetLyricsModal();
+      });
+    }
+
+    if (this.elements.resetLyricsModal) {
+      this.elements.resetLyricsModal.addEventListener("click", (e) => {
+        if (e.target === this.elements.resetLyricsModal) {
+          this.closeResetLyricsModal();
+        }
+      });
+    }
+
+    if (this.elements.resetLyricsDefaultBtn) {
+      this.elements.resetLyricsDefaultBtn.addEventListener("click", () => {
+        this.handleResetLyricsDefault();
+      });
+    }
+
+    if (this.elements.resetLyricsLyricsifyBtn) {
+      this.elements.resetLyricsLyricsifyBtn.addEventListener("click", () => {
+        this.handleResetLyricsLyricsify();
+      });
+    }
+
+    // Import Lyrics Actions (.LRC / .TXT)
+    if (this.elements.importLyricsBtn) {
+      this.elements.importLyricsBtn.addEventListener("click", () => {
+        this.elements.importLrcFileInput?.click();
+      });
+    }
+
+    if (this.elements.resetLyricsImportBtn) {
+      this.elements.resetLyricsImportBtn.addEventListener("click", () => {
+        this.elements.importLrcFileInput?.click();
+      });
+    }
+
+    if (this.elements.importLrcFileInput) {
+      this.elements.importLrcFileInput.addEventListener("change", (e) => {
+        this.handleImportLyricsFile(e);
       });
     }
 
@@ -4688,14 +5524,36 @@ class NimiyoMusicPlayer {
       }
     }
 
-    // Speed Modal Preset Buttons
+    // MixTools Modal Events (BPM Slider & Spatial Reverb)
     if (this.elements.speedModal) {
-      this.elements.speedModal.querySelectorAll(".option-pill-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const speed = parseFloat(btn.getAttribute("data-speed"));
-          if (!isNaN(speed)) this.setPlaybackRate(speed);
+      if (this.elements.slowedBpmSlider) {
+        this.elements.slowedBpmSlider.addEventListener("input", (e) => {
+          const bpm = parseInt(e.target.value, 10);
+          this.setBpmRate(bpm, false);
         });
-      });
+      }
+      if (this.elements.resetSlowedBpmBtn) {
+        this.elements.resetSlowedBpmBtn.addEventListener("click", () => {
+          this.setBpmRate(100, true);
+        });
+      }
+      if (this.elements.reverbToggle) {
+        this.elements.reverbToggle.addEventListener("change", (e) => {
+          this.toggleReverbMode(e.target.checked);
+        });
+      }
+      if (this.elements.resetReverbBtn) {
+        this.elements.resetReverbBtn.addEventListener("click", () => {
+          this.setReverbXY(0.5, 0.5);
+        });
+      }
+      if (this.elements.resetAllMixToolsBtn) {
+        this.elements.resetAllMixToolsBtn.addEventListener("click", () => {
+          this.resetAllMixTools();
+        });
+      }
+      this.setupReverbPadEvents();
+
       if (this.elements.closeSpeedModalBtn) {
         this.elements.closeSpeedModalBtn.addEventListener("click", () => this.closeSpeedModal());
       }

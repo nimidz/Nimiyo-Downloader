@@ -16,7 +16,18 @@ const shareTranslations = {
     downloadAll: "DOWNLOAD ALL ({count})",
     ready: "Ready to download",
     unsupported: "Unsupported platform link.",
-    analysisFailed: "Failed to analyze link.",
+    analysisFailed: "Failed to analyze link. Please check URL or switch server.",
+    errorOffline: "No internet connection. Please check your data or Wi-Fi.",
+    errorTimeout: "Connection timed out. Server or network is slow.",
+    errorSpotifyPlaylistPrivate: "Spotify playlist is private or not found. Make sure the playlist is set to Public on Spotify.",
+    errorSpotifyTrackNotFound: "Spotify track or album not found, private, or region-restricted.",
+    errorInstagramPrivate: "Instagram post or Reel is private, restricted, or has been deleted.",
+    errorTikTokPrivate: "TikTok video is private or has been removed by the creator.",
+    errorYouTubeUnavailable: "YouTube video or playlist is private, age-restricted, or unavailable.",
+    errorTwitterPrivate: "X (Twitter) post not found or the account is private.",
+    errorFacebookPrivate: "Facebook post is private, restricted, or requires login.",
+    errorMediaNotFound: "Media not found or content has been deleted/private.",
+    errorServerBlocked: "Scraper server is busy or protected. Please switch server.",
     cancelled: "Analysis cancelled.",
     saving: "Saving file...",
     saved: "File saved successfully!",
@@ -46,7 +57,18 @@ const shareTranslations = {
     downloadAll: "UNDUH SEMUA ({count})",
     ready: "Siap diunduh",
     unsupported: "Tautan platform tidak didukung.",
-    analysisFailed: "Gagal menganalisis tautan.",
+    analysisFailed: "Gagal menganalisis tautan. Periksa link atau coba server lain.",
+    errorOffline: "Tidak ada koneksi internet. Periksa koneksi data atau Wi-Fi Anda.",
+    errorTimeout: "Koneksi batas waktu (timeout). Server atau jaringan lambat.",
+    errorSpotifyPlaylistPrivate: "Playlist Spotify bersifat privat atau tidak ditemukan. Pastikan playlist disetel Publik di Spotify.",
+    errorSpotifyTrackNotFound: "Lagu atau album Spotify tidak ditemukan atau dibatasi wilayah/privat.",
+    errorInstagramPrivate: "Postingan/Reel Instagram bersifat privat, dibatasi, atau telah dihapus.",
+    errorTikTokPrivate: "Video TikTok bersifat privat atau telah dihapus oleh pengunggah.",
+    errorYouTubeUnavailable: "Video/Playlist YouTube bersifat privat, dibatasi usia, atau tidak tersedia.",
+    errorTwitterPrivate: "Postingan X (Twitter) tidak ditemukan atau akun digembok (privat).",
+    errorFacebookPrivate: "Postingan Facebook bersifat privat atau membutuhkan login.",
+    errorMediaNotFound: "Media tidak ditemukan atau konten telah dihapus/bersifat privat.",
+    errorServerBlocked: "Server scraper sedang padat atau terproteksi. Coba ganti server.",
     cancelled: "Analisis dibatalkan.",
     saving: "Menyimpan berkas...",
     saved: "Berkas berhasil disimpan!",
@@ -76,7 +98,18 @@ const shareTranslations = {
     downloadAll: "全部下载 ({count})",
     ready: "准备下载",
     unsupported: "不支持的平台链接。",
-    analysisFailed: "解析链接失败。",
+    analysisFailed: "解析链接失败。请检查链接或更换服务器。",
+    errorOffline: "无网络连接。请检查您的移动数据或 Wi-Fi 连接。",
+    errorTimeout: "连接超时。服务器或网络响应缓慢。",
+    errorSpotifyPlaylistPrivate: "Spotify 歌单为私密或未找到。请确保该歌单在 Spotify 上已设为公开。",
+    errorSpotifyTrackNotFound: "Spotify 歌曲或专辑未找到、私密或受地区限制。",
+    errorInstagramPrivate: "Instagram 帖子或 Reel 属于私密、受限或已被删除。",
+    errorTikTokPrivate: "TikTok 视频属于私密或已被创作者删除。",
+    errorYouTubeUnavailable: "YouTube 视频或播放列表属于私密、年龄受限或不可用。",
+    errorTwitterPrivate: "X (Twitter) 推文未找到或该账号为私密账号。",
+    errorFacebookPrivate: "Facebook 帖子为私密或需要登录访问。",
+    errorMediaNotFound: "未找到媒体，或内容已被删除/设为私密。",
+    errorServerBlocked: "解析服务器繁忙或受到保护。请切换服务器。",
     cancelled: "已取消解析。",
     saving: "正在保存文件...",
     saved: "文件保存成功！",
@@ -106,7 +139,18 @@ const shareTranslations = {
     downloadAll: "すべてダウンロード ({count})",
     ready: "ダウンロード可能",
     unsupported: "非対応のプラットフォームです。",
-    analysisFailed: "リンクの解析に失敗しました。",
+    analysisFailed: "リンクの解析に失敗しました。URLを確認するか、サーバーを変更してください。",
+    errorOffline: "インターネット接続がありません。データ通信または Wi-Fi を確認してください。",
+    errorTimeout: "接続がタイムアウトしました。サーバーまたはネットワークが遅延しています。",
+    errorSpotifyPlaylistPrivate: "Spotify プレイリストが非公開か見つかりません。公開設定になっているか確認してください。",
+    errorSpotifyTrackNotFound: "Spotify の楽曲またはアルバムが見つからないか、非公開または地域制限されています。",
+    errorInstagramPrivate: "Instagram の投稿または Reel は非公開、制限されているか、削除されています。",
+    errorTikTokPrivate: "TikTok 動画は非公開か、投稿者によって削除されています。",
+    errorYouTubeUnavailable: "YouTube 動画または再生リストが非公開、年齢制限、または利用できません。",
+    errorTwitterPrivate: "X (Twitter) の投稿が見つからないか、アカウントが非公開です。",
+    errorFacebookPrivate: "Facebook の投稿は非公開か、ログインが必要です。",
+    errorMediaNotFound: "メディアが見つからないか、非公開または削除されています。",
+    errorServerBlocked: "スクレイパーサーバーが混雑または保護されています。サーバーを変更してください。",
     cancelled: "解析をキャンセルしました。",
     saving: "ファイルを保存中...",
     saved: "ファイルを正常に保存しました！",
@@ -600,6 +644,115 @@ window.switchServer = function () {
   startAnalyze(true);
 };
 
+async function formatShareErrorMessage(url, platform, failureDetails = []) {
+  const lowerUrl = (url || "").toLowerCase();
+  const allErrorsText = failureDetails
+    .map(f => (f.message || ""))
+    .join(" ")
+    .toLowerCase();
+
+  // 1. Comprehensive Network / Offline detection
+  const isNetworkFailure =
+    (typeof navigator !== "undefined" && navigator.onLine === false) ||
+    /unable to resolve host|no address associated|network is unreachable|unreachable|failed to connect|failed to fetch|networkerror|network error|unknownhost|unknown host|connectexception|socketexception|sockettimeout|connection refused|connection reset|route to host|no route|ehostunreach|enotfound|econnrefused|econnreset|net::err|internet_disconnected|name_not_resolved|network request failed/i.test(allErrorsText);
+
+  if (isNetworkFailure) {
+    return t("errorOffline");
+  }
+
+  // 2. Check if ANY scraper reached an HTTP server
+  const hadAnyHttpContact = failureDetails.some(f => f.statusCode && f.statusCode > 0);
+
+  // If no scraper ever reached any HTTP endpoint, do a quick probe (max 600ms)
+  if (!hadAnyHttpContact) {
+    try {
+      await Promise.race([
+        fetch("https://www.google.com/generate_204", { method: "HEAD", mode: "no-cors", cache: "no-store" }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("probe_timeout")), 600))
+      ]);
+    } catch (_) {
+      return t("errorOffline");
+    }
+  }
+
+  // 3. Timeout detection
+  const isTimeout = /timed out|timeout|request timeout/i.test(allErrorsText);
+  if (isTimeout && failureDetails.length > 0 && failureDetails.every(f => /timed out|timeout/i.test(f.message || ""))) {
+    return t("errorTimeout");
+  }
+
+  // 4. Platform-specific diagnostics ONLY IF content/server was actually reached or error explicitly mentions private/deleted
+  if (platform === "spotify") {
+    if (lowerUrl.includes("/playlist/")) {
+      return t("errorSpotifyPlaylistPrivate");
+    }
+    return t("errorSpotifyTrackNotFound");
+  }
+
+  if (platform === "instagram") {
+    if (/private|login|checkpoint|restricted|not found|404|removed|deleted|empty/i.test(allErrorsText) || hadAnyHttpContact) {
+      return t("errorInstagramPrivate");
+    }
+  }
+
+  if (platform === "tiktok") {
+    if (/private|deleted|removed|not found|404|unavailable/i.test(allErrorsText) || hadAnyHttpContact) {
+      return t("errorTikTokPrivate");
+    }
+  }
+
+  if (platform === "youtube") {
+    if (/private|age|restricted|not available|unavailable|removed|deleted|404|playlist/i.test(allErrorsText) || hadAnyHttpContact) {
+      return t("errorYouTubeUnavailable");
+    }
+  }
+
+  if (platform === "twitter") {
+    if (/private|suspended|not found|404|protected|empty/i.test(allErrorsText) || hadAnyHttpContact) {
+      return t("errorTwitterPrivate");
+    }
+  }
+
+  if (platform === "facebook") {
+    if (/private|login|permission|not found|404/i.test(allErrorsText) || hadAnyHttpContact) {
+      return t("errorFacebookPrivate");
+    }
+  }
+
+  // 5. Rate-limit / Cloudflare protection block
+  if (/cloudflare|rate-limit|rate limited|blocked|429|503|502|html error page/i.test(allErrorsText)) {
+    return t("errorServerBlocked");
+  }
+
+  // 6. Clean, human-readable scraper message if available
+  for (const f of failureDetails) {
+    const msg = (f.message || "").trim();
+    if (
+      msg &&
+      msg.length > 8 &&
+      !msg.startsWith("<") &&
+      !msg.includes("Error:") &&
+      !msg.includes("SyntaxError") &&
+      !msg.includes("TypeError") &&
+      !msg.includes("JSON.parse") &&
+      !msg.includes("returned failure") &&
+      !msg.includes("dummy")
+    ) {
+      return msg;
+    }
+  }
+
+  if (/not found|404|empty|removed|deleted/i.test(allErrorsText)) {
+    return t("errorMediaNotFound");
+  }
+
+  if (isTimeout) {
+    return t("errorTimeout");
+  }
+
+  return t("analysisFailed");
+}
+
 async function startAnalyze(forced = false) {
   if (!activeUrl || (isAnalyzing && !forced)) return;
   isAnalyzing = true;
@@ -625,7 +778,7 @@ async function startAnalyze(forced = false) {
   ];
 
   let success = false;
-  let lastErrorMsg = t("analysisFailed");
+  const failureDetails = [];
 
   for (const method of scrapers) {
     if (analysisAborted) break;
@@ -644,10 +797,11 @@ async function startAnalyze(forced = false) {
         success = true;
         break;
       } else {
-        lastErrorMsg = res?.message || lastErrorMsg;
+        const errorMsg = res?.message || "Unknown error";
+        failureDetails.push({ scraper: method, message: errorMsg, statusCode: res?.statusCode });
       }
     } catch (e) {
-      lastErrorMsg = e.message || lastErrorMsg;
+      failureDetails.push({ scraper: method, message: e?.message || String(e) });
     }
   }
 
@@ -660,7 +814,8 @@ async function startAnalyze(forced = false) {
   }
 
   if (!success) {
-    showError(lastErrorMsg);
+    const formattedError = await formatShareErrorMessage(activeUrl, platform, failureDetails);
+    showError(formattedError);
   }
 }
 

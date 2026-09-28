@@ -293,7 +293,7 @@
               <img src="icon_untukdi_aboutthisapp.webp" alt="Nimiyo App Logo" class="about-logo">
               <div class="about-title-group">
                 <h4>NIMIYO Downloader</h4>
-                <div class="about-badge-pill" data-i18n="aboutVersion">v2.1.1 (Lite)</div>
+                <div class="about-badge-pill" data-i18n="aboutVersion">v2.2.0 (Lite)</div>
               </div>
             </div>
 
@@ -966,7 +966,7 @@
       </div>
       <div class="modal-body update-modal-body">
         <div class="update-banner">
-          <div class="update-version-badge" id="updateVersionBadge">v2.1.1</div>
+          <div class="update-version-badge" id="updateVersionBadge">v2.2.0</div>
           <div class="update-app-title">NIMIYO Downloader (Lite)</div>
         </div>
         <div class="update-changelog-box">
@@ -1125,14 +1125,24 @@
                 <span id="lyricsMiniArtist" class="lyrics-mini-artist">Artist</span>
               </div>
             </div>
-            <button id="toggleLyricsCoverBtn" class="btn outline-btn lyrics-cover-toggle-btn" title="Tampilkan Cover">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                <polyline points="21 15 16 10 5 21"></polyline>
-              </svg>
-              <span data-i18n="musicShowCover">Cover</span>
-            </button>
+            <div class="lyrics-stage-actions">
+              <button id="toggleLyricsCoverBtn" class="lyrics-action-icon-btn lyrics-cover-toggle-btn" title="Tampilkan Cover" aria-label="Cover">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+              </button>
+
+              <button id="openEditLyricsBtn" class="lyrics-action-icon-btn lyrics-edit-toggle-btn" title="Edit Lirik" aria-label="Edit Lirik">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 6h8"></path>
+                  <path d="M4 12h6"></path>
+                  <path d="M4 18h8"></path>
+                  <path d="M14.5 3.5a2.121 2.121 0 0 1 3 3L8 16l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </button>
+            </div>
           </div>
 
           <!-- Flowing Lyrics Scroll Area -->
@@ -1229,11 +1239,19 @@
           <span data-i18n="musicSleepTimerBtn">TIMER</span>
           <span id="fullPlayerSleepTimerBadge" class="action-mini-badge hidden"></span>
         </button>
-        <button id="fullPlayerSpeedBtn" class="dock-action-btn">
+        <button id="fullPlayerSpeedBtn" class="dock-action-btn" title="MixTools">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            <line x1="4" y1="21" x2="4" y2="14"></line>
+            <line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line>
+            <line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="1" y1="14" x2="7" y2="14"></line>
+            <line x1="9" y1="8" x2="15" y2="8"></line>
+            <line x1="17" y1="16" x2="23" y2="16"></line>
           </svg>
-          <span id="fullPlayerSpeedLabel">1.0x</span>
+          <span id="fullPlayerSpeedLabel">MixTools</span>
         </button>
       </div>
     </div>
@@ -1285,17 +1303,125 @@
             <span id="lyricsModalArtist" class="lyrics-header-artist">Artist</span>
           </div>
         </div>
-        <button id="closeLyricsModalBtn" class="icon-btn" aria-label="Close">
+        <div style="display: flex; align-items: center; gap: 8px;">
+
+          <button id="closeLyricsModalBtn" class="icon-btn" aria-label="Close">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="modal-body lyrics-modal-body">
+        <div id="lyricsContent" class="lyrics-content-scroll">
+          <!-- Dynamically populated lyrics with tap-to-seek -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Lyrics Modal Sheet -->
+  <div id="editLyricsModal" class="window-popup-overlay hidden">
+    <div class="window-popup-card edit-lyrics-modal-card">
+      <div class="modal-header">
+        <div class="modal-header-icon-title">
+          <span class="modal-icon">📝</span>
+          <div>
+            <h3 class="modal-title">Edit Lirik</h3>
+            <span id="editLyricsTrackTitle" class="modal-subtitle">Track Title</span>
+          </div>
+        </div>
+        <button id="closeEditLyricsModalBtn" class="icon-btn" aria-label="Tutup">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
       </div>
-      <div class="modal-body lyrics-modal-body">
-        <div id="lyricsContent" class="lyrics-content-scroll">
-          <!-- Dynamically populated lyrics with tap-to-seek -->
+      <div class="modal-body edit-lyrics-modal-body">
+        <div class="edit-lyrics-help-banner">
+          <span class="help-icon">💡</span>
+          <span class="help-text">Format: <code>[00:00.00] Lirik di sini</code> (menit:detik.milidetik)</span>
         </div>
+        <textarea id="editLyricsTextarea" class="edit-lyrics-textarea" placeholder="[00:00.00] Baris lirik pertama...&#10;[00:15.30] Baris lirik kedua..." spellcheck="false"></textarea>
+
+        <!-- Baris Tombol Aksi: REFRESH | IMPORT -->
+        <div class="edit-lyrics-top-actions">
+          <button id="refreshLyricsBtn" type="button" class="btn outline-btn edit-top-action-btn" title="Reset & cari lirik baru">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path>
+            </svg>
+            <span>REFRESH</span>
+          </button>
+          <button id="importLyricsBtn" type="button" class="btn outline-btn edit-top-action-btn" title="Import file lirik .LRC lokal">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>IMPORT</span>
+          </button>
+          <input type="file" id="importLrcFileInput" accept=".lrc,.txt" style="display: none;">
+        </div>
+      </div>
+      <div class="modal-footer edit-lyrics-modal-footer-row">
+        <button id="cancelEditLyricsBtn" class="btn outline-btn edit-footer-btn">BATAL</button>
+        <button id="saveEditLyricsBtn" class="btn primary-btn edit-footer-btn">SIMPAN</button>
+        <button id="downloadLyricsFileBtn" class="btn outline-btn edit-footer-btn download-lrc-icon-btn" title="Download file .LRC">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>.LRC</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset / Search Lyrics Modal -->
+  <div id="resetLyricsModal" class="window-popup-overlay hidden">
+    <div class="window-popup-card reset-lyrics-modal-card">
+      <div class="modal-header">
+        <div class="modal-header-icon-title">
+          <span class="modal-icon">🔄</span>
+          <div>
+            <h3 class="modal-title">Pilihan Reset Lirik</h3>
+            <span id="resetLyricsTrackTitle" class="modal-subtitle">Pilih sumber pencarian lirik</span>
+          </div>
+        </div>
+        <button id="closeResetLyricsModalBtn" class="icon-btn" aria-label="Tutup">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body reset-lyrics-modal-body">
+        <button id="resetLyricsDefaultBtn" type="button" class="reset-lyric-option-btn">
+          <div class="option-icon-box">🌐</div>
+          <div class="option-text-box">
+            <div class="option-title">Cari Otomatis (Default / LRCLIB)</div>
+            <div class="option-desc">Hapus lirik lokal & ambil ulang lirik asli sinkron dari database online</div>
+          </div>
+        </button>
+
+        <button id="resetLyricsLyricsifyBtn" type="button" class="reset-lyric-option-btn">
+          <div class="option-icon-box">🔍</div>
+          <div class="option-text-box">
+            <div class="option-title">Cari di Lyricsify.com</div>
+            <div class="option-desc">Buka pencarian lagu ini di Lyricsify via browser untuk salin lirik .LRC</div>
+          </div>
+        </button>
+
+        <button id="resetLyricsImportBtn" type="button" class="reset-lyric-option-btn">
+          <div class="option-icon-box">📂</div>
+          <div class="option-text-box">
+            <div class="option-title">Import File .LRC Lokal</div>
+            <div class="option-desc">Pilih file lirik .lrc atau .txt yang tersimpan di HP Anda</div>
+          </div>
+        </button>
       </div>
     </div>
   </div>
@@ -1332,29 +1458,97 @@
     </div>
   </div>
 
-  <!-- Playback Speed Modal -->
+  <!-- MixTools Modal (Slowed / SpeedUp & Spatial Reverb FX) -->
   <div id="musicSpeedModal" class="window-popup-overlay hidden">
-    <div class="window-popup-card options-modal-card">
+    <div class="window-popup-card options-modal-card mixtools-modal-card">
       <div class="modal-header">
         <div class="modal-header-icon-title">
-          <span class="modal-icon">⚡</span>
-          <h3 data-i18n="musicSpeedTitle">Kecepatan Putar</h3>
+          <span class="modal-icon">🎛️</span>
+          <h3 data-i18n="mixtoolsTitle">MixTools</h3>
         </div>
-        <button id="closeSpeedModalBtn" class="icon-btn" aria-label="Close">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
+        <div class="modal-header-actions-right">
+          <button id="resetAllMixToolsBtn" class="icon-btn" title="Reset Semua" aria-label="Reset All">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+            </svg>
+          </button>
+          <button id="closeSpeedModalBtn" class="icon-btn" aria-label="Close">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
       </div>
-      <div class="modal-body options-modal-body">
-        <div class="options-grid">
-          <button class="option-pill-btn" data-speed="0.5">0.5x</button>
-          <button class="option-pill-btn" data-speed="0.75">0.75x</button>
-          <button class="option-pill-btn active" data-speed="1.0">1.0x (Normal)</button>
-          <button class="option-pill-btn" data-speed="1.25">1.25x</button>
-          <button class="option-pill-btn" data-speed="1.5">1.5x</button>
-          <button class="option-pill-btn" data-speed="2.0">2.0x</button>
+      <div class="modal-body options-modal-body mixtools-modal-body">
+        <!-- Section 1: Speed FX -->
+        <div class="mixtool-section">
+          <div class="mixtool-section-header">
+            <div class="mixtool-header-text">
+              <h4 class="mixtool-title" data-i18n="mixtoolsSpeedTitle">Speed FX</h4>
+              <p class="mixtool-desc" data-i18n="mixtoolsSpeedDesc">Ubah kecepatan tempo musik</p>
+            </div>
+          </div>
+
+          <div class="slowed-bpm-status-row">
+            <span class="slowed-bpm-label" id="slowedBpmValueLabel">100% • Normal</span>
+            <button id="resetSlowedBpmBtn" class="btn outline-btn small-btn mini-reset-btn" data-i18n="btnReset">Reset</button>
+          </div>
+
+          <div class="slowed-slider-wrapper">
+            <span class="bpm-slider-min">60%</span>
+            <input type="range" id="slowedBpmSlider" class="progress-slider bpm-slider" min="60" max="140" value="100" step="1">
+            <span class="bpm-slider-max">140%</span>
+          </div>
+          <div class="slowed-slider-guide">
+            <span data-i18n="mixtoolsGuideSlowed">Slowed</span>
+            <span data-i18n="mixtoolsGuideNormal">Normal</span>
+            <span data-i18n="mixtoolsGuideSpeedUp">SpeedUp</span>
+          </div>
+        </div>
+
+        <!-- Section Divider -->
+        <div class="mixtools-divider"></div>
+
+        <!-- Section 2: Reverb FX -->
+        <div class="mixtool-section">
+          <div class="speed-toggle-row reverb-toggle-row">
+            <div class="speed-toggle-info">
+              <span class="speed-toggle-title" data-i18n="mixtoolsReverbTitle">Reverb FX</span>
+              <span class="speed-toggle-desc" data-i18n="mixtoolsReverbDesc">Efek gema akustik 3D</span>
+            </div>
+            <label class="switch-toggle" for="reverbToggle">
+              <input type="checkbox" id="reverbToggle">
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+
+          <!-- 2D XY Reverb Pad Container -->
+          <div id="reverbPadContainer" class="reverb-pad-container hidden">
+            <div class="reverb-pad-header">
+              <span id="reverbStatusLabel" class="reverb-status-label">Dry/Wet: 50% • Decay: 50%</span>
+              <button id="resetReverbBtn" class="btn outline-btn small-btn mini-reset-btn" data-i18n="btnReset">Reset</button>
+            </div>
+
+            <div class="reverb-xy-pad-wrapper">
+              <div class="xy-axis-label top-label" data-i18n="mixtoolsReverbStadium">▲ Luas</div>
+              <div class="xy-axis-label bottom-label" data-i18n="mixtoolsReverbClub">▼ Rapat</div>
+              <div class="xy-axis-label left-label" data-i18n="mixtoolsReverbDry">◀ Dry</div>
+              <div class="xy-axis-label right-label" data-i18n="mixtoolsReverbWet">Wet ▶</div>
+
+              <!-- The 2D Interactive Touch Pad -->
+              <div id="reverbXyPad" class="reverb-xy-pad">
+                <div class="reverb-pad-grid-line h-line"></div>
+                <div class="reverb-pad-grid-line v-line"></div>
+                <!-- Clean Draggable Puck -->
+                <div id="reverbPadPuck" class="reverb-pad-puck" style="left: 50%; top: 50%;">
+                  <div class="puck-core"></div>
+                </div>
+              </div>
+            </div>
+            <div class="reverb-pad-hint" data-i18n="mixtoolsReverbHint">Atas = Luas • Kanan = Gema</div>
+          </div>
         </div>
       </div>
     </div>
