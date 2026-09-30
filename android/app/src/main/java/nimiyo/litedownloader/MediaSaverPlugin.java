@@ -550,6 +550,7 @@ public class MediaSaverPlugin extends Plugin {
             Uri fileUri = null;
             File targetFileLegacy = null;
             ContentResolver resolver = getContext().getContentResolver();
+            int notifId = 0;
 
             try {
                 String lowerFileName = fileName.toLowerCase();
@@ -567,7 +568,7 @@ public class MediaSaverPlugin extends Plugin {
                     targetSubFolder = "VideoYo";
                 }
 
-                int notifId = 8000 + Math.abs((targetSubFolder + "/" + fileName).hashCode() % 10000);
+                notifId = 8000 + Math.abs((targetSubFolder + "/" + fileName).hashCode() % 10000);
 
                 if ("skip".equalsIgnoreCase(overwriteMode)) {
                     File existing = resolveMediaFile(targetSubFolder, fileName);
@@ -722,6 +723,10 @@ public class MediaSaverPlugin extends Plugin {
                 try { os.close(); } catch (Exception ignored) {}
                 os = null;
 
+                if (totalDownloaded <= 0) {
+                    throw new Exception("Unduhan gagal: tidak ada data berkas yang diterima");
+                }
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && fileUri != null) {
                     ContentValues finishValues = new ContentValues();
                     finishValues.put(MediaStore.MediaColumns.IS_PENDING, 0);
@@ -777,8 +782,7 @@ public class MediaSaverPlugin extends Plugin {
                 if (targetFileLegacy != null && targetFileLegacy.exists()) {
                     try { targetFileLegacy.delete(); } catch (Exception ignored) {}
                 }
-                int fallbackNotifId = 8000 + Math.abs(fileName.hashCode() % 10000);
-                showSystemNotificationDirect(fallbackNotifId, "Nimiyo Downloader", "Gagal mengunduh " + fileName, 0, 0, true);
+                showSystemNotificationDirect(notifId, "Nimiyo Downloader", "Gagal mengunduh: " + fileName, 0, 0, true);
                 call.reject("Download failed: " + e.getMessage());
             } finally {
                 try { if (is != null) is.close(); } catch (Exception ignored) {}
@@ -799,6 +803,10 @@ public class MediaSaverPlugin extends Plugin {
             call.reject("filePath and fileName are required");
             return;
         }
+
+        ContentResolver resolver = getContext().getContentResolver();
+        Uri fileUri = null;
+        File targetFileLegacy = null;
 
         try {
             String cleanedPath = filePath;
@@ -826,8 +834,6 @@ public class MediaSaverPlugin extends Plugin {
                 call.reject("Source file does not exist: " + cleanedPath);
                 return;
             }
-
-            ContentResolver resolver = getContext().getContentResolver();
             
             String lowerFileName = fileName.toLowerCase();
             String subFolder;
@@ -883,7 +889,6 @@ public class MediaSaverPlugin extends Plugin {
 
             String actualFileName = fileName;
             String actualFilePath = null;
-            Uri fileUri = null;
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 ContentValues values = new ContentValues();
@@ -964,6 +969,7 @@ public class MediaSaverPlugin extends Plugin {
                         counter++;
                     }
                 }
+                targetFileLegacy = targetFile;
 
                 try (FileOutputStream fos = new FileOutputStream(targetFile);
                      FileInputStream fis = new FileInputStream(sourceFile)) {
@@ -996,6 +1002,12 @@ public class MediaSaverPlugin extends Plugin {
             }
             call.resolve(ret);
         } catch (Exception e) {
+            if (fileUri != null) {
+                try { resolver.delete(fileUri, null, null); } catch (Exception ignored) {}
+            }
+            if (targetFileLegacy != null && targetFileLegacy.exists()) {
+                try { targetFileLegacy.delete(); } catch (Exception ignored) {}
+            }
             call.reject("Failed to save media: " + e.getMessage());
         }
     }

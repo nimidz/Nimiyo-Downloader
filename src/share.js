@@ -196,7 +196,7 @@ const platformMapping = {
 };
 
 const fallbackChains = {
-  tiktok: ['snaptik', 'tiktokio', 'ssstik', 'direct'],
+  tiktok: ['tiktokio', 'snaptik', 'ssstik', 'direct'],
   instagram: ['snapsave', 'indown', 'direct'],
   facebook: ['snapsave', 'direct'],
   spotify: ['spotidown', 'soundloaders', 'direct'],
@@ -253,17 +253,31 @@ function updateDownloadProgressCard(visible, title, percent) {
 }
 
 function applyAccentColor(accentColor) {
-  if (!accentColor || typeof accentColor !== "string") return;
-  const clean = accentColor.trim();
-  if (!clean) return;
+  const currentAccent = (accentColor && typeof accentColor === "string" && accentColor.trim()) ? accentColor.trim() : "yellow";
 
-  document.documentElement.style.setProperty('--accent', clean);
-  document.documentElement.style.setProperty('--accent-color', clean);
-  document.documentElement.style.setProperty('--primary-accent', clean);
+  document.documentElement.setAttribute('data-accent', currentAccent);
   if (document.body) {
-    document.body.style.setProperty('--accent', clean);
-    document.body.style.setProperty('--accent-color', clean);
-    document.body.style.setProperty('--primary-accent', clean);
+    document.body.setAttribute('data-accent', currentAccent);
+  }
+
+  if (currentAccent.startsWith("#") || currentAccent.startsWith("rgb")) {
+    document.documentElement.style.setProperty('--accent', currentAccent);
+    document.documentElement.style.setProperty('--accent-color', currentAccent);
+    document.documentElement.style.setProperty('--primary-accent', currentAccent);
+    if (document.body) {
+      document.body.style.setProperty('--accent', currentAccent);
+      document.body.style.setProperty('--accent-color', currentAccent);
+      document.body.style.setProperty('--primary-accent', currentAccent);
+    }
+  } else {
+    document.documentElement.style.removeProperty('--accent');
+    document.documentElement.style.removeProperty('--accent-color');
+    document.documentElement.style.removeProperty('--primary-accent');
+    if (document.body) {
+      document.body.style.removeProperty('--accent');
+      document.body.style.removeProperty('--accent-color');
+      document.body.style.removeProperty('--primary-accent');
+    }
   }
 }
 
@@ -302,7 +316,7 @@ function initLanguageAndTheme() {
       } catch (_) { }
     }
     if (!parsed.accentColor) {
-      parsed.accentColor = localStorage.getItem("nimiyo_accent_color") || "";
+      parsed.accentColor = localStorage.getItem("nimiyo_accent_color") || "yellow";
     }
   }
 
@@ -319,9 +333,8 @@ function initLanguageAndTheme() {
   if (isDark) document.body.classList.add('dark-mode');
   else document.body.classList.remove('dark-mode');
 
-  if (parsed.accentColor) {
-    applyAccentColor(parsed.accentColor);
-  }
+  const accent = parsed.accentColor || urlParams.get("accentColor") || localStorage.getItem("nimiyo_accent_color") || 'yellow';
+  applyAccentColor(accent);
 
   if (parsed.language && shareTranslations[parsed.language]) {
     currentLang = parsed.language;
@@ -373,9 +386,7 @@ window.applyNimiyoSettings = function(newSettings) {
   if (isDark) document.body.classList.add('dark-mode');
   else document.body.classList.remove('dark-mode');
 
-  if (newSettings.accentColor) {
-    applyAccentColor(newSettings.accentColor);
-  }
+  applyAccentColor(newSettings.accentColor || 'yellow');
 
   if (newSettings.language && shareTranslations[newSettings.language]) {
     currentLang = newSettings.language;
@@ -671,7 +682,7 @@ window.onShareUrlReady = function (url) {
   } else {
     badge.innerText = "LINK";
     badge.style.backgroundColor = "var(--accent-color)";
-    badge.style.color = "#121212";
+    badge.style.color = "var(--accent-text, #121212)";
   }
 
   mediaTitle.innerText = t("analyzing");
@@ -1002,7 +1013,18 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
     if (downloadUrl.startsWith("spotidown_resolve:")) {
       const parts = downloadUrl.replace("spotidown_resolve:", "").split("|||");
       const payload = parts[0];
-      const cookie = decodeURIComponent(parts[1] || "");
+      let cookie = decodeURIComponent(parts[1] || "");
+
+      if (!cookie) {
+        try {
+          const homeRes = window.scrapr?.scraperFetch
+            ? await window.scrapr.scraperFetch({ url: "https://spotidown.app/", rawResponse: true }, "SpotiDown Cookie")
+            : await fetch("https://spotidown.app/");
+          const hHeaders = homeRes?.headers || {};
+          const sc = hHeaders["set-cookie"] || hHeaders["Set-Cookie"] || "";
+          if (sc) cookie = typeof sc === "string" ? sc.split(";")[0] : sc[0].split(";")[0];
+        } catch (_) {}
+      }
 
       let resData = null;
       if (window.NimiyoShareBridge?.httpRequestAsync) {
@@ -1202,9 +1224,18 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
           notifyNative("Nimiyo Downloader", `${sanitizedFilename} selesai diunduh!`, 100, 100, true);
           showToast(t("saved"));
           showNativeToast(t("saved"));
-          setTimeout(() => {
-            window.dismissPanel();
-          }, 1200);
+
+          // Periksa jumlah opsi unduhan: tahan window jika ada banyak opsi, tutup jika hanya 1 opsi
+          const totalOptions = (result && Array.isArray(result.downloads)) ? result.downloads.length : 1;
+          if (totalOptions <= 1) {
+            setTimeout(() => {
+              window.dismissPanel();
+            }, 1200);
+          } else {
+            setTimeout(() => {
+              updateDownloadProgressCard(false);
+            }, 2000);
+          }
         }
         return true;
       } else {
@@ -1229,9 +1260,17 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
         updateDownloadProgressCard(true, displayTitle, 100);
         showToast(t("saved"));
         showNativeToast(t("saved"));
-        setTimeout(() => {
-          window.dismissPanel();
-        }, 1200);
+
+        const totalOptions = (result && Array.isArray(result.downloads)) ? result.downloads.length : 1;
+        if (totalOptions <= 1) {
+          setTimeout(() => {
+            window.dismissPanel();
+          }, 1200);
+        } else {
+          setTimeout(() => {
+            updateDownloadProgressCard(false);
+          }, 2000);
+        }
       }
       return true;
     }
@@ -1339,17 +1378,31 @@ async function executeBatchDownload(items, result) {
   activeDownloadProgressCallback = null;
 
   // Finished batch
-  updateDownloadProgressCard(true, `✓ ${successCount}/${total} berkas selesai diunduh!`, 100);
+  if (successCount === 0) {
+    updateDownloadProgressCard(false);
+    if (window.NimiyoShareBridge && window.NimiyoShareBridge.showBatchNotification) {
+      window.NimiyoShareBridge.showBatchNotification(
+        "NIMIYO Quick Save",
+        "Unduhan gagal: berkas tidak dapat diunduh",
+        total,
+        total,
+        0,
+        true
+      );
+    }
+  } else {
+    updateDownloadProgressCard(true, `✓ ${successCount}/${total} berkas selesai diunduh!`, 100);
 
-  if (window.NimiyoShareBridge && window.NimiyoShareBridge.showBatchNotification) {
-    window.NimiyoShareBridge.showBatchNotification(
-      "NIMIYO Quick Save",
-      `Semua ${successCount} berkas selesai diunduh!`,
-      total,
-      total,
-      100,
-      true
-    );
+    if (window.NimiyoShareBridge && window.NimiyoShareBridge.showBatchNotification) {
+      window.NimiyoShareBridge.showBatchNotification(
+        "NIMIYO Quick Save",
+        `Semua ${successCount} berkas selesai diunduh!`,
+        total,
+        total,
+        100,
+        true
+      );
+    }
   }
 
   if (allBtn) {

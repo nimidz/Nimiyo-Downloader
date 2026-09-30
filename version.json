@@ -14,9 +14,7 @@
     "Fixed various download and notification issues related to server switching",
     "Added Snooze options to the OTA Update notification with 1 Day, 3 Days, and 1 Week options",
     "Improved the Update Available window with a Remind Me Later feature",
-    "Updated Spotify scraper servers with Spotisaver as primary server & fallback handling",
     "Added SSSTik as an additional TikTok server with support for no-watermark videos, MP3 audio, and photo slides",
-    "Improved Twitter/X download performance by prioritizing the direct FxTwitter server",
-    "Added multi-language support (EN, ID, ZH, JA) to MixTools, Edit Lyrics, and Reset Lyrics windows"
+    "Improved Twitter/X download performance by prioritizing the direct FxTwitter server"
   ]
 }

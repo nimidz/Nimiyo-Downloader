@@ -28,19 +28,24 @@
 
         var theme = urlTheme || s.uiTheme || "neobrutalism";
         var isDark = (urlDark === "1" || urlDark === "true") || !!s.darkMode;
-        var accent = urlAccent || s.accentColor || localStorage.getItem("nimiyo_accent_color") || "";
+        var accent = urlAccent || s.accentColor || localStorage.getItem("nimiyo_accent_color") || "yellow";
+        var fontKey = s.appFont || "misans";
 
-        document.documentElement.classList.add("theme-" + theme);
-        if (isDark) document.documentElement.classList.add("dark-mode");
-        if (accent) {
-          document.documentElement.style.setProperty("--accent-color", accent);
-        }
+        var root = document.documentElement;
+        root.className = "share-page theme-" + theme + (isDark ? " dark-mode" : " light-mode");
+        root.setAttribute("data-accent", accent);
+
+        var fontMap = {
+          misans: "'MiSans', sans-serif",
+          inter: "'Inter', sans-serif",
+          outfit: "'Outfit', sans-serif",
+          mono: "'Space Mono', monospace"
+        };
+        root.style.setProperty('--font-main', fontMap[fontKey] || fontMap.misans);
+
         document.addEventListener("DOMContentLoaded", function() {
-          document.body.classList.add("theme-" + theme);
-          if (isDark) document.body.classList.add("dark-mode");
-          if (accent) {
-            document.body.style.setProperty("--accent-color", accent);
-          }
+          document.body.className = "share-body theme-" + theme + (isDark ? " dark-mode" : " light-mode");
+          document.body.setAttribute("data-accent", accent);
         });
       } catch(e) {}
     })();

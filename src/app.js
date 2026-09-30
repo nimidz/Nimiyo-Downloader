@@ -303,7 +303,7 @@ const translations = {
     btnResetSettings: "RESET ALL SETTINGS TO DEFAULT",
     groupAbout: "About & Help",
     menuAboutDesc: "Version, Info & Developer",
-    aboutVersion: "Version 2.2.1 (Lite)",
+    aboutVersion: "Version 2.1.1 (Lite)",
     aboutDesc: "A premium, modern, and lightweight media downloader engine built on scrapr.",
     aboutThanks: "Thanks to:",
     toastClipboardEmpty: "Clipboard is empty or does not contain a text link.",
@@ -1055,7 +1055,7 @@ const translations = {
     btnResetSettings: "KEMBALIKAN SEMUA SETELAN KE DEFAULT",
     groupAbout: "Tentang & Bantuan",
     menuAboutDesc: "Versi, Info & Pengembang",
-    aboutVersion: "Versi 2.2.1 (Lite)",
+    aboutVersion: "Versi 2.1.1 (Lite)",
     aboutDesc: "Mesin pengunduh media premium, modern, dan ringan yang dibangun di atas scrapr.",
     aboutThanks: "Terima kasih kepada:",
     toastClipboardEmpty: "Papan klip kosong atau tidak berisi tautan teks.",
@@ -1805,7 +1805,7 @@ const translations = {
     btnResetSettings: "恢复所有设置到默认值",
     groupAbout: "关于与帮助",
     menuAboutDesc: "版本信息、开源与开发团队",
-    aboutVersion: "版本 2.2.1 (Lite)",
+    aboutVersion: "版本 2.1.1 (Lite)",
     aboutDesc: "基于 scrapr 构建的高级、现代且轻量级的媒体下载引擎。",
     aboutThanks: "致谢:",
     toastClipboardEmpty: "剪贴板为空或不包含文本链接。",
@@ -2557,7 +2557,7 @@ const translations = {
     btnResetSettings: "すべての設定を初期値に戻す",
     groupAbout: "アプリについてとヘルプ",
     menuAboutDesc: "バージョン、情報と開発チーム",
-    aboutVersion: "バージョン 2.2.1 (Lite)",
+    aboutVersion: "バージョン 2.1.1 (Lite)",
     aboutDesc: "scrapr をベースに構築されたプレミアムでモダン、軽量なメディアダウンローダー。",
     aboutThanks: "スペシャルサンクス:",
     toastClipboardEmpty: "クリップボードが空か、有効なテキストリンクが含まれていません。",
@@ -3173,7 +3173,7 @@ const platformMapping = {
 
 // Predefined scraper fallback order per platform (100% matching share.js & scrapr)
 const fallbackChains = {
-  tiktok: ['snaptik', 'tiktokio', 'ssstik', 'direct'],
+  tiktok: ['tiktokio', 'snaptik', 'ssstik', 'direct'],
   instagram: ['snapsave', 'indown', 'direct'],
   facebook: ['snapsave', 'direct'],
   spotify: ['spotidown', 'soundloaders', 'direct'],
@@ -3265,6 +3265,7 @@ function loadSettings() {
   currentLanguage = settings.language || systemLang;
   applyDarkMode(settings.darkMode);
   applyUiTheme(settings.uiTheme);
+  applyAccentColor(settings.accentColor);
   syncSettingsToNative();
 }
 
@@ -3282,6 +3283,7 @@ function syncSettingsToNative() {
 // Save Settings to LocalStorage & Native
 function saveSettings() {
   localStorage.setItem("nimiyo_settings", JSON.stringify(settings));
+  localStorage.setItem("nimiyo_accent_color", settings.accentColor || "yellow");
   currentLanguage = settings.language || 'en';
   applyDarkMode(settings.darkMode);
   applyUiTheme(settings.uiTheme);
@@ -5596,9 +5598,20 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
     console.log("[SPOTIFY RESOLVE] Resolving SpotiDown token for track:", itemTitle);
     const parts = downloadUrl.replace("spotidown_resolve:", "").split("|||");
     const payload = parts[0];
-    const cookie = decodeURIComponent(parts[1] || "");
+    let cookie = decodeURIComponent(parts[1] || "");
 
     try {
+      if (!cookie) {
+        try {
+          const homeRes = window.scrapr?.scraperFetch
+            ? await window.scrapr.scraperFetch({ url: "https://spotidown.app/", rawResponse: true }, "SpotiDown Cookie")
+            : await fetch("https://spotidown.app/");
+          const hHeaders = homeRes?.headers || {};
+          const sc = hHeaders["set-cookie"] || hHeaders["Set-Cookie"] || "";
+          if (sc) cookie = typeof sc === "string" ? sc.split(";")[0] : sc[0].split(";")[0];
+        } catch (_) {}
+      }
+
       let data = null;
       if (window.scrapr?.scraperFetch) {
         data = await window.scrapr.scraperFetch({
@@ -6049,37 +6062,39 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
         throw new Error("[FILE WRITE FAILED] Could not retrieve cached file URI.");
       }
 
-      if (MediaSaver?.saveToPublicStorage) {
-        const mediaSaverRes = await MediaSaver.saveToPublicStorage({
-          filePath: uriResult.uri,
-          fileName: sanitizedFilename,
-          fileType: mediaCategory,
-          overwriteMode: settings.overwriteMode || "rename"
-        });
-        if (mediaSaverRes?.skipped) {
-          savedFileUri = mediaSaverRes.uri;
-          if (mediaSaverRes.fileName) sanitizedFilename = mediaSaverRes.fileName;
-          updateProgressPercent(100);
-          showToast(getTranslation("toastSkippedDuplicate") || `Berkas sudah ada (dilewati): ${sanitizedFilename}`, "info");
-          return;
-        }
-        if (!mediaSaverRes || !mediaSaverRes.success || !mediaSaverRes.uri) {
-          throw new Error("[PUBLIC STORAGE FAILED] MediaSaver failed to copy file to Downloads/Nimiyo/ storage.");
-        }
-        savedFileUri = mediaSaverRes.uri;
-        if (mediaSaverRes?.fileName) {
-          sanitizedFilename = mediaSaverRes.fileName;
-        }
-      } else {
-        savedFileUri = uriResult.uri;
-      }
-
       try {
-        await Filesystem.deleteFile({
-          path: targetRelativePath,
-          directory: capDir
-        });
-      } catch (_) { }
+        if (MediaSaver?.saveToPublicStorage) {
+          const mediaSaverRes = await MediaSaver.saveToPublicStorage({
+            filePath: uriResult.uri,
+            fileName: sanitizedFilename,
+            fileType: mediaCategory,
+            overwriteMode: settings.overwriteMode || "rename"
+          });
+          if (mediaSaverRes?.skipped) {
+            savedFileUri = mediaSaverRes.uri;
+            if (mediaSaverRes.fileName) sanitizedFilename = mediaSaverRes.fileName;
+            updateProgressPercent(100);
+            showToast(getTranslation("toastSkippedDuplicate") || `Berkas sudah ada (dilewati): ${sanitizedFilename}`, "info");
+            return;
+          }
+          if (!mediaSaverRes || !mediaSaverRes.success || !mediaSaverRes.uri) {
+            throw new Error("[PUBLIC STORAGE FAILED] MediaSaver failed to copy file to Downloads/Nimiyo/ storage.");
+          }
+          savedFileUri = mediaSaverRes.uri;
+          if (mediaSaverRes?.fileName) {
+            sanitizedFilename = mediaSaverRes.fileName;
+          }
+        } else {
+          savedFileUri = uriResult.uri;
+        }
+      } finally {
+        try {
+          await Filesystem.deleteFile({
+            path: targetRelativePath,
+            directory: capDir
+          });
+        } catch (_) { }
+      }
 
       updateProgressPercent(100);
     }
@@ -6220,6 +6235,17 @@ async function updateSystemDownloadNotification(title, message, progress = 0, ma
     }
   } catch (e) {
     console.warn("System notification update failed:", e);
+  }
+}
+
+async function clearSystemDownloadNotification() {
+  try {
+    const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
+    if (MediaSaver && typeof MediaSaver.clearSystemNotification === "function") {
+      await MediaSaver.clearSystemNotification();
+    }
+  } catch (e) {
+    console.warn("Clear system notification failed:", e);
   }
 }
 
@@ -6409,6 +6435,7 @@ function cancelSingleTask(taskId) {
 
     if (activeDownloadQueue.length === 0) {
       hideBalloonProgress();
+      clearSystemDownloadNotification();
     }
   }
 }
@@ -6421,6 +6448,7 @@ function cancelAllQueue() {
   });
   activeDownloadQueue = [];
   hideBalloonProgress();
+  clearSystemDownloadNotification();
   showToast(getTranslation("toastDownloadCancelled"), "error");
 }
 
@@ -6540,6 +6568,22 @@ async function processDownloadQueue() {
         activeDownloadQueue = activeDownloadQueue.filter(t => t.id !== nextTask.id);
         updateBalloonQueueUI();
 
+        // Release ongoing lock on notification drawer so it doesn't get stuck
+        updateSystemDownloadNotification(
+          "Nimiyo Downloader",
+          `Gagal mengunduh: ${nextTask.filename}`,
+          0,
+          0,
+          true
+        );
+
+        setTimeout(() => {
+          const hasRunning = activeDownloadQueue.some(t => t.status === 'downloading' || t.status === 'pending');
+          if (!hasRunning) {
+            clearSystemDownloadNotification();
+          }
+        }, 3000);
+
         // Auto-switch server on download failure and re-analyze
         const platform = currentPlatform || nextTask.mediaResult?.platform || nextTask.dlItem?.platform;
         const scrapers = platform ? (fallbackChains[platform] || []) : [];
@@ -6585,6 +6629,11 @@ async function processDownloadQueue() {
       triggerHaptic();
       showToast(getTranslation("toastBatchCompleted", { count: completedQueueCount }), "success");
       completedQueueCount = 0;
+    } else {
+      // If 0 items succeeded (all failed or cancelled), ensure notification is cleared
+      setTimeout(() => {
+        clearSystemDownloadNotification();
+      }, 3000);
     }
   }
 }

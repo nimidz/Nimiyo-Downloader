@@ -530,6 +530,10 @@ public class ShareActivity extends AppCompatActivity {
                     outStream.flush();
                     try { is.close(); } catch (Exception ignored) {}
 
+                    if (totalBytesRead <= 0) {
+                        throw new Exception("Unduhan gagal: tidak ada data berkas yang diterima");
+                    }
+
                     if (totalBytesRead < 200 && !lowerFileName.endsWith(".jpg") && !lowerFileName.endsWith(".png")) {
                         throw new Exception("Downloaded file is invalid or empty (" + totalBytesRead + " bytes)");
                     }
@@ -566,6 +570,9 @@ public class ShareActivity extends AppCompatActivity {
                     errorMsg = e.getMessage() != null ? e.getMessage() : "Unknown download error";
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && itemUri != null) {
                         try { resolver.delete(itemUri, null, null); } catch (Exception ignored) {}
+                    }
+                    if (targetFile != null && targetFile.exists()) {
+                        try { targetFile.delete(); } catch (Exception ignored) {}
                     }
                 } finally {
                     if (outStream != null) {
