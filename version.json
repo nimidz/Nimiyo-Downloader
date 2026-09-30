@@ -5,16 +5,16 @@
   "releaseDate": "2026-09-30",
   "downloadUrl": "https://github.com/nimidz/Nimiyo-Downloader/releases/download/v2.2.1/Nimiyo.v2.2.1.apk",
   "changelog": [
-    "🐛 Perbaikan: Unduhan foto TikTok dari QuickSave yang sempat macet",
-    "🐛 Perbaikan: Penggabungan banyak unduhan foto menjadi satu notifikasi progres tunggal",
-    "🐛 Perbaikan: Sinkronisasi Warna Aksen (Accent Color) pada QuickSave",
-    "🐛 Perbaikan: Unduhan QuickSave kini tampil di Balon Unduhan Melayang aplikasi utama",
-    "🐛 Perbaikan: QuickSave tidak lagi memunculkan aplikasi utama ke latar depan saat di Recent Apps",
-    "🐛 Perbaikan: Kontras teks dan tombol ekspor file .LRC di Mode Gelap",
-    "🐛 Perbaikan: Kendala unduhan dan notifikasi saat berpindah server",
-    "⚙️ Peningkatan: Opsi Tunda (Snooze) notifikasi Pembaruan (1 Hari, 3 Hari, 1 Minggu)",
-    "⚙️ Peningkatan: Jendela Update Tersedia kini dilengkapi fitur Ingatkan Nanti",
-    "⚙️ Peningkatan: Server SSSTik untuk TikTok (video tanpa watermark, audio MP3, & slide foto)",
-    "⚙️ Peningkatan: Performa unduhan Twitter/X lebih cepat dengan prioritas server FxTwitter"
+    "Memperbaiki unduhan foto TikTok dari QuickSave yang sempat macet",
+    "Menggabungkan notifikasi banyak unduhan foto menjadi satu notifikasi progres tunggal",
+    "Memperbaiki sinkronisasi Warna Aksen (Accent Color) pada QuickSave dengan aplikasi utama",
+    "Memperbaiki unduhan QuickSave agar tampil di Balon Unduhan Melayang aplikasi utama",
+    "Memperbaiki QuickSave agar tidak memunculkan aplikasi utama ke latar depan saat di Recent Apps",
+    "Memperbaiki kontras teks dan latar belakang pada ekspor file .LRC dan tombol outline di Mode Gelap",
+    "Memperbaiki berbagai kendala unduhan dan notifikasi saat pergantian server",
+    "Menambahkan opsi Tunda (Snooze) pada notifikasi Pembaruan OTA (1 Hari, 3 Hari, 1 Minggu)",
+    "Meningkatkan jendela Pembaruan Tersedia dengan fitur Ingatkan Nanti (Remind Me Later)",
+    "Menambahkan SSSTik sebagai server tambahan TikTok (video tanpa watermark, audio MP3, slide foto)",
+    "Meningkatkan performa dan stabilitas unduhan Twitter/X dengan memprioritaskan server direct FxTwitter"
   ]
 }
