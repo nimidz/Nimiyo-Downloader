@@ -13,6 +13,7 @@
         var params = new URLSearchParams(window.location.search);
         var urlTheme = params.get("theme");
         var urlDark = params.get("darkMode");
+        var urlAccent = params.get("accentColor");
 
         var s = {};
         try {
@@ -27,12 +28,19 @@
 
         var theme = urlTheme || s.uiTheme || "neobrutalism";
         var isDark = (urlDark === "1" || urlDark === "true") || !!s.darkMode;
+        var accent = urlAccent || s.accentColor || localStorage.getItem("nimiyo_accent_color") || "";
 
         document.documentElement.classList.add("theme-" + theme);
         if (isDark) document.documentElement.classList.add("dark-mode");
+        if (accent) {
+          document.documentElement.style.setProperty("--accent-color", accent);
+        }
         document.addEventListener("DOMContentLoaded", function() {
           document.body.classList.add("theme-" + theme);
           if (isDark) document.body.classList.add("dark-mode");
+          if (accent) {
+            document.body.style.setProperty("--accent-color", accent);
+          }
         });
       } catch(e) {}
     })();
@@ -69,6 +77,20 @@
           <span class="server-icon">⇄</span>
           <span class="server-name" id="serverLabel">Server</span>
         </button>
+      </div>
+    </div>
+
+    <!-- Active Download Progress Card (Inline Balloon Progress Bar) -->
+    <div id="downloadProgressCard" class="download-progress-card hidden">
+      <div class="progress-info-row">
+        <div class="progress-title-group">
+          <span class="progress-pulse-dot"></span>
+          <span class="progress-title" id="progressTitle">Mengunduh...</span>
+        </div>
+        <span class="progress-percent" id="progressPercent">0%</span>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progressBarFill" style="width: 0%;"></div>
       </div>
     </div>
 

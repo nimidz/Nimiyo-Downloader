@@ -36,8 +36,11 @@
             android:label="@string/share_target_label"
             android:theme="@style/Theme.Nimiyo.ShareDialog"
             android:exported="true"
-            android:launchMode="singleTask"
+            android:taskAffinity="nimiyo.litedownloader.shareactivity"
+            android:launchMode="singleInstance"
+            android:documentLaunchMode="always"
             android:excludeFromRecents="true"
+            android:noHistory="false"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />

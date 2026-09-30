@@ -191,6 +191,56 @@ body.theme-softui .danger-btn:active {
   box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2), inset 0 1px 3px rgba(0, 0, 0, 0.15) !important;
 }
 
+body.theme-softui .outline-btn {
+  background: var(--soft-surface, #ffffff) !important;
+  color: var(--soft-text, #1f2937) !important;
+  border: 1px solid var(--soft-border) !important;
+  box-shadow: var(--soft-shadow-card-sm) !important;
+}
+
+body.theme-softui .outline-btn:active {
+  transform: translateY(1px) scale(0.98);
+  background: var(--soft-surface-subtle, rgba(245, 243, 235, 0.85)) !important;
+}
+
+body.theme-softui .outline-btn svg {
+  stroke: currentColor !important;
+}
+
+body.theme-softui.dark-mode .outline-btn,
+html.dark-mode body.theme-softui .outline-btn {
+  background: var(--soft-surface, rgba(28, 28, 34, 0.85)) !important;
+  color: var(--soft-text, #f3f4f6) !important;
+  border: 1px solid var(--soft-border, rgba(255, 255, 255, 0.08)) !important;
+  box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.theme-softui .download-lrc-icon-btn {
+  background: var(--soft-surface, #ffffff) !important;
+  color: var(--soft-text, #1f2937) !important;
+  border: 1px solid var(--soft-border) !important;
+  box-shadow: var(--soft-shadow-card-sm) !important;
+}
+
+body.theme-softui .download-lrc-icon-btn svg {
+  stroke: currentColor !important;
+}
+
+body.theme-softui.dark-mode .download-lrc-icon-btn,
+html.dark-mode body.theme-softui .download-lrc-icon-btn {
+  background: var(--soft-surface, rgba(28, 28, 34, 0.85)) !important;
+  color: var(--soft-text, #f3f4f6) !important;
+  border: 1px solid var(--soft-border, rgba(255, 255, 255, 0.08)) !important;
+}
+
+body.theme-softui.dark-mode .download-lrc-icon-btn svg,
+html.dark-mode body.theme-softui .download-lrc-icon-btn svg,
+body.theme-softui.dark-mode .download-lrc-icon-btn span,
+html.dark-mode body.theme-softui .download-lrc-icon-btn span {
+  color: var(--soft-text, #f3f4f6) !important;
+  stroke: var(--soft-text, #f3f4f6) !important;
+}
+
 /* --------------------------------------------------------------------------
    Scrape Result Section
    -------------------------------------------------------------------------- */

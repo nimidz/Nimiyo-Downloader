@@ -182,6 +182,38 @@ const translations = {
     mixtoolsReverbDry: "◀ Dry",
     mixtoolsReverbWet: "Wet ▶",
     mixtoolsReverbHint: "Up = Wide • Right = Wet",
+    mixtoolsResetSuccess: "MixTools reset to default",
+    mixtoolsStatusDecay: "Decay",
+    editLyricsTitle: "Edit Lyrics",
+    editLyricsFormatHelp: "Format: <code>[00:00.00] Lyrics line here</code> (minutes:seconds.ms)",
+    editLyricsPlaceholder: "[00:00.00] First lyric line...\n[00:15.30] Second lyric line...",
+    editLyricsRefresh: "REFRESH",
+    editLyricsRefreshTitle: "Reset & search new lyrics",
+    editLyricsImport: "IMPORT",
+    editLyricsImportTitle: "Import local .LRC lyrics file",
+    editLyricsDownloadLrcTitle: "Download .LRC file",
+    resetLyricsTitle: "Reset Lyrics Options",
+    resetLyricsSubtitle: "Choose lyrics search source",
+    resetLyricsOptDefaultTitle: "Auto Search (Default / LRCLIB)",
+    resetLyricsOptDefaultDesc: "Clear local lyrics & re-fetch synced lyrics from online database",
+    resetLyricsOptLyricsifyTitle: "Search on Lyricsify.com",
+    resetLyricsOptLyricsifyDesc: "Open this song on Lyricsify via browser to copy .LRC lyrics",
+    resetLyricsOptImportTitle: "Import Local .LRC File",
+    resetLyricsOptImportDesc: "Select .lrc or .txt lyrics file stored on your device",
+    toastSelectSongFirst: "Please select a song first",
+    toastLyricsSearchingOnline: "Searching lyrics automatically (LRCLIB)...",
+    toastLyricsResetSuccess: "Lyrics reset successfully from online database!",
+    toastLyricsNotFoundOnline: "Lyrics not found in online database",
+    toastLyricsFetchFailed: "Failed to fetch online lyrics",
+    toastLyricsLyricsifyHint: "Lyrics reset. Copy .LRC lyrics from Lyricsify and paste here",
+    toastLyricsImportSuccess: "Lyrics {file} imported successfully",
+    toastLyricsImportFailed: "Failed to read lyrics file",
+    toastLyricsEmptyWarning: "Lyrics cannot be empty",
+    toastLyricsSavedSuccess: "Lyrics edited and saved locally",
+    toastLyricsNoDownload: "No lyrics available to download",
+    toastLyricsSavedTo: "Lyrics saved: {file} in Nimiyo/LyricsYo",
+    toastLyricsDownloaded: "Lyrics {file} downloaded successfully",
+    toastLyricsDownloadFailed: "Failed to download lyrics",
     btnReset: "Reset",
     musicSongInfoTitle: "Song Details",
     musicLabelTitle: "Title",
@@ -271,7 +303,7 @@ const translations = {
     btnResetSettings: "RESET ALL SETTINGS TO DEFAULT",
     groupAbout: "About & Help",
     menuAboutDesc: "Version, Info & Developer",
-    aboutVersion: "Version 2.2.0 (Lite)",
+    aboutVersion: "Version 2.2.1 (Lite)",
     aboutDesc: "A premium, modern, and lightweight media downloader engine built on scrapr.",
     aboutThanks: "Thanks to:",
     toastClipboardEmpty: "Clipboard is empty or does not contain a text link.",
@@ -349,6 +381,11 @@ const translations = {
     updateDownloading: "Downloading update...",
     btnLater: "Remind Me Later",
     btnRemindLater: "Remind Me Later",
+    remindScheduleTitle: "Remind Update in:",
+    remind1Day: "1 Day",
+    remind3Days: "3 Days",
+    remind1Week: "1 Week",
+    toastRemindScheduled: "Update reminder set for {time}.",
     btnUpdateNow: "Update and Install",
     btnUpdateAndInstall: "Update and Install",
     btnManualDownload: "Download Manual Install",
@@ -897,6 +934,38 @@ const translations = {
     mixtoolsReverbDry: "◀ Dry",
     mixtoolsReverbWet: "Wet ▶",
     mixtoolsReverbHint: "Atas = Luas • Kanan = Gema",
+    mixtoolsResetSuccess: "MixTools di-reset ke default",
+    mixtoolsStatusDecay: "Gema",
+    editLyricsTitle: "Edit Lirik",
+    editLyricsFormatHelp: "Format: <code>[00:00.00] Lirik di sini</code> (menit:detik.milidetik)",
+    editLyricsPlaceholder: "[00:00.00] Baris lirik pertama...\n[00:15.30] Baris lirik kedua...",
+    editLyricsRefresh: "REFRESH",
+    editLyricsRefreshTitle: "Reset & cari lirik baru",
+    editLyricsImport: "IMPORT",
+    editLyricsImportTitle: "Import file lirik .LRC lokal",
+    editLyricsDownloadLrcTitle: "Download file .LRC",
+    resetLyricsTitle: "Pilihan Reset Lirik",
+    resetLyricsSubtitle: "Pilih sumber pencarian lirik",
+    resetLyricsOptDefaultTitle: "Cari Otomatis (Default / LRCLIB)",
+    resetLyricsOptDefaultDesc: "Hapus lirik lokal & ambil ulang lirik asli sinkron dari database online",
+    resetLyricsOptLyricsifyTitle: "Cari di Lyricsify.com",
+    resetLyricsOptLyricsifyDesc: "Buka pencarian lagu ini di Lyricsify via browser untuk salin lirik .LRC",
+    resetLyricsOptImportTitle: "Import File .LRC Lokal",
+    resetLyricsOptImportDesc: "Pilih file lirik .lrc atau .txt yang tersimpan di HP Anda",
+    toastSelectSongFirst: "Pilih lagu terlebih dahulu",
+    toastLyricsSearchingOnline: "Mencari lirik otomatis (LRCLIB)...",
+    toastLyricsResetSuccess: "Lirik berhasil di-reset dari database online!",
+    toastLyricsNotFoundOnline: "Lirik tidak ditemukan di database online",
+    toastLyricsFetchFailed: "Gagal mengambil lirik online",
+    toastLyricsLyricsifyHint: "Lirik di-reset. Salin lirik .LRC dari Lyricsify lalu tempel di sini",
+    toastLyricsImportSuccess: "Lirik {file} berhasil di-import",
+    toastLyricsImportFailed: "Gagal membaca file lirik",
+    toastLyricsEmptyWarning: "Lirik tidak boleh kosong",
+    toastLyricsSavedSuccess: "Edit Lirik berhasil, dan disimpan Lokal",
+    toastLyricsNoDownload: "Belum ada lirik untuk di-download",
+    toastLyricsSavedTo: "Lirik tersimpan: {file} di Nimiyo/LyricsYo",
+    toastLyricsDownloaded: "Lirik {file} berhasil diunduh",
+    toastLyricsDownloadFailed: "Gagal mendownload lirik",
     btnReset: "Reset",
     musicSongInfoTitle: "Rincian Lagu",
     musicLabelTitle: "Judul",
@@ -986,7 +1055,7 @@ const translations = {
     btnResetSettings: "KEMBALIKAN SEMUA SETELAN KE DEFAULT",
     groupAbout: "Tentang & Bantuan",
     menuAboutDesc: "Versi, Info & Pengembang",
-    aboutVersion: "Versi 2.2.0 (Lite)",
+    aboutVersion: "Versi 2.2.1 (Lite)",
     aboutDesc: "Mesin pengunduh media premium, modern, dan ringan yang dibangun di atas scrapr.",
     aboutThanks: "Terima kasih kepada:",
     toastClipboardEmpty: "Papan klip kosong atau tidak berisi tautan teks.",
@@ -1064,6 +1133,11 @@ const translations = {
     updateDownloading: "Mengunduh pembaruan...",
     btnLater: "Nanti ingatkan kembali",
     btnRemindLater: "Nanti ingatkan kembali",
+    remindScheduleTitle: "Ingatkan Pembaruan Dalam:",
+    remind1Day: "1 Hari",
+    remind3Days: "3 Hari",
+    remind1Week: "1 Minggu",
+    toastRemindScheduled: "Pengingat pembaruan diatur untuk {time}.",
     btnUpdateNow: "Update dan Install",
     btnUpdateAndInstall: "Update dan Install",
     btnManualDownload: "Download Manual Install",
@@ -1610,6 +1684,38 @@ const translations = {
     mixtoolsReverbDry: "◀ Dry",
     mixtoolsReverbWet: "Wet ▶",
     mixtoolsReverbHint: "向上 = 开阔 • 向右 = 混响",
+    mixtoolsResetSuccess: "MixTools 已重置为默认值",
+    mixtoolsStatusDecay: "衰减",
+    editLyricsTitle: "编辑歌词",
+    editLyricsFormatHelp: "格式: <code>[00:00.00] 歌词内容</code> (分:秒.毫秒)",
+    editLyricsPlaceholder: "[00:00.00] 第一句歌词...\n[00:15.30] 第二句歌词...",
+    editLyricsRefresh: "刷新",
+    editLyricsRefreshTitle: "重置并搜索新歌词",
+    editLyricsImport: "导入",
+    editLyricsImportTitle: "导入本地 .LRC 歌词文件",
+    editLyricsDownloadLrcTitle: "下载 .LRC 歌词文件",
+    resetLyricsTitle: "重置歌词选项",
+    resetLyricsSubtitle: "选择歌词搜索来源",
+    resetLyricsOptDefaultTitle: "自动搜索 (默认 / LRCLIB)",
+    resetLyricsOptDefaultDesc: "清除本地歌词并从在线数据库重新获取同步歌词",
+    resetLyricsOptLyricsifyTitle: "在 Lyricsify.com 搜索",
+    resetLyricsOptLyricsifyDesc: "在浏览器中打开 Lyricsify 页面以复制 .LRC 歌词",
+    resetLyricsOptImportTitle: "导入本地 .LRC 文件",
+    resetLyricsOptImportDesc: "选择存储在设备上的 .lrc 或 .txt 歌词文件",
+    toastSelectSongFirst: "请先选择一首歌曲",
+    toastLyricsSearchingOnline: "正在自动搜索歌词 (LRCLIB)...",
+    toastLyricsResetSuccess: "歌词已成功从在线数据库重置！",
+    toastLyricsNotFoundOnline: "在线数据库中未找到歌词",
+    toastLyricsFetchFailed: "获取在线歌词失败",
+    toastLyricsLyricsifyHint: "歌词已重置。从 Lyricsify 复制 .LRC 歌词并粘贴在此处",
+    toastLyricsImportSuccess: "歌词 {file} 导入成功",
+    toastLyricsImportFailed: "读取歌词文件失败",
+    toastLyricsEmptyWarning: "歌词内容不能为空",
+    toastLyricsSavedSuccess: "歌词编辑成功并已保存在本地",
+    toastLyricsNoDownload: "没有可供下载的歌词",
+    toastLyricsSavedTo: "歌词已保存: {file} 至 Nimiyo/LyricsYo",
+    toastLyricsDownloaded: "歌词 {file} 下载成功",
+    toastLyricsDownloadFailed: "下载歌词失败",
     btnReset: "重置",
     musicSongInfoTitle: "歌曲详情",
     musicLabelTitle: "标题",
@@ -1699,7 +1805,7 @@ const translations = {
     btnResetSettings: "恢复所有设置到默认值",
     groupAbout: "关于与帮助",
     menuAboutDesc: "版本信息、开源与开发团队",
-    aboutVersion: "版本 2.2.0 (Lite)",
+    aboutVersion: "版本 2.2.1 (Lite)",
     aboutDesc: "基于 scrapr 构建的高级、现代且轻量级的媒体下载引擎。",
     aboutThanks: "致谢:",
     toastClipboardEmpty: "剪贴板为空或不包含文本链接。",
@@ -1777,6 +1883,11 @@ const translations = {
     updateDownloading: "正在下载更新...",
     btnLater: "稍后提醒我",
     btnRemindLater: "稍后提醒我",
+    remindScheduleTitle: "更新提醒时间：",
+    remind1Day: "1 天",
+    remind3Days: "3 天",
+    remind1Week: "1 周",
+    toastRemindScheduled: "已设置更新提醒：{time}后。",
     btnUpdateNow: "更新并安装",
     btnUpdateAndInstall: "更新并安装",
     btnManualDownload: "手动下载安装包",
@@ -2325,6 +2436,38 @@ const translations = {
     mixtoolsReverbDry: "◀ Dry",
     mixtoolsReverbWet: "Wet ▶",
     mixtoolsReverbHint: "上 = 空間 • 右 = 残響",
+    mixtoolsResetSuccess: "MixTools がデフォルトにリセットされました",
+    mixtoolsStatusDecay: "減衰",
+    editLyricsTitle: "歌詞を編集",
+    editLyricsFormatHelp: "形式: <code>[00:00.00] 歌詞テキスト</code> (分:秒.ミリ秒)",
+    editLyricsPlaceholder: "[00:00.00] 最初の歌詞行...\n[00:15.30] 2番目の歌詞行...",
+    editLyricsRefresh: "更新",
+    editLyricsRefreshTitle: "リセットして新しい歌詞を検索",
+    editLyricsImport: "インポート",
+    editLyricsImportTitle: "ローカルの .LRC 歌詞ファイルをインポート",
+    editLyricsDownloadLrcTitle: ".LRC ファイルをダウンロード",
+    resetLyricsTitle: "歌詞リセットオプション",
+    resetLyricsSubtitle: "歌詞の検索元を選択",
+    resetLyricsOptDefaultTitle: "自動検索 (デフォルト / LRCLIB)",
+    resetLyricsOptDefaultDesc: "ローカル歌詞を削除し、オンラインから同期歌詞を再取得",
+    resetLyricsOptLyricsifyTitle: "Lyricsify.com で検索",
+    resetLyricsOptLyricsifyDesc: "ブラウザで Lyricsify を開き、.LRC 歌詞をコピー",
+    resetLyricsOptImportTitle: "ローカル .LRC ファイルをインポート",
+    resetLyricsOptImportDesc: "端末に保存されている .lrc または .txt 歌詞ファイルを選択",
+    toastSelectSongFirst: "先に曲を選択してください",
+    toastLyricsSearchingOnline: "歌詞を自動検索中 (LRCLIB)...",
+    toastLyricsResetSuccess: "オンラインデータベースから歌詞をリセットしました！",
+    toastLyricsNotFoundOnline: "オンラインデータベースに歌詞が見つかりませんでした",
+    toastLyricsFetchFailed: "オンライン歌詞の取得に失敗しました",
+    toastLyricsLyricsifyHint: "歌詞をリセットしました。Lyricsify から .LRC 歌詞をコピーして貼り付けてください",
+    toastLyricsImportSuccess: "歌詞 {file} を正常にインポートしました",
+    toastLyricsImportFailed: "歌詞ファイルの読み込みに失敗しました",
+    toastLyricsEmptyWarning: "歌詞を空にすることはできません",
+    toastLyricsSavedSuccess: "歌詞を編集し、ローカルに保存しました",
+    toastLyricsNoDownload: "ダウンロード可能な歌詞がありません",
+    toastLyricsSavedTo: "歌詞を保存しました: {file} (Nimiyo/LyricsYo)",
+    toastLyricsDownloaded: "歌詞 {file} をダウンロードしました",
+    toastLyricsDownloadFailed: "歌詞のダウンロードに失敗しました",
     btnReset: "リセット",
     musicSongInfoTitle: "楽曲の詳細情報",
     musicLabelTitle: "曲名",
@@ -2414,7 +2557,7 @@ const translations = {
     btnResetSettings: "すべての設定を初期値に戻す",
     groupAbout: "アプリについてとヘルプ",
     menuAboutDesc: "バージョン、情報と開発チーム",
-    aboutVersion: "バージョン 2.2.0 (Lite)",
+    aboutVersion: "バージョン 2.2.1 (Lite)",
     aboutDesc: "scrapr をベースに構築されたプレミアムでモダン、軽量なメディアダウンローダー。",
     aboutThanks: "スペシャルサンクス:",
     toastClipboardEmpty: "クリップボードが空か、有効なテキストリンクが含まれていません。",
@@ -2492,6 +2635,11 @@ const translations = {
     updateDownloading: "更新をダウンロード中...",
     btnLater: "後で通知する",
     btnRemindLater: "後で通知する",
+    remindScheduleTitle: "アップデート再通知の時期：",
+    remind1Day: "1 日後",
+    remind3Days: "3 日後",
+    remind1Week: "1 週間後",
+    toastRemindScheduled: "{time}後にアップデートを再通知します。",
     btnUpdateNow: "更新してインストール",
     btnUpdateAndInstall: "更新してインストール",
     btnManualDownload: "手動ダウンロード・インストール",
@@ -3025,11 +3173,11 @@ const platformMapping = {
 
 // Predefined scraper fallback order per platform (100% matching share.js & scrapr)
 const fallbackChains = {
-  tiktok: ['snaptik', 'tiktokio', 'direct'],
+  tiktok: ['snaptik', 'tiktokio', 'ssstik', 'direct'],
   instagram: ['snapsave', 'indown', 'direct'],
   facebook: ['snapsave', 'direct'],
-  spotify: ['spotidown', 'soundloaders', 'direct'],
-  twitter: ['tvd', 'tweeload', 'direct'],
+  spotify: ['spotisaver', 'spotidown', 'soundloaders', 'direct'],
+  twitter: ['direct', 'tweeload', 'tvd'],
   youtube: ['ytmp3', 'direct'],
   applemusic: ['aplmate', 'direct'],
   pinterest: ['pindown', 'direct'],
@@ -3043,8 +3191,8 @@ const fallbackChains = {
 };
 
 // App Version Constants & GitHub Auto-Update Engine
-const APP_VERSION_NAME = "2.2.0";
-const APP_VERSION_CODE = 5;
+const APP_VERSION_NAME = "2.2.1";
+const APP_VERSION_CODE = 6;
 const UPDATE_MANIFEST_URL = "https://raw.githubusercontent.com/nimidz/Nimiyo-Downloader/main/version.json";
 let latestUpdateInfo = null;
 
@@ -3307,13 +3455,30 @@ function applyTranslations() {
   // Automatically translate all elements with data-i18n attribute
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
-    if (key) el.innerText = getTranslation(key);
+    if (key) {
+      const val = getTranslation(key);
+      if (val && val.includes("<") && val.includes(">")) {
+        el.innerHTML = val;
+      } else if (val) {
+        el.innerText = val;
+      }
+    }
   });
 
   // Automatically translate placeholders with data-i18n-placeholder attribute
   document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
     const key = el.getAttribute("data-i18n-placeholder");
     if (key) el.placeholder = getTranslation(key);
+  });
+
+  // Automatically translate titles / tooltips with data-i18n-title attribute
+  document.querySelectorAll("[data-i18n-title]").forEach(el => {
+    const key = el.getAttribute("data-i18n-title");
+    if (key) {
+      const val = getTranslation(key);
+      el.title = val;
+      el.setAttribute("aria-label", val);
+    }
   });
 
   // Balloon sheet strings
@@ -4341,9 +4506,47 @@ function setupEventListeners() {
   if (btnLaterUpdate) {
     btnLaterUpdate.addEventListener("click", () => {
       triggerHaptic();
+      document.getElementById("remindScheduleMenu")?.classList.add("hidden");
       document.getElementById("updateModal").classList.add("hidden");
     });
   }
+
+  // Toggle Reminder Schedule Menu
+  const btnRemindSchedule = document.getElementById("btnRemindSchedule");
+  const remindScheduleMenu = document.getElementById("remindScheduleMenu");
+  if (btnRemindSchedule && remindScheduleMenu) {
+    btnRemindSchedule.addEventListener("click", (e) => {
+      e.stopPropagation();
+      triggerHaptic();
+      remindScheduleMenu.classList.toggle("hidden");
+    });
+  }
+
+  // Handle reminder schedule options: 1 Hari, 3 Hari, 1 Minggu
+  document.querySelectorAll(".remind-opt-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      triggerHaptic();
+      const days = parseInt(btn.getAttribute("data-days")) || 1;
+      const until = Date.now() + (days * 24 * 60 * 60 * 1000);
+      const versionStr = String(latestUpdateInfo?.versionName || latestUpdateInfo?.versionCode || "latest");
+
+      localStorage.setItem("nimiyo_update_snooze_until", String(until));
+      localStorage.setItem("nimiyo_update_snooze_version", versionStr);
+      localStorage.removeItem("nimiyo_update_snooze_expired");
+
+      let timeLabel = `${days} Hari`;
+      if (days === 1) timeLabel = getTranslation("remind1Day", "1 Hari");
+      else if (days === 3) timeLabel = getTranslation("remind3Days", "3 Hari");
+      else if (days === 7) timeLabel = getTranslation("remind1Week", "1 Minggu");
+
+      const msg = getTranslation("toastRemindScheduled", { time: timeLabel });
+      showToast(msg, "info");
+
+      if (remindScheduleMenu) remindScheduleMenu.classList.add("hidden");
+      document.getElementById("updateModal")?.classList.add("hidden");
+    });
+  });
 
   // Update Now / Update & Install button
   const btnStartUpdate = document.getElementById("btnStartUpdate");
@@ -5125,6 +5328,7 @@ function detectMediaCategory(dlItem, mediaResult, contentType = "") {
     rawUrl.endsWith(".m4a") ||
     rawUrl.endsWith(".wav") ||
     rawUrl.endsWith(".flac") ||
+    rawUrl.includes("spotisaver_resolve:") ||
     rawUrl.includes("spotidown_resolve:") ||
     rawUrl.includes("soundloaders_resolve:") ||
     rawUrl.includes("ytmp3gg_resolve:") ||
@@ -5387,6 +5591,122 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
   // ==========================================
   // STAGE 1: NETWORK DOWNLOAD / RESOLVE
   // ==========================================
+
+  // 1A-0. Spotify Spotisaver Lazy Resolving
+  if (downloadUrl.startsWith("spotisaver_resolve:")) {
+    console.log("[SPOTIFY RESOLVE] Resolving Spotisaver token for track:", itemTitle);
+    const parts = downloadUrl.replace("spotisaver_resolve:", "").split("|||");
+    const trackId = parts[0];
+    const trackB64 = parts[1];
+    const cookie = decodeURIComponent(parts[2] || "");
+    const userIp = decodeURIComponent(parts[3] || "");
+    const sigConfigB64 = parts[4];
+
+    try {
+      let trackObj = null;
+      let sigConfig = null;
+      try {
+        trackObj = JSON.parse(decodeURIComponent(escape(atob(trackB64))));
+      } catch (_) {}
+      try {
+        sigConfig = JSON.parse(decodeURIComponent(escape(atob(sigConfigB64))));
+      } catch (_) {}
+
+      if (trackObj && sigConfig) {
+        const wire = sigConfig.wire || {};
+        const dlCtx = {
+          lang: "en",
+          id: String(trackObj.id || trackId).trim(),
+          name: String(trackObj.name || "").trim(),
+          duration_ms: String(Math.trunc(trackObj.duration_ms || 0)),
+        };
+        const b64Dl = btoa(unescape(encodeURIComponent(JSON.stringify(dlCtx))))
+          .replace(/\+/g, "-")
+          .replace(/\//g, "_")
+          .replace(/=+$/g, "");
+
+        const dlSigParams = new URLSearchParams();
+        dlSigParams.set(wire.token_param, sigConfig.requestToken);
+        dlSigParams.set(wire.action_param, wire.actions["download_track"]);
+        dlSigParams.set(wire.ctx_param, b64Dl);
+
+        const BASE = "https://spotisaver.net";
+        const sigUrl = BASE + sigConfig.endpoint + "?" + dlSigParams.toString();
+
+        let sigRes = null;
+        if (window.scrapr?.scraperFetch) {
+          sigRes = await window.scrapr.scraperFetch(
+            {
+              url: sigUrl,
+              headers: {
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+                Accept: "application/json",
+                Referer: BASE + "/en1",
+                Cookie: cookie,
+              },
+              rawResponse: true,
+            },
+            "Spotisaver Signature DL",
+          );
+        }
+
+        let rSigData = sigRes?.data || sigRes;
+        if (typeof rSigData === "string") {
+          try {
+            rSigData = JSON.parse(rSigData);
+          } catch (_) {}
+        }
+
+        if (rSigData && rSigData.token) {
+          const dlHeaders = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "Content-Type": "application/json",
+            Referer: BASE + "/en1",
+            Cookie: cookie,
+          };
+          dlHeaders[wire.sig_header] = rSigData.token;
+          dlHeaders[wire.exp_header] = String(rSigData.exp);
+
+          const dlPostData = {
+            track: trackObj,
+            download_dir: "downloads",
+            filename_tag: "SPOTISAVER",
+            user_ip: userIp,
+            is_premium: false,
+            lang: "en",
+          };
+
+          const postRes = await window.scrapr.scraperFetch(
+            {
+              url: BASE + "/api/download_track.php",
+              method: "POST",
+              headers: dlHeaders,
+              data: dlPostData,
+              rawResponse: true,
+            },
+            "Spotisaver Download Track",
+          );
+
+          if (postRes?.data) {
+            let resText = typeof postRes.data === "string" ? postRes.data : JSON.stringify(postRes.data);
+            if (resText.startsWith("{") && resText.includes('"error"')) {
+              try {
+                const errObj = JSON.parse(resText);
+                if (errObj.error) throw new Error(errObj.error);
+              } catch (e) {
+                if (e.message !== "Unexpected end of JSON input") throw e;
+              }
+            }
+          }
+        }
+      }
+
+      downloadUrl = `https://spotisaver.net/api/download_track.php?id=${encodeURIComponent(trackId)}`;
+    } catch (e) {
+      console.error("[SPOTIFY RESOLVE] Error resolving Spotisaver token:", e);
+      throw new Error(`[NETWORK DOWNLOAD FAILED] Spotisaver resolve failed: ${e.message}`);
+    }
+  }
 
   // 1A. Spotify SpotiDown Lazy Resolving
   if (downloadUrl.startsWith("spotidown_resolve:")) {
@@ -7072,6 +7392,17 @@ async function checkForAppUpdates(isManual = false) {
     latestUpdateInfo = manifestData;
 
     if (manifestData.versionCode > APP_VERSION_CODE) {
+      // Check if update is currently snoozed (only bypass snooze on manual check)
+      const snoozeVersion = localStorage.getItem("nimiyo_update_snooze_version");
+      const snoozeUntil = Number(localStorage.getItem("nimiyo_update_snooze_until")) || 0;
+      const currentVersionStr = String(manifestData.versionName || manifestData.versionCode);
+      const isSameVersion = (snoozeVersion === currentVersionStr);
+
+      if (!isManual && isSameVersion && snoozeUntil > 0 && Date.now() < snoozeUntil) {
+        console.log(`[Update] Update v${currentVersionStr} is snoozed until ${new Date(snoozeUntil).toLocaleString()}`);
+        return;
+      }
+
       // New update available! Show update dialog modal
       showUpdateModal(manifestData);
     } else {
@@ -7095,6 +7426,8 @@ function showUpdateModal(data) {
   const progressBox = document.getElementById("updateDownloadProgressBox");
   const actionRow = document.getElementById("updateActionRow");
   const startBtn = document.getElementById("btnStartUpdate");
+  const clockBtn = document.getElementById("btnRemindSchedule");
+  const scheduleMenu = document.getElementById("remindScheduleMenu");
 
   if (!modal) return;
 
@@ -7108,6 +7441,30 @@ function showUpdateModal(data) {
       li.innerText = item;
       list.appendChild(li);
     });
+  }
+
+  // Handle Snooze expiration logic:
+  // If user previously selected a snooze duration (1d, 3d, 1w) and that duration has expired,
+  // hide the clock button so user cannot snooze again.
+  const snoozeVersion = localStorage.getItem("nimiyo_update_snooze_version");
+  const snoozeUntil = Number(localStorage.getItem("nimiyo_update_snooze_until")) || 0;
+  const currentVersionStr = String(data.versionName || data.versionCode);
+  const isSameVersion = (snoozeVersion === currentVersionStr);
+
+  let isSnoozeExpired = localStorage.getItem("nimiyo_update_snooze_expired") === "true";
+  if (isSameVersion && snoozeUntil > 0 && Date.now() >= snoozeUntil) {
+    isSnoozeExpired = true;
+    localStorage.setItem("nimiyo_update_snooze_expired", "true");
+  }
+
+  if (scheduleMenu) scheduleMenu.classList.add("hidden");
+
+  if (clockBtn) {
+    if (isSnoozeExpired && isSameVersion) {
+      clockBtn.classList.add("hidden");
+    } else {
+      clockBtn.classList.remove("hidden");
+    }
   }
 
   if (progressBox) progressBox.classList.add("hidden");

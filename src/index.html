@@ -293,7 +293,7 @@
               <img src="icon_untukdi_aboutthisapp.webp" alt="Nimiyo App Logo" class="about-logo">
               <div class="about-title-group">
                 <h4>NIMIYO Downloader</h4>
-                <div class="about-badge-pill" data-i18n="aboutVersion">v2.2.0 (Lite)</div>
+                <div class="about-badge-pill" data-i18n="aboutVersion">v2.2.1 (Lite)</div>
               </div>
             </div>
 
@@ -966,7 +966,7 @@
       </div>
       <div class="modal-body update-modal-body">
         <div class="update-banner">
-          <div class="update-version-badge" id="updateVersionBadge">v2.2.0</div>
+          <div class="update-version-badge" id="updateVersionBadge">v2.2.1</div>
           <div class="update-app-title">NIMIYO Downloader (Lite)</div>
         </div>
         <div class="update-changelog-box">
@@ -987,7 +987,30 @@
         <div class="action-row update-action-row" id="updateActionRow">
           <button id="btnStartUpdate" class="btn primary-btn" data-i18n="btnUpdateAndInstall">Update dan Install</button>
           <button id="btnManualDownloadUpdate" class="btn outline-btn" data-i18n="btnManualDownload">Download Manual Install</button>
-          <button id="btnLaterUpdate" class="btn outline-btn" data-i18n="btnRemindLater">Nanti ingatkan kembali</button>
+          <div class="update-remind-group" id="updateRemindGroup">
+            <button id="btnLaterUpdate" class="btn outline-btn btn-remind-later" data-i18n="btnRemindLater">Nanti ingatkan kembali</button>
+            <button id="btnRemindSchedule" class="btn outline-btn btn-remind-clock" type="button" aria-label="Jadwalkan Pengingat" title="Jadwalkan Pengingat">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </button>
+          </div>
+          <!-- Menu Pilihan Waktu Reminder (1 Hari, 3 Hari, 1 Minggu) -->
+          <div id="remindScheduleMenu" class="remind-schedule-menu hidden">
+            <div class="remind-schedule-title" data-i18n="remindScheduleTitle">Ingatkan Pembaruan Dalam:</div>
+            <div class="remind-schedule-options">
+              <button type="button" class="btn outline-btn remind-opt-btn" data-days="1">
+                <span data-i18n="remind1Day">1 Hari</span>
+              </button>
+              <button type="button" class="btn outline-btn remind-opt-btn" data-days="3">
+                <span data-i18n="remind3Days">3 Hari</span>
+              </button>
+              <button type="button" class="btn outline-btn remind-opt-btn" data-days="7">
+                <span data-i18n="remind1Week">1 Minggu</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1134,7 +1157,7 @@
                 </svg>
               </button>
 
-              <button id="openEditLyricsBtn" class="lyrics-action-icon-btn lyrics-edit-toggle-btn" title="Edit Lirik" aria-label="Edit Lirik">
+              <button id="openEditLyricsBtn" class="lyrics-action-icon-btn lyrics-edit-toggle-btn" data-i18n-title="editLyricsTitle" title="Edit Lirik" aria-label="Edit Lirik">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M4 6h8"></path>
                   <path d="M4 12h6"></path>
@@ -1239,7 +1262,7 @@
           <span data-i18n="musicSleepTimerBtn">TIMER</span>
           <span id="fullPlayerSleepTimerBadge" class="action-mini-badge hidden"></span>
         </button>
-        <button id="fullPlayerSpeedBtn" class="dock-action-btn" title="MixTools">
+        <button id="fullPlayerSpeedBtn" class="dock-action-btn" data-i18n-title="mixtoolsTitle" title="MixTools">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="4" y1="21" x2="4" y2="14"></line>
             <line x1="4" y1="10" x2="4" y2="3"></line>
@@ -1328,11 +1351,11 @@
         <div class="modal-header-icon-title">
           <span class="modal-icon">📝</span>
           <div>
-            <h3 class="modal-title">Edit Lirik</h3>
+            <h3 class="modal-title" data-i18n="editLyricsTitle">Edit Lirik</h3>
             <span id="editLyricsTrackTitle" class="modal-subtitle">Track Title</span>
           </div>
         </div>
-        <button id="closeEditLyricsModalBtn" class="icon-btn" aria-label="Tutup">
+        <button id="closeEditLyricsModalBtn" class="icon-btn" data-i18n-title="btnClose" aria-label="Tutup">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1342,33 +1365,33 @@
       <div class="modal-body edit-lyrics-modal-body">
         <div class="edit-lyrics-help-banner">
           <span class="help-icon">💡</span>
-          <span class="help-text">Format: <code>[00:00.00] Lirik di sini</code> (menit:detik.milidetik)</span>
+          <span class="help-text" data-i18n="editLyricsFormatHelp">Format: <code>[00:00.00] Lirik di sini</code> (menit:detik.milidetik)</span>
         </div>
-        <textarea id="editLyricsTextarea" class="edit-lyrics-textarea" placeholder="[00:00.00] Baris lirik pertama...&#10;[00:15.30] Baris lirik kedua..." spellcheck="false"></textarea>
+        <textarea id="editLyricsTextarea" class="edit-lyrics-textarea" data-i18n-placeholder="editLyricsPlaceholder" placeholder="[00:00.00] Baris lirik pertama...&#10;[00:15.30] Baris lirik kedua..." spellcheck="false"></textarea>
 
         <!-- Baris Tombol Aksi: REFRESH | IMPORT -->
         <div class="edit-lyrics-top-actions">
-          <button id="refreshLyricsBtn" type="button" class="btn outline-btn edit-top-action-btn" title="Reset & cari lirik baru">
+          <button id="refreshLyricsBtn" type="button" class="btn outline-btn edit-top-action-btn" data-i18n-title="editLyricsRefreshTitle" title="Reset & cari lirik baru">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path>
             </svg>
-            <span>REFRESH</span>
+            <span data-i18n="editLyricsRefresh">REFRESH</span>
           </button>
-          <button id="importLyricsBtn" type="button" class="btn outline-btn edit-top-action-btn" title="Import file lirik .LRC lokal">
+          <button id="importLyricsBtn" type="button" class="btn outline-btn edit-top-action-btn" data-i18n-title="editLyricsImportTitle" title="Import file lirik .LRC lokal">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            <span>IMPORT</span>
+            <span data-i18n="editLyricsImport">IMPORT</span>
           </button>
           <input type="file" id="importLrcFileInput" accept=".lrc,.txt" style="display: none;">
         </div>
       </div>
       <div class="modal-footer edit-lyrics-modal-footer-row">
-        <button id="cancelEditLyricsBtn" class="btn outline-btn edit-footer-btn">BATAL</button>
-        <button id="saveEditLyricsBtn" class="btn primary-btn edit-footer-btn">SIMPAN</button>
-        <button id="downloadLyricsFileBtn" class="btn outline-btn edit-footer-btn download-lrc-icon-btn" title="Download file .LRC">
+        <button id="cancelEditLyricsBtn" class="btn outline-btn edit-footer-btn" data-i18n="btnCancel">BATAL</button>
+        <button id="saveEditLyricsBtn" class="btn primary-btn edit-footer-btn" data-i18n="btnSave">SIMPAN</button>
+        <button id="downloadLyricsFileBtn" class="btn outline-btn edit-footer-btn download-lrc-icon-btn" data-i18n-title="editLyricsDownloadLrcTitle" title="Download file .LRC">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7 10 12 15 17 10"></polyline>
@@ -1387,11 +1410,11 @@
         <div class="modal-header-icon-title">
           <span class="modal-icon">🔄</span>
           <div>
-            <h3 class="modal-title">Pilihan Reset Lirik</h3>
-            <span id="resetLyricsTrackTitle" class="modal-subtitle">Pilih sumber pencarian lirik</span>
+            <h3 class="modal-title" data-i18n="resetLyricsTitle">Pilihan Reset Lirik</h3>
+            <span id="resetLyricsTrackTitle" class="modal-subtitle" data-i18n="resetLyricsSubtitle">Pilih sumber pencarian lirik</span>
           </div>
         </div>
-        <button id="closeResetLyricsModalBtn" class="icon-btn" aria-label="Tutup">
+        <button id="closeResetLyricsModalBtn" class="icon-btn" data-i18n-title="btnClose" aria-label="Tutup">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1402,24 +1425,24 @@
         <button id="resetLyricsDefaultBtn" type="button" class="reset-lyric-option-btn">
           <div class="option-icon-box">🌐</div>
           <div class="option-text-box">
-            <div class="option-title">Cari Otomatis (Default / LRCLIB)</div>
-            <div class="option-desc">Hapus lirik lokal & ambil ulang lirik asli sinkron dari database online</div>
+            <div class="option-title" data-i18n="resetLyricsOptDefaultTitle">Cari Otomatis (Default / LRCLIB)</div>
+            <div class="option-desc" data-i18n="resetLyricsOptDefaultDesc">Hapus lirik lokal & ambil ulang lirik asli sinkron dari database online</div>
           </div>
         </button>
 
         <button id="resetLyricsLyricsifyBtn" type="button" class="reset-lyric-option-btn">
           <div class="option-icon-box">🔍</div>
           <div class="option-text-box">
-            <div class="option-title">Cari di Lyricsify.com</div>
-            <div class="option-desc">Buka pencarian lagu ini di Lyricsify via browser untuk salin lirik .LRC</div>
+            <div class="option-title" data-i18n="resetLyricsOptLyricsifyTitle">Cari di Lyricsify.com</div>
+            <div class="option-desc" data-i18n="resetLyricsOptLyricsifyDesc">Buka pencarian lagu ini di Lyricsify via browser untuk salin lirik .LRC</div>
           </div>
         </button>
 
         <button id="resetLyricsImportBtn" type="button" class="reset-lyric-option-btn">
           <div class="option-icon-box">📂</div>
           <div class="option-text-box">
-            <div class="option-title">Import File .LRC Lokal</div>
-            <div class="option-desc">Pilih file lirik .lrc atau .txt yang tersimpan di HP Anda</div>
+            <div class="option-title" data-i18n="resetLyricsOptImportTitle">Import File .LRC Lokal</div>
+            <div class="option-desc" data-i18n="resetLyricsOptImportDesc">Pilih file lirik .lrc atau .txt yang tersimpan di HP Anda</div>
           </div>
         </button>
       </div>
@@ -1467,7 +1490,7 @@
           <h3 data-i18n="mixtoolsTitle">MixTools</h3>
         </div>
         <div class="modal-header-actions-right">
-          <button id="resetAllMixToolsBtn" class="icon-btn" title="Reset Semua" aria-label="Reset All">
+          <button id="resetAllMixToolsBtn" class="icon-btn" data-i18n-title="mixtoolsResetAll" title="Reset Semua" aria-label="Reset All">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
               <path d="M3 3v5h5"></path>

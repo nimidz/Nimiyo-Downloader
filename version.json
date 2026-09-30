@@ -1,15 +1,22 @@
 {
-  "versionCode": 5,
-  "versionName": "2.2.0",
+  "versionCode": 6,
+  "versionName": "2.2.1",
   "minRequiredVersion": "2.0.0",
-  "releaseDate": "2026-09-28",
-  "downloadUrl": "https://github.com/nimidz/Nimiyo-Downloader/releases/download/v2.2.0/Nimiyo.v2.2.0.apk",
+  "releaseDate": "2026-09-30",
+  "downloadUrl": "https://github.com/nimidz/Nimiyo-Downloader/releases/download/v2.2.1/Nimiyo.v2.2.1.apk",
   "changelog": [
-    "🎛️ MixTools: Atur tempo BPM musik (Slowed & SpeedUp) & efek Reverb FX 3D",
-    "📝 Edit Lirik Baru: Edit lirik, Import file .lrc lokal, Simpan & Refresh lirik",
-    "📂 Penyimpanan Lirik Lokal otomatis di folder Nimiyo/LyricsYO",
-    "🎨 Sinkronisasi Accent Color dinamis menyeluruh di seluruh UI",
-    "🔔 Peningkatan notifikasi Toast lebih informatif & deteksi Spotify Playlist",
-    "🌐 Deteksi koneksi offline & dukungan multi-bahasa lebih akurat"
+    "Fixed TikTok photo downloads from QuickSave getting stuck",
+    "Fixed multiple photo downloads generating separate notifications by combining them into a single unified progress notification",
+    "Fixed QuickSave Accent Color synchronization",
+    "Fixed QuickSave downloads not appearing in the main app's Floating Download Balloon",
+    "Fixed QuickSave opening or bringing the main application window to the foreground when the app is already present in Recent Apps",
+    "Fixed text and background contrast blending on .LRC export and outline buttons in Dark Mode",
+    "Fixed various download and notification issues related to server switching",
+    "Added Snooze options to the OTA Update notification with 1 Day, 3 Days, and 1 Week options",
+    "Improved the Update Available window with a Remind Me Later feature",
+    "Updated Spotify scraper servers with Spotisaver as primary server & fallback handling",
+    "Added SSSTik as an additional TikTok server with support for no-watermark videos, MP3 audio, and photo slides",
+    "Improved Twitter/X download performance by prioritizing the direct FxTwitter server",
+    "Added multi-language support (EN, ID, ZH, JA) to MixTools, Edit Lyrics, and Reset Lyrics windows"
   ]
 }

@@ -1355,9 +1355,10 @@ class NimiyoMusicPlayer {
       this.elements.slowedBpmSlider.value = clamped;
     }
 
-    let tag = "Normal";
-    if (clamped < 100) tag = "Slowed";
-    else if (clamped > 100) tag = "SpeedUp";
+    let tagKey = "mixtoolsGuideNormal";
+    if (clamped < 100) tagKey = "mixtoolsGuideSlowed";
+    else if (clamped > 100) tagKey = "mixtoolsGuideSpeedUp";
+    const tag = window.getTranslation ? window.getTranslation(tagKey) : (clamped === 100 ? "Normal" : (clamped < 100 ? "Slowed" : "SpeedUp"));
 
     if (this.elements.slowedBpmValueLabel) {
       this.elements.slowedBpmValueLabel.innerText = `${clamped}% • ${tag}`;
@@ -1387,9 +1388,6 @@ class NimiyoMusicPlayer {
       }
       this.reverbEngine.setEnabled(true);
       this.setReverbXY(this.reverbDryWet, this.reverbDepth);
-      if (window.showToast) {
-        window.showToast("Reverb FX Aktif", "info");
-      }
     } else {
       if (this.reverbEngine) {
         this.reverbEngine.setEnabled(false);
@@ -1408,7 +1406,8 @@ class NimiyoMusicPlayer {
     }
 
     if (this.elements.reverbStatusLabel) {
-      this.elements.reverbStatusLabel.innerText = `Dry/Wet: ${Math.round(this.reverbDryWet * 100)}% • Decay: ${Math.round(this.reverbDepth * 100)}%`;
+      const decayLabel = window.getTranslation ? window.getTranslation("mixtoolsStatusDecay") : "Decay";
+      this.elements.reverbStatusLabel.innerText = `Dry/Wet: ${Math.round(this.reverbDryWet * 100)}% • ${decayLabel}: ${Math.round(this.reverbDepth * 100)}%`;
     }
 
     if (this.reverbEngine) {
@@ -1429,7 +1428,8 @@ class NimiyoMusicPlayer {
     }
     this.savePreferences();
     if (window.showToast) {
-      window.showToast("MixTools di-reset ke default", "info");
+      const msg = window.getTranslation ? window.getTranslation("mixtoolsResetSuccess") : "MixTools di-reset ke default";
+      window.showToast(msg, "info");
     }
   }
 
@@ -2094,7 +2094,8 @@ class NimiyoMusicPlayer {
 
   openEditLyricsModal() {
     if (!this.currentTrack) {
-      if (window.showToast) window.showToast("Pilih lagu terlebih dahulu", "info");
+      const msg = window.getTranslation ? window.getTranslation("toastSelectSongFirst") : "Pilih lagu terlebih dahulu";
+      if (window.showToast) window.showToast(msg, "info");
       return;
     }
     if (this.elements.editLyricsTrackTitle) {
@@ -2129,7 +2130,8 @@ class NimiyoMusicPlayer {
 
   openResetLyricsModal() {
     if (!this.currentTrack) {
-      if (window.showToast) window.showToast("Pilih lagu terlebih dahulu", "info");
+      const msg = window.getTranslation ? window.getTranslation("toastSelectSongFirst") : "Pilih lagu terlebih dahulu";
+      if (window.showToast) window.showToast(msg, "info");
       return;
     }
     if (this.elements.resetLyricsTrackTitle) {
@@ -2164,7 +2166,8 @@ class NimiyoMusicPlayer {
     this.updateLyricsBadgesAndRender();
 
     if (window.showToast) {
-      window.showToast("Mencari lirik otomatis (LRCLIB)...", "info");
+      const msg = window.getTranslation ? window.getTranslation("toastLyricsSearchingOnline") : "Mencari lirik otomatis (LRCLIB)...";
+      window.showToast(msg, "info");
     }
 
     try {
@@ -2182,18 +2185,21 @@ class NimiyoMusicPlayer {
         this.syncIntegratedLyrics(this.audio.currentTime || 0, true);
         this.closeResetLyricsModal();
         if (window.showToast) {
-          window.showToast("Lirik berhasil di-reset dari database online!", "success");
+          const msg = window.getTranslation ? window.getTranslation("toastLyricsResetSuccess") : "Lirik berhasil di-reset dari database online!";
+          window.showToast(msg, "success");
         }
       } else {
         this.closeResetLyricsModal();
         if (window.showToast) {
-          window.showToast("Lirik tidak ditemukan di database online", "info");
+          const msg = window.getTranslation ? window.getTranslation("toastLyricsNotFoundOnline") : "Lirik tidak ditemukan di database online";
+          window.showToast(msg, "info");
         }
       }
     } catch (err) {
       this.closeResetLyricsModal();
       if (window.showToast) {
-        window.showToast("Gagal mengambil lirik online", "error");
+        const msg = window.getTranslation ? window.getTranslation("toastLyricsFetchFailed") : "Gagal mengambil lirik online";
+        window.showToast(msg, "error");
       }
     }
   }
@@ -2223,7 +2229,8 @@ class NimiyoMusicPlayer {
     window.open(searchUrl, "_blank");
 
     if (window.showToast) {
-      window.showToast("Lirik di-reset. Salin lirik .LRC dari Lyricsify lalu tempel di sini", "info");
+      const msg = window.getTranslation ? window.getTranslation("toastLyricsLyricsifyHint") : "Lirik di-reset. Salin lirik .LRC dari Lyricsify lalu tempel di sini";
+      window.showToast(msg, "info");
     }
   }
 
@@ -2240,13 +2247,15 @@ class NimiyoMusicPlayer {
         }
         this.closeResetLyricsModal();
         if (window.showToast) {
-          window.showToast(`Lirik ${file.name} berhasil di-import`, "success");
+          const tpl = window.getTranslation ? window.getTranslation("toastLyricsImportSuccess") : "Lirik {file} berhasil di-import";
+          window.showToast(tpl.replace("{file}", file.name), "success");
         }
       }
     };
     reader.onerror = () => {
       if (window.showToast) {
-        window.showToast("Gagal membaca file lirik", "error");
+        const msg = window.getTranslation ? window.getTranslation("toastLyricsImportFailed") : "Gagal membaca file lirik";
+        window.showToast(msg, "error");
       }
     };
     reader.readAsText(file, "UTF-8");
@@ -2259,7 +2268,8 @@ class NimiyoMusicPlayer {
     const content = textarea ? textarea.value.trim() : "";
 
     if (!content) {
-      if (window.showToast) window.showToast("Lirik tidak boleh kosong", "warning");
+      const msg = window.getTranslation ? window.getTranslation("toastLyricsEmptyWarning") : "Lirik tidak boleh kosong";
+      if (window.showToast) window.showToast(msg, "warning");
       return;
     }
 
@@ -2276,7 +2286,8 @@ class NimiyoMusicPlayer {
     this.closeEditLyricsModal();
 
     if (window.showToast) {
-      window.showToast("Edit Lirik berhasil, dan disimpan Lokal", "success");
+      const msg = window.getTranslation ? window.getTranslation("toastLyricsSavedSuccess") : "Edit Lirik berhasil, dan disimpan Lokal";
+      window.showToast(msg, "success");
     }
   }
 
@@ -2286,7 +2297,8 @@ class NimiyoMusicPlayer {
     const content = (textarea && textarea.value.trim()) ? textarea.value.trim() : (this.currentLyrics || "");
 
     if (!content) {
-      if (window.showToast) window.showToast("Belum ada lirik untuk di-download", "warning");
+      const msg = window.getTranslation ? window.getTranslation("toastLyricsNoDownload") : "Belum ada lirik untuk di-download";
+      if (window.showToast) window.showToast(msg, "warning");
       return;
     }
 
@@ -2306,7 +2318,8 @@ class NimiyoMusicPlayer {
         });
         if (res && res.success) {
           if (window.showToast) {
-            window.showToast(`Lirik tersimpan: ${res.fileName || fileName} di Nimiyo/LyricsYo`, "success");
+            const tpl = window.getTranslation ? window.getTranslation("toastLyricsSavedTo") : "Lirik tersimpan: {file} di Nimiyo/LyricsYo";
+            window.showToast(tpl.replace("{file}", res.fileName || fileName), "success");
           }
           return;
         }
@@ -2327,11 +2340,13 @@ class NimiyoMusicPlayer {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       if (window.showToast) {
-        window.showToast(`Lirik ${fileName} berhasil diunduh`, "success");
+        const tpl = window.getTranslation ? window.getTranslation("toastLyricsDownloaded") : "Lirik {file} berhasil diunduh";
+        window.showToast(tpl.replace("{file}", fileName), "success");
       }
     } catch (e) {
       if (window.showToast) {
-        window.showToast("Gagal mendownload lirik", "error");
+        const msg = window.getTranslation ? window.getTranslation("toastLyricsDownloadFailed") : "Gagal mendownload lirik";
+        window.showToast(msg, "error");
       }
     }
   }
@@ -3576,9 +3591,10 @@ class NimiyoMusicPlayer {
         this.elements.slowedBpmSlider.style.setProperty("--progress", `${pct.toFixed(1)}%`);
       }
       if (this.elements.slowedBpmValueLabel) {
-        let tag = "Normal";
-        if (this.bpmRate < 100) tag = "Slowed";
-        else if (this.bpmRate > 100) tag = "SpeedUp";
+        let tagKey = "mixtoolsGuideNormal";
+        if (this.bpmRate < 100) tagKey = "mixtoolsGuideSlowed";
+        else if (this.bpmRate > 100) tagKey = "mixtoolsGuideSpeedUp";
+        const tag = window.getTranslation ? window.getTranslation(tagKey) : (this.bpmRate === 100 ? "Normal" : (this.bpmRate < 100 ? "Slowed" : "SpeedUp"));
         this.elements.slowedBpmValueLabel.innerText = `${this.bpmRate}% • ${tag}`;
       }
       if (this.elements.reverbToggle) {
@@ -3592,7 +3608,8 @@ class NimiyoMusicPlayer {
         this.elements.reverbPadPuck.style.top = `${((1 - this.reverbDepth) * 100).toFixed(1)}%`;
       }
       if (this.elements.reverbStatusLabel) {
-        this.elements.reverbStatusLabel.innerText = `Dry/Wet: ${Math.round(this.reverbDryWet * 100)}% • Decay: ${Math.round(this.reverbDepth * 100)}%`;
+        const decayLabel = window.getTranslation ? window.getTranslation("mixtoolsStatusDecay") : "Decay";
+        this.elements.reverbStatusLabel.innerText = `Dry/Wet: ${Math.round(this.reverbDryWet * 100)}% • ${decayLabel}: ${Math.round(this.reverbDepth * 100)}%`;
       }
       this.elements.speedModal.classList.remove("hidden");
     }

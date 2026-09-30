@@ -196,11 +196,11 @@ const platformMapping = {
 };
 
 const fallbackChains = {
-  tiktok: ['snaptik', 'tiktokio'],
-  instagram: ['snapsave', 'indown'],
+  tiktok: ['snaptik', 'tiktokio', 'ssstik', 'direct'],
+  instagram: ['snapsave', 'indown', 'direct'],
   facebook: ['snapsave', 'direct'],
-  spotify: ['spotidown', 'soundloaders'],
-  twitter: ['tvd', 'tweeload'],
+  spotify: ['spotisaver', 'spotidown', 'soundloaders', 'direct'],
+  twitter: ['direct', 'tweeload', 'tvd'],
   youtube: ['ytmp3', 'direct'],
   applemusic: ['aplmate', 'direct'],
   pinterest: ['pindown', 'direct'],
@@ -223,6 +223,50 @@ function t(key, params = {}) {
   return str;
 }
 
+let activeDownloadProgressCallback = null;
+
+window.__onNativeDownloadProgress = function(reqId, percent) {
+  if (typeof activeDownloadProgressCallback === "function") {
+    try {
+      activeDownloadProgressCallback(reqId, Number(percent) || 0);
+    } catch (_) {}
+  }
+};
+
+function updateDownloadProgressCard(visible, title, percent) {
+  const card = document.getElementById("downloadProgressCard");
+  const titleEl = document.getElementById("progressTitle");
+  const percentEl = document.getElementById("progressPercent");
+  const fillEl = document.getElementById("progressBarFill");
+  if (!card) return;
+
+  if (!visible) {
+    card.classList.add("hidden");
+    return;
+  }
+
+  card.classList.remove("hidden");
+  if (titleEl && title) titleEl.innerText = title;
+  const p = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)));
+  if (percentEl) percentEl.innerText = p + "%";
+  if (fillEl) fillEl.style.width = p + "%";
+}
+
+function applyAccentColor(accentColor) {
+  if (!accentColor || typeof accentColor !== "string") return;
+  const clean = accentColor.trim();
+  if (!clean) return;
+
+  document.documentElement.style.setProperty('--accent', clean);
+  document.documentElement.style.setProperty('--accent-color', clean);
+  document.documentElement.style.setProperty('--primary-accent', clean);
+  if (document.body) {
+    document.body.style.setProperty('--accent', clean);
+    document.body.style.setProperty('--accent-color', clean);
+    document.body.style.setProperty('--primary-accent', clean);
+  }
+}
+
 function initLanguageAndTheme() {
   let parsed = {};
 
@@ -236,22 +280,29 @@ function initLanguageAndTheme() {
     }
   } catch (_) {}
 
+  const urlParams = new URLSearchParams(window.location.search);
   if (!parsed.uiTheme) {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("theme")) {
-      parsed.uiTheme = params.get("theme");
+    if (urlParams.get("theme")) {
+      parsed.uiTheme = urlParams.get("theme");
     }
-    if (params.get("darkMode") !== null) {
-      parsed.darkMode = (params.get("darkMode") === "1" || params.get("darkMode") === "true");
+    if (urlParams.get("darkMode") !== null) {
+      parsed.darkMode = (urlParams.get("darkMode") === "1" || urlParams.get("darkMode") === "true");
     }
   }
 
-  if (!parsed.uiTheme) {
+  if (!parsed.accentColor && urlParams.get("accentColor")) {
+    parsed.accentColor = urlParams.get("accentColor");
+  }
+
+  if (!parsed.uiTheme || !parsed.accentColor) {
     const savedSettings = localStorage.getItem("nimiyo_settings");
     if (savedSettings) {
       try {
         parsed = { ...parsed, ...JSON.parse(savedSettings) };
       } catch (_) { }
+    }
+    if (!parsed.accentColor) {
+      parsed.accentColor = localStorage.getItem("nimiyo_accent_color") || "";
     }
   }
 
@@ -267,6 +318,10 @@ function initLanguageAndTheme() {
   document.body.classList.add('theme-' + theme);
   if (isDark) document.body.classList.add('dark-mode');
   else document.body.classList.remove('dark-mode');
+
+  if (parsed.accentColor) {
+    applyAccentColor(parsed.accentColor);
+  }
 
   if (parsed.language && shareTranslations[parsed.language]) {
     currentLang = parsed.language;
@@ -317,6 +372,10 @@ window.applyNimiyoSettings = function(newSettings) {
   document.body.classList.add('theme-' + theme);
   if (isDark) document.body.classList.add('dark-mode');
   else document.body.classList.remove('dark-mode');
+
+  if (newSettings.accentColor) {
+    applyAccentColor(newSettings.accentColor);
+  }
 
   if (newSettings.language && shareTranslations[newSettings.language]) {
     currentLang = newSettings.language;
@@ -376,6 +435,7 @@ function detectMediaCategory(dlItem, mediaResult) {
     rawUrl.endsWith(".m4a") ||
     rawUrl.endsWith(".wav") ||
     rawUrl.endsWith(".flac") ||
+    rawUrl.includes("spotisaver_resolve:") ||
     rawUrl.includes("spotidown_resolve:") ||
     rawUrl.includes("soundloaders_resolve:") ||
     rawUrl.includes("ytmp3gg_resolve:") ||
@@ -849,6 +909,7 @@ function renderResult(result, platform) {
       groupDiv.style.width = "100%";
 
       const allBtn = document.createElement("button");
+      allBtn.id = "downloadAllBtn";
       allBtn.className = "btn primary-btn";
       allBtn.style.width = "100%";
       allBtn.innerText = t("downloadAll", { count: result.downloads.length });
@@ -882,6 +943,7 @@ function renderResult(result, platform) {
       meta.appendChild(quality);
 
       const btn = document.createElement("button");
+      btn.id = "downloadOptBtn_" + idx;
       btn.className = "btn primary-btn option-btn";
       btn.innerText = t("download");
 
@@ -899,27 +961,160 @@ function renderResult(result, platform) {
 }
 
 // Download execution with Native Stream Downloader
-async function executeSingleDownload(dlItem, result, index = 0) {
+async function executeSingleDownload(dlItem, result, index = 0, isBatch = false, batchIndex = 0, batchTotal = 1) {
   if (!dlItem || !dlItem.url) {
     showToast(t("unsupported"));
     showNativeToast(t("unsupported"));
-    return;
+    return false;
+  }
+
+  const optBtn = document.getElementById("downloadOptBtn_" + index);
+  if (optBtn) {
+    optBtn.innerText = t("downloading");
+    optBtn.disabled = true;
   }
 
   // Show minimize button when download starts
   const minimizeBtn = document.getElementById("minimizeBtn");
   if (minimizeBtn) minimizeBtn.classList.remove("hidden");
 
-  showToast(t("downloading"));
-  notifyNative("Nimiyo Downloader", `${t("downloading")} ${result.title || 'file'}`, 10, 100, false);
+  const mediaCategory = detectMediaCategory(dlItem, result);
+  const targetExtension = determineExtension(mediaCategory, dlItem.url);
+  const sanitizedFilename = buildTargetFilename(dlItem, result, mediaCategory, currentPlatform, targetExtension);
+  const isAudio = mediaCategory === "audio";
+  const mimeType = isAudio ? "audio/mpeg" : (mediaCategory === "image" ? "image/jpeg" : "video/mp4");
+  const displayTitle = dlItem.title || result.title || sanitizedFilename;
+
+  if (!isBatch) {
+    showToast(t("downloading"));
+    updateDownloadProgressCard(true, displayTitle, 10);
+    notifyNative("Nimiyo Downloader", `${t("downloading")} ${displayTitle}`, 10, 100, false);
+
+    activeDownloadProgressCallback = (reqId, pct) => {
+      updateDownloadProgressCard(true, displayTitle, pct);
+      notifyNative("Nimiyo Downloader", `${t("downloading")} ${displayTitle} (${Math.round(pct)}%)`, pct, 100, false);
+    };
+  }
 
   try {
     let downloadUrl = dlItem.url;
-    const mediaCategory = detectMediaCategory(dlItem, result);
-    const targetExtension = determineExtension(mediaCategory, downloadUrl);
-    const sanitizedFilename = buildTargetFilename(dlItem, result, mediaCategory, currentPlatform, targetExtension);
-    const isAudio = mediaCategory === "audio";
-    const mimeType = isAudio ? "audio/mpeg" : (mediaCategory === "image" ? "image/jpeg" : "video/mp4");
+
+    // 1A-0. Spotify Spotisaver Lazy Resolving
+    if (downloadUrl.startsWith("spotisaver_resolve:")) {
+      const parts = downloadUrl.replace("spotisaver_resolve:", "").split("|||");
+      const trackId = parts[0];
+      const trackB64 = parts[1];
+      const cookie = decodeURIComponent(parts[2] || "");
+      const userIp = decodeURIComponent(parts[3] || "");
+      const sigConfigB64 = parts[4];
+
+      try {
+        let trackObj = null;
+        let sigConfig = null;
+        try {
+          trackObj = JSON.parse(decodeURIComponent(escape(atob(trackB64))));
+        } catch (_) {}
+        try {
+          sigConfig = JSON.parse(decodeURIComponent(escape(atob(sigConfigB64))));
+        } catch (_) {}
+
+        if (trackObj && sigConfig) {
+          const wire = sigConfig.wire || {};
+          const dlCtx = {
+            lang: "en",
+            id: String(trackObj.id || trackId).trim(),
+            name: String(trackObj.name || "").trim(),
+            duration_ms: String(Math.trunc(trackObj.duration_ms || 0)),
+          };
+          const b64Dl = btoa(unescape(encodeURIComponent(JSON.stringify(dlCtx))))
+            .replace(/\+/g, "-")
+            .replace(/\//g, "_")
+            .replace(/=+$/g, "");
+
+          const dlSigParams = new URLSearchParams();
+          dlSigParams.set(wire.token_param, sigConfig.requestToken);
+          dlSigParams.set(wire.action_param, wire.actions["download_track"]);
+          dlSigParams.set(wire.ctx_param, b64Dl);
+
+          const BASE = "https://spotisaver.net";
+          const sigUrl = BASE + sigConfig.endpoint + "?" + dlSigParams.toString();
+
+          let sigRes = null;
+          if (window.scrapr?.scraperFetch) {
+            sigRes = await window.scrapr.scraperFetch(
+              {
+                url: sigUrl,
+                headers: {
+                  "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+                  Accept: "application/json",
+                  Referer: BASE + "/en1",
+                  Cookie: cookie,
+                },
+                rawResponse: true,
+              },
+              "Spotisaver Signature DL",
+            );
+          }
+
+          let rSigData = sigRes?.data || sigRes;
+          if (typeof rSigData === "string") {
+            try {
+              rSigData = JSON.parse(rSigData);
+            } catch (_) {}
+          }
+
+          if (rSigData && rSigData.token) {
+            const dlHeaders = {
+              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+              "Content-Type": "application/json",
+              Referer: BASE + "/en1",
+              Cookie: cookie,
+            };
+            dlHeaders[wire.sig_header] = rSigData.token;
+            dlHeaders[wire.exp_header] = String(rSigData.exp);
+
+            const dlPostData = {
+              track: trackObj,
+              download_dir: "downloads",
+              filename_tag: "SPOTISAVER",
+              user_ip: userIp,
+              is_premium: false,
+              lang: "en",
+            };
+
+            if (window.scrapr?.scraperFetch) {
+              const postRes = await window.scrapr.scraperFetch(
+                {
+                  url: BASE + "/api/download_track.php",
+                  method: "POST",
+                  headers: dlHeaders,
+                  data: dlPostData,
+                  rawResponse: true,
+                },
+                "Spotisaver Download Track",
+              );
+
+              if (postRes?.data) {
+                let resText = typeof postRes.data === "string" ? postRes.data : JSON.stringify(postRes.data);
+                if (resText.startsWith("{") && resText.includes('"error"')) {
+                  try {
+                    const errObj = JSON.parse(resText);
+                    if (errObj.error) throw new Error(errObj.error);
+                  } catch (e) {
+                    if (e.message !== "Unexpected end of JSON input") throw e;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        downloadUrl = `https://spotisaver.net/api/download_track.php?id=${encodeURIComponent(trackId)}`;
+      } catch (e) {
+        console.error("[SPOTIFY RESOLVE] Error resolving Spotisaver token:", e);
+        throw new Error(`Spotify resolve failed: ${e.message}`);
+      }
+    }
 
     // 1A. Spotify SpotiDown Lazy Resolving
     if (downloadUrl.startsWith("spotidown_resolve:")) {
@@ -1115,9 +1310,21 @@ async function executeSingleDownload(dlItem, result, index = 0) {
 
       if (res && res.success) {
         saveToHistory(sanitizedFilename, result, dlItem, isAudio ? "audio" : mediaCategory);
-        setTimeout(() => {
-          window.dismissPanel();
-        }, 1200);
+        if (optBtn) {
+          optBtn.innerText = "✓ Selesai";
+          optBtn.disabled = true;
+        }
+
+        if (!isBatch) {
+          updateDownloadProgressCard(true, displayTitle, 100);
+          notifyNative("Nimiyo Downloader", `${sanitizedFilename} selesai diunduh!`, 100, 100, true);
+          showToast(t("saved"));
+          showNativeToast(t("saved"));
+          setTimeout(() => {
+            window.dismissPanel();
+          }, 1200);
+        }
+        return true;
       } else {
         throw new Error(res?.error || "Download stream failed");
       }
@@ -1130,46 +1337,151 @@ async function executeSingleDownload(dlItem, result, index = 0) {
       a.href = URL.createObjectURL(blob);
       a.download = sanitizedFilename;
       a.click();
-      showToast(t("saved"));
-      showNativeToast(t("saved"));
+      if (optBtn) {
+        optBtn.innerText = "✓ Selesai";
+        optBtn.disabled = true;
+      }
       saveToHistory(sanitizedFilename, result, dlItem, isAudio ? "audio" : mediaCategory);
+
+      if (!isBatch) {
+        updateDownloadProgressCard(true, displayTitle, 100);
+        showToast(t("saved"));
+        showNativeToast(t("saved"));
+        setTimeout(() => {
+          window.dismissPanel();
+        }, 1200);
+      }
+      return true;
     }
 
   } catch (err) {
     console.error("Download error:", err);
-    const platform = currentPlatform || (activeUrl ? detectPlatform(activeUrl) : null);
-    const servers = platform ? (fallbackChains[platform] || ['direct']) : ['direct'];
-
-    if (servers.length > 1) {
-      currentServerIndex = (currentServerIndex + 1) % servers.length;
-      const nextServer = servers[currentServerIndex];
-      const formatted = nextServer.charAt(0).toUpperCase() + nextServer.slice(1);
-      updateServerButtonLabel();
-      const failMsg = t("downloadFailedSwitchServer", { server: formatted });
-      showToast(failMsg);
-      showNativeToast(failMsg);
-      notifyNative("Nimiyo Downloader", failMsg, 0, 0, true);
-      // Automatically re-analyze link with next server
-      setTimeout(() => {
-        startAnalyze(true);
-      }, 700);
-    } else {
-      const errText = t("downloadFailedManualServer");
-      showToast(errText);
-      showNativeToast(errText);
-      notifyNative("Nimiyo Downloader", errText, 0, 0, true);
+    if (optBtn) {
+      optBtn.innerText = "Gagal";
+      optBtn.disabled = false;
     }
+
+    if (!isBatch) {
+      updateDownloadProgressCard(false);
+      const platform = currentPlatform || (activeUrl ? detectPlatform(activeUrl) : null);
+      const servers = platform ? (fallbackChains[platform] || ['direct']) : ['direct'];
+
+      if (servers.length > 1) {
+        currentServerIndex = (currentServerIndex + 1) % servers.length;
+        const nextServer = servers[currentServerIndex];
+        const formatted = nextServer.charAt(0).toUpperCase() + nextServer.slice(1);
+        updateServerButtonLabel();
+        const failMsg = t("downloadFailedSwitchServer", { server: formatted });
+        showToast(failMsg);
+        showNativeToast(failMsg);
+        notifyNative("Nimiyo Downloader", failMsg, 0, 0, true);
+        // Automatically re-analyze link with next server
+        setTimeout(() => {
+          startAnalyze(true);
+        }, 700);
+      } else {
+        const errText = t("downloadFailedManualServer");
+        showToast(errText);
+        showNativeToast(errText);
+        notifyNative("Nimiyo Downloader", errText, 0, 0, true);
+      }
+    } else {
+      console.warn(`[Batch Download] Item ${batchIndex + 1}/${batchTotal} failed:`, err?.message || err);
+    }
+    return false;
   }
 }
 
 async function executeBatchDownload(items, result) {
+  if (!items || items.length === 0) return;
+
   const minimizeBtn = document.getElementById("minimizeBtn");
   if (minimizeBtn) minimizeBtn.classList.remove("hidden");
 
-  showToast(t("downloading"));
-  for (let i = 0; i < items.length; i++) {
-    await executeSingleDownload(items[i], result, i);
+  const allBtn = document.getElementById("downloadAllBtn");
+  if (allBtn) {
+    allBtn.disabled = true;
+    allBtn.innerText = `MENGUNDUH (1/${items.length})...`;
   }
+
+  const total = items.length;
+  showToast(t("downloading"));
+  showNativeToast(`Memulai unduhan ${total} berkas...`);
+
+  updateDownloadProgressCard(true, `Mengunduh berkas 1 dari ${total}...`, 0);
+
+  if (window.NimiyoShareBridge && window.NimiyoShareBridge.showBatchNotification) {
+    window.NimiyoShareBridge.showBatchNotification(
+      "NIMIYO Quick Save",
+      `Mengunduh 1/${total} berkas...`,
+      1,
+      total,
+      0,
+      false
+    );
+  }
+
+  let successCount = 0;
+
+  for (let i = 0; i < total; i++) {
+    const item = items[i];
+    const baseProgress = (i / total) * 100;
+    const itemWeight = 100 / total;
+
+    if (allBtn) {
+      allBtn.innerText = `MENGUNDUH (${i + 1}/${total})...`;
+    }
+
+    const cardTitle = `Mengunduh berkas ${i + 1} dari ${total}...`;
+    updateDownloadProgressCard(true, cardTitle, baseProgress);
+
+    activeDownloadProgressCallback = (reqId, pct) => {
+      const overall = Math.min(99, Math.round(baseProgress + ((pct / 100) * itemWeight)));
+      updateDownloadProgressCard(true, cardTitle, overall);
+      if (window.NimiyoShareBridge && window.NimiyoShareBridge.showBatchNotification) {
+        window.NimiyoShareBridge.showBatchNotification(
+          "NIMIYO Quick Save",
+          `Mengunduh ${i + 1}/${total} berkas (${Math.round(pct)}%)...`,
+          i + 1,
+          total,
+          overall,
+          false
+        );
+      }
+    };
+
+    const ok = await executeSingleDownload(item, result, i, true, i, total);
+    if (ok) successCount++;
+  }
+
+  activeDownloadProgressCallback = null;
+
+  // Finished batch
+  updateDownloadProgressCard(true, `✓ ${successCount}/${total} berkas selesai diunduh!`, 100);
+
+  if (window.NimiyoShareBridge && window.NimiyoShareBridge.showBatchNotification) {
+    window.NimiyoShareBridge.showBatchNotification(
+      "NIMIYO Quick Save",
+      `Semua ${successCount} berkas selesai diunduh!`,
+      total,
+      total,
+      100,
+      true
+    );
+  }
+
+  if (allBtn) {
+    allBtn.innerText = `✓ SEMUA SELESAI (${successCount}/${total})`;
+    allBtn.disabled = true;
+  }
+
+  showToast(t("saved"));
+  showNativeToast(t("saved"));
+
+  // Dismiss panel after 1500ms
+  setTimeout(() => {
+    window.dismissPanel();
+  }, 1500);
 }
 
 function saveToHistory(filename, result, dlItem, mediaType = "media") {

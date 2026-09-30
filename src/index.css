@@ -468,6 +468,29 @@ body.dark-mode .tab-bar {
   background-color: var(--accent-hover);
 }
 
+.outline-btn {
+  background-color: var(--card-bg, #ffffff);
+  color: var(--text-color, #121212);
+  border: var(--border-width) solid var(--border-color);
+}
+
+.outline-btn:hover,
+.outline-btn:active {
+  background-color: var(--tag-bg, #f0ede4);
+  color: var(--text-color);
+}
+
+.outline-btn svg {
+  stroke: currentColor;
+}
+
+html.dark-mode .outline-btn,
+body.dark-mode .outline-btn {
+  background-color: var(--card-bg, #1e1c15);
+  color: var(--text-color, #faf6ee);
+  border-color: var(--border-color, #faf6ee);
+}
+
 .danger-btn {
   background-color: var(--danger-color);
   color: #FFFFFF;
@@ -2341,6 +2364,75 @@ body.dark-mode .queue-progress-bar-bg {
   padding: 12px 14px;
 }
 
+.update-remind-group {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+}
+
+.update-remind-group .btn-remind-later {
+  flex: 1;
+}
+
+.update-remind-group .btn-remind-clock {
+  width: 48px;
+  min-width: 48px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--text-color);
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+
+.update-remind-group .btn-remind-clock:active {
+  transform: scale(0.95);
+}
+
+.remind-schedule-menu {
+  background: var(--card-bg);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.remind-schedule-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.remind-schedule-options {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.remind-schedule-options .remind-opt-btn {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 8px 4px;
+  text-align: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.remind-schedule-options .remind-opt-btn:hover {
+  background: var(--accent-color);
+  color: #121212;
+}
+
 /* ---------------------------------------------------- */
 /* Enhanced About Card Layout & Social Elements         */
 /* ---------------------------------------------------- */
@@ -3995,8 +4087,76 @@ body.dark-mode .lyrics-trans-toggle-btn.active {
   box-sizing: border-box;
 }
 
-.download-lrc-icon-btn {
+.edit-footer-btn.outline-btn {
+  background: var(--card-bg, #ffffff);
+  color: var(--text-color, #121212);
+  border: var(--border-width) solid var(--border-color);
+}
+
+.edit-footer-btn.outline-btn:hover,
+.edit-footer-btn.outline-btn:active {
+  background: var(--tag-bg, #f0ede4);
   color: var(--text-color);
+}
+
+.download-lrc-icon-btn {
+  background: var(--card-bg, #ffffff);
+  color: var(--text-color, #121212);
+  border: var(--border-width) solid var(--border-color);
+  box-shadow: 2px 2px 0px var(--border-color);
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.15s ease;
+}
+
+.download-lrc-icon-btn svg {
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+
+.download-lrc-icon-btn span {
+  color: inherit;
+  font-family: var(--font-bold);
+  font-size: 11.5px;
+  letter-spacing: 0.3px;
+}
+
+.download-lrc-icon-btn:hover {
+  background: var(--tag-bg, #f0ede4);
+  color: var(--text-color);
+}
+
+.download-lrc-icon-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px var(--border-color);
+}
+
+/* Explicit Dark Mode Overrides for Edit Lyrics Buttons */
+html.dark-mode .edit-footer-btn.outline-btn,
+body.dark-mode .edit-footer-btn.outline-btn,
+html.dark-mode .download-lrc-icon-btn,
+body.dark-mode .download-lrc-icon-btn {
+  background: var(--card-bg, #1e1c15);
+  color: var(--text-color, #faf6ee);
+  border-color: var(--border-color, #faf6ee);
+  box-shadow: 2px 2px 0px var(--border-color, #faf6ee);
+}
+
+html.dark-mode .download-lrc-icon-btn svg,
+body.dark-mode .download-lrc-icon-btn svg {
+  stroke: var(--text-color, #faf6ee);
+}
+
+html.dark-mode .download-lrc-icon-btn span,
+body.dark-mode .download-lrc-icon-btn span {
+  color: var(--text-color, #faf6ee);
+}
+
+html.dark-mode .edit-footer-btn.outline-btn:hover,
+body.dark-mode .edit-footer-btn.outline-btn:hover,
+html.dark-mode .download-lrc-icon-btn:hover,
+body.dark-mode .download-lrc-icon-btn:hover {
+  background: var(--tag-bg, #2b281d);
+  color: var(--text-color, #faf6ee);
 }
 
 /* Flowing Lyric Primary & Secondary (Double Lyrics) */
