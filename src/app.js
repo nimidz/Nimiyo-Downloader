@@ -3176,7 +3176,7 @@ const fallbackChains = {
   tiktok: ['snaptik', 'tiktokio', 'ssstik', 'direct'],
   instagram: ['snapsave', 'indown', 'direct'],
   facebook: ['snapsave', 'direct'],
-  spotify: ['spotisaver', 'spotidown', 'soundloaders', 'direct'],
+  spotify: ['spotidown', 'soundloaders', 'direct'],
   twitter: ['direct', 'tweeload', 'tvd'],
   youtube: ['ytmp3', 'direct'],
   applemusic: ['aplmate', 'direct'],
@@ -5328,7 +5328,6 @@ function detectMediaCategory(dlItem, mediaResult, contentType = "") {
     rawUrl.endsWith(".m4a") ||
     rawUrl.endsWith(".wav") ||
     rawUrl.endsWith(".flac") ||
-    rawUrl.includes("spotisaver_resolve:") ||
     rawUrl.includes("spotidown_resolve:") ||
     rawUrl.includes("soundloaders_resolve:") ||
     rawUrl.includes("ytmp3gg_resolve:") ||
@@ -5591,122 +5590,6 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
   // ==========================================
   // STAGE 1: NETWORK DOWNLOAD / RESOLVE
   // ==========================================
-
-  // 1A-0. Spotify Spotisaver Lazy Resolving
-  if (downloadUrl.startsWith("spotisaver_resolve:")) {
-    console.log("[SPOTIFY RESOLVE] Resolving Spotisaver token for track:", itemTitle);
-    const parts = downloadUrl.replace("spotisaver_resolve:", "").split("|||");
-    const trackId = parts[0];
-    const trackB64 = parts[1];
-    const cookie = decodeURIComponent(parts[2] || "");
-    const userIp = decodeURIComponent(parts[3] || "");
-    const sigConfigB64 = parts[4];
-
-    try {
-      let trackObj = null;
-      let sigConfig = null;
-      try {
-        trackObj = JSON.parse(decodeURIComponent(escape(atob(trackB64))));
-      } catch (_) {}
-      try {
-        sigConfig = JSON.parse(decodeURIComponent(escape(atob(sigConfigB64))));
-      } catch (_) {}
-
-      if (trackObj && sigConfig) {
-        const wire = sigConfig.wire || {};
-        const dlCtx = {
-          lang: "en",
-          id: String(trackObj.id || trackId).trim(),
-          name: String(trackObj.name || "").trim(),
-          duration_ms: String(Math.trunc(trackObj.duration_ms || 0)),
-        };
-        const b64Dl = btoa(unescape(encodeURIComponent(JSON.stringify(dlCtx))))
-          .replace(/\+/g, "-")
-          .replace(/\//g, "_")
-          .replace(/=+$/g, "");
-
-        const dlSigParams = new URLSearchParams();
-        dlSigParams.set(wire.token_param, sigConfig.requestToken);
-        dlSigParams.set(wire.action_param, wire.actions["download_track"]);
-        dlSigParams.set(wire.ctx_param, b64Dl);
-
-        const BASE = "https://spotisaver.net";
-        const sigUrl = BASE + sigConfig.endpoint + "?" + dlSigParams.toString();
-
-        let sigRes = null;
-        if (window.scrapr?.scraperFetch) {
-          sigRes = await window.scrapr.scraperFetch(
-            {
-              url: sigUrl,
-              headers: {
-                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-                Accept: "application/json",
-                Referer: BASE + "/en1",
-                Cookie: cookie,
-              },
-              rawResponse: true,
-            },
-            "Spotisaver Signature DL",
-          );
-        }
-
-        let rSigData = sigRes?.data || sigRes;
-        if (typeof rSigData === "string") {
-          try {
-            rSigData = JSON.parse(rSigData);
-          } catch (_) {}
-        }
-
-        if (rSigData && rSigData.token) {
-          const dlHeaders = {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-            "Content-Type": "application/json",
-            Referer: BASE + "/en1",
-            Cookie: cookie,
-          };
-          dlHeaders[wire.sig_header] = rSigData.token;
-          dlHeaders[wire.exp_header] = String(rSigData.exp);
-
-          const dlPostData = {
-            track: trackObj,
-            download_dir: "downloads",
-            filename_tag: "SPOTISAVER",
-            user_ip: userIp,
-            is_premium: false,
-            lang: "en",
-          };
-
-          const postRes = await window.scrapr.scraperFetch(
-            {
-              url: BASE + "/api/download_track.php",
-              method: "POST",
-              headers: dlHeaders,
-              data: dlPostData,
-              rawResponse: true,
-            },
-            "Spotisaver Download Track",
-          );
-
-          if (postRes?.data) {
-            let resText = typeof postRes.data === "string" ? postRes.data : JSON.stringify(postRes.data);
-            if (resText.startsWith("{") && resText.includes('"error"')) {
-              try {
-                const errObj = JSON.parse(resText);
-                if (errObj.error) throw new Error(errObj.error);
-              } catch (e) {
-                if (e.message !== "Unexpected end of JSON input") throw e;
-              }
-            }
-          }
-        }
-      }
-
-      downloadUrl = `https://spotisaver.net/api/download_track.php?id=${encodeURIComponent(trackId)}`;
-    } catch (e) {
-      console.error("[SPOTIFY RESOLVE] Error resolving Spotisaver token:", e);
-      throw new Error(`[NETWORK DOWNLOAD FAILED] Spotisaver resolve failed: ${e.message}`);
-    }
-  }
 
   // 1A. Spotify SpotiDown Lazy Resolving
   if (downloadUrl.startsWith("spotidown_resolve:")) {
