@@ -5,16 +5,16 @@
   "releaseDate": "2026-09-30",
   "downloadUrl": "https://github.com/nimidz/Nimiyo-Downloader/releases/download/v2.2.1/Nimiyo.v2.2.1.apk",
   "changelog": [
-    "Fixed TikTok photo downloads from QuickSave getting stuck",
-    "Fixed multiple photo downloads generating separate notifications by combining them into a single unified progress notification",
-    "Fixed QuickSave Accent Color synchronization",
-    "Fixed QuickSave downloads not appearing in the main app's Floating Download Balloon",
-    "Fixed QuickSave opening or bringing the main application window to the foreground when the app is already present in Recent Apps",
-    "Fixed text and background contrast blending on .LRC export and outline buttons in Dark Mode",
-    "Fixed various download and notification issues related to server switching",
-    "Added Snooze options to the OTA Update notification with 1 Day, 3 Days, and 1 Week options",
-    "Improved the Update Available window with a Remind Me Later feature",
-    "Added SSSTik as an additional TikTok server with support for no-watermark videos, MP3 audio, and photo slides",
-    "Improved Twitter/X download performance by prioritizing the direct FxTwitter server"
+    "🐛 Perbaikan: Unduhan foto TikTok dari QuickSave yang sempat macet",
+    "🐛 Perbaikan: Penggabungan banyak unduhan foto menjadi satu notifikasi progres tunggal",
+    "🐛 Perbaikan: Sinkronisasi Warna Aksen (Accent Color) pada QuickSave",
+    "🐛 Perbaikan: Unduhan QuickSave kini tampil di Balon Unduhan Melayang aplikasi utama",
+    "🐛 Perbaikan: QuickSave tidak lagi memunculkan aplikasi utama ke latar depan saat di Recent Apps",
+    "🐛 Perbaikan: Kontras teks dan tombol ekspor file .LRC di Mode Gelap",
+    "🐛 Perbaikan: Kendala unduhan dan notifikasi saat berpindah server",
+    "⚙️ Peningkatan: Opsi Tunda (Snooze) notifikasi Pembaruan (1 Hari, 3 Hari, 1 Minggu)",
+    "⚙️ Peningkatan: Jendela Update Tersedia kini dilengkapi fitur Ingatkan Nanti",
+    "⚙️ Peningkatan: Server SSSTik untuk TikTok (video tanpa watermark, audio MP3, & slide foto)",
+    "⚙️ Peningkatan: Performa unduhan Twitter/X lebih cepat dengan prioritas server FxTwitter"
   ]
 }
