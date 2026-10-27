@@ -1,9 +1,9 @@
 {
-  "versionCode": 7,
-  "versionName": "2.3.0",
+  "versionCode": 6,
+  "versionName": "2.2.1",
   "minRequiredVersion": "2.0.0",
-  "releaseDate": "2026-10-27",
-  "downloadUrl": "https://github.com/nimidz/Nimiyo-Downloader/releases/download/v2.3.0/Nimiyo.v2.3.0.apk",
+  "releaseDate": "2026-09-30",
+  "downloadUrl": "https://github.com/nimidz/Nimiyo-Downloader/releases/download/v2.2.1/Nimiyo.v2.2.1.apk",
   "changelog": [
     "Memperbaiki unduhan foto TikTok dari QuickSave yang sempat macet",
     "Menggabungkan notifikasi banyak unduhan foto menjadi satu notifikasi progres tunggal",
