@@ -37,16 +37,40 @@
 ## 🌟 What's New in v2.3.0
 
 - ☁️ **SoundCloud Support**: Added SoundCloud as a brand-new audio downloading platform with high-bitrate streaming extraction, embedded metadata tags, and full-resolution cover art.
-- 🎼 **Kugou Lyrics & Hierarchical Search Fallback**: Added Kugou as an official lyrics engine with smart hierarchical fallback (Kugou → LRCLIB → Boidu → BetterLyrics) ensuring ultra-accurate and complete lyric matches.
-- 🎤 **Word-by-Word Karaoke Lyrics (TTML)**: Full real-time syllable-by-syllable lyric highlighting. When TTML data is detected, lyrics illuminate word-by-word with smooth back-vocal transitions and a fluid Spotlight guide.
+- 🎼 **Smart Hierarchical Lyrics Engine**: Integrated multi-provider lyrics resolution featuring **KuGou Studio**, **LRCLIB**, **BetterLyrics**, and **Boidu** for unmatched lyrics accuracy and coverage across Asian and Western songs.
+- 🎤 **Word-by-Word Karaoke Lyrics (TTML Mode)**: Full real-time syllable-by-syllable lyric highlighting with glowing word trails, smooth back-vocal transitions, and an interactive Spotlight guide.
 - 🚀 **Ultra-Lightweight Background Playback**: Pure Android native media session pipeline with zero DOM activity and halted animation loops when minimized or controlled from the lockscreen/notification shade.
 - 🎨 **Dynamic Accent Color Synchronization**: Adaptive color harmony extracted from album artwork seamlessly synchronized across the player cards, floating bubbles, and notifications.
 
 ---
 
-## 🎤 Word-by-Word Lyrics Showcase (TTML vs LRC)
+## 📱 App Screenshots & Interactive Showcase
 
-Experience synchronized singing with our dual-engine lyrics player. Seamlessly toggle between classic line-by-line synced LRC and dynamic syllable-by-syllable TTML lyrics.
+<div align="center">
+
+| 1. Home / Analyzer | 2. Media Player & Tabs | 3. History & Storage |
+| :---: | :---: | :---: |
+| <img src="assets/screenshots/screenshot_01_home.jpg" width="220" alt="1. Home Screen" /> | <img src="assets/screenshots/screenshot_02_player.jpg" width="220" alt="2. Player Page" /> | <img src="assets/screenshots/screenshot_03_history.jpg" width="220" alt="3. History Page" /> |
+
+| 4. Settings & UI/UX | 5. Quick Save Floating Panel | 6. Player: TTML Word-by-Word Lyrics |
+| :---: | :---: | :---: |
+| <img src="assets/screenshots/screenshot_04_settings.jpg" width="220" alt="4. Settings Page" /> | <img src="assets/screenshots/screenshot_05_quicksave.jpg" width="220" alt="5. Quick Download Page" /> | <video src="assets/videos/newLyrics_.mp4" controls width="220" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.3);"></video> |
+
+| 7. Player: Classic LRC Synced Lyrics | 8. Multi-Select Song Manager | 9. Custom Playlists |
+| :---: | :---: | :---: |
+| <video src="assets/videos/oldLyrics.mp4" controls width="220" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.3);"></video> | <img src="assets/screenshots/screenshot_08_multiselect.jpg" width="220" alt="8. Multi-Select Songs" /> | <img src="assets/screenshots/screenshot_09_playlist.jpg" width="220" alt="9. Playlist Page" /> |
+
+| 10. Built-in HD Video Player |
+| :---: |
+| <img src="assets/screenshots/screenshot_10_videoplayer.jpg" width="280" alt="10. Video Player" /> |
+
+</div>
+
+---
+
+## 🎤 Dual-Engine Lyrics Showcase (TTML vs LRC)
+
+Experience synchronized singing with our dual-engine lyrics player. Seamlessly toggle between classic line-by-line synced LRC and dynamic syllable-by-syllable TTML lyrics at any time.
 
 <div align="center">
 
@@ -59,23 +83,31 @@ Experience synchronized singing with our dual-engine lyrics player. Seamlessly t
 
 ---
 
-## 📱 App Screenshots
+## 🎼 Multi-Provider Lyrics Architecture
 
-<div align="center">
+NIMIYO incorporates an intelligent multi-provider lyrics engine designed to ensure you never miss lyrics, supporting both syllable-synced TTML and timestamped LRC formats:
 
-| 1. Home / Analyzer | 2. Media Player & Tabs | 3. History & Storage |
-| :---: | :---: | :---: |
-| <img src="assets/screenshots/screenshot_01_home.jpg" width="220" alt="1. Home Screen" /> | <img src="assets/screenshots/screenshot_02_player.jpg" width="220" alt="2. Player Page" /> | <img src="assets/screenshots/screenshot_03_history.jpg" width="220" alt="3. History Page" /> |
+### 1. 🎤 Word-by-Word TTML Lyrics Providers (Karaoke & Syllable Timing)
+- **BetterLyrics API (`api.betterlyrics.org`)**:
+  - High-precision cloud provider delivering Apple Music & Spotify TTML word-by-word synchronized lyrics data in XML/TTML format.
+- **Boidu Lyrics API (`lyrics-api.boidu.dev`)**:
+  - Dedicated fast-response endpoint providing syllable-level timing timestamps and rich background vocal metadata (`ttm:role="lyric:background"`).
 
-| 4. Settings & UI/UX | 5. Quick Save Floating Panel | 6. Full Music Player Window |
-| :---: | :---: | :---: |
-| <img src="assets/screenshots/screenshot_04_settings.jpg" width="220" alt="4. Settings Page" /> | <img src="assets/screenshots/screenshot_05_quicksave.jpg" width="220" alt="5. Quick Download Page" /> | <img src="assets/screenshots/screenshot_06_music_player.jpg" width="220" alt="6. Music Player Window" /> |
+### 2. 📝 Line-by-Line LRC Synced Lyrics Providers (Studio & Community)
+- **KuGou Music Studio API (`kugou.com`)**:
+  - High-precision studio-synced lyrics database with candidate matching by duration and song hash, offering unmatched accuracy for Asian, anime, and international releases.
+- **LRCLIB (`lrclib.net`)**:
+  - Open-source global community lyrics repository providing millisecond-accurate synchronized LRC timestamps across international tracks.
+- **Smart Hierarchical Fallback**:
+  - Automatic intelligent search order: **KuGou Studio → LRCLIB → Boidu → BetterLyrics** with fallback to plain lyrics if synced timestamps are unavailable.
 
-| 7. Multi-Select Song Manager | 8. Custom Playlists | 9. Built-in HD Video Player |
-| :---: | :---: | :---: |
-| <img src="assets/screenshots/screenshot_08_multiselect.jpg" width="220" alt="7. Multi-Select Songs" /> | <img src="assets/screenshots/screenshot_09_playlist.jpg" width="220" alt="8. Playlist Page" /> | <img src="assets/screenshots/screenshot_10_videoplayer.jpg" width="220" alt="9. Video Player" /> |
-
-</div>
+### 3. 📂 Local & Offline Lyrics Engine
+- **Local Storage Auto-Detector (`.lrc`)**:
+  - Automatically detects and pairs local `.lrc` files placed alongside your downloaded audio tracks or inside `Download/Nimiyo/LyricsYO/`.
+- **In-App Interactive Lyrics Editor**:
+  - Built-in visual editor for manual timestamp adjustments, line-by-line timecode fine-tuning, and direct local `.lrc` file exporting.
+- **Offline Persistent Caching**:
+  - Automatically caches fetched lyrics in `localStorage` and `LyricsYO/` so previously played songs always have instant lyrics without internet access.
 
 ---
 
@@ -83,7 +115,7 @@ Experience synchronized singing with our dual-engine lyrics player. Seamlessly t
 
 - ⚡ **All-In-One Universal Downloader**: Support for videos, audio tracks, covers, slideshows, and photo carousels from 16+ major platforms.
 - 🎤 **Word-by-Word Lyrics (Karaoke TTML Engine)**: Syllable-by-syllable dynamic text highlighting, fluid Spotlight onboarding guide, smooth back-vocal animations, and instant LRC/TTML mode toggle.
-- 🎼 **Smart Hierarchical Lyrics Engine**: Automated lyrics resolution across Kugou, LRCLIB, Boidu, and BetterLyrics with interactive tap-to-seek, built-in manual lyrics editor, local `.lrc` import/export, and offline cache at `Nimiyo/LyricsYO/`.
+- 🎼 **Smart Hierarchical Lyrics Engine**: Automated lyrics resolution across KuGou, LRCLIB, Boidu, and BetterLyrics with interactive tap-to-seek, built-in manual lyrics editor, local `.lrc` import/export, and offline cache at `Nimiyo/LyricsYO/`.
 - 🎛️ **MixTools Audio Studio**: Real-time playback speed control (**Speed FX**) for Slowed & Speed Up listening, paired with an interactive 2D XY Soundstage Pad for **Spatial Reverb FX**.
 - 🎨 **Dynamic Accent Color & UI Aesthetics**: Automatic vibrant color extraction from active album art synchronized across the entire player UI, background radial glow, and controls. Choose between distinctive Neobrutalism or sleek Soft UI themes.
 - 🎵 **Built-In Music Player**: Offline audio playback from `Download/Nimiyo/AudioYo/`, custom playlist creation, interactive artist/album explorer, and lightweight native Android media session notifications.
@@ -142,7 +174,6 @@ Nimiyo-Downloader/
 │       ├── screenshot_03_history.jpg
 │       ├── screenshot_04_settings.jpg
 │       ├── screenshot_05_quicksave.jpg
-│       ├── screenshot_06_music_player.jpg
 │       ├── screenshot_08_multiselect.jpg
 │       ├── screenshot_09_playlist.jpg
 │       └── screenshot_10_videoplayer.jpg
