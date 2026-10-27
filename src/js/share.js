@@ -20,6 +20,7 @@ import {
   scrapeBandcamp,
   scrapePixiv,
   scrapeShopee,
+  scrapeSoundCloud,
 } from "./scrapers/index.js";
 import { cleanUrl } from "./utils/urlUtils.js";
 import { getUserAgent } from "./utils/index.js";
@@ -276,6 +277,8 @@ window.startAnalyze = async function () {
       data = await scrapePixiv(targetUrl);
     } else if (currentPlatform === "shopee") {
       data = await scrapeShopee(targetUrl);
+    } else if (currentPlatform === "soundcloud") {
+      data = await scrapeSoundCloud(targetUrl);
     } else {
       data = { status: false, message: lang["share-err-unsupported"] || "Unsupported platform link." };
     }

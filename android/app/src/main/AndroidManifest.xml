@@ -79,7 +79,7 @@
         <service
             android:name=".MusicPlaybackService"
             android:foregroundServiceType="mediaPlayback"
-            android:stopWithTask="true"
+            android:stopWithTask="false"
             android:exported="false" />
     </application>
 

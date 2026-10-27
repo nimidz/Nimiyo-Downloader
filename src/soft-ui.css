@@ -840,47 +840,40 @@ body.theme-softui.dark-mode .full-player-art-card {
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
 }
 
-body.theme-softui .flowing-lyric-line.active {
-  background: var(--accent-subtle, rgba(255, 204, 0, 0.22)) !important;
-  color: var(--soft-text) !important;
-  border-radius: 14px !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
-}
-
+body.theme-softui .flowing-lyric-line.active,
 body.theme-softui.dark-mode .flowing-lyric-line.active {
-  color: #FFFFFF !important;
   background: var(--accent-subtle, rgba(255, 204, 0, 0.22)) !important;
+  color: #FFFFFF !important;
   border-radius: 14px !important;
-  text-shadow: 0 0 16px var(--accent-glow, rgba(255, 204, 0, 0.6)) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25) !important;
+  text-shadow: none !important;
+  filter: none !important;
+  padding: 8px 18px !important;
 }
 
-body.theme-softui .control-btn {
-  background: var(--soft-surface) !important;
-  border: 1px solid var(--soft-border) !important;
-  box-shadow: var(--soft-shadow-btn) !important;
-}
-
-body.theme-softui.dark-mode .control-btn {
-  background: #1C1C24 !important;
-  border-color: var(--soft-border) !important;
-  box-shadow: var(--soft-shadow-btn) !important;
-}
-
-body.theme-softui .control-btn.active {
-  background: var(--soft-primary) !important;
-  color: #1A1200 !important;
-  border-color: transparent !important;
-}
-
-body.theme-softui .play-circle-btn {
-  background: var(--soft-primary) !important;
+body.theme-softui .full-player-container .full-player-icon-btn,
+body.theme-softui.dark-mode .full-player-container .full-player-icon-btn,
+body.theme-softui .full-player-container .control-btn,
+body.theme-softui.dark-mode .full-player-container .control-btn,
+body.theme-softui .full-player-container .full-player-play-btn,
+body.theme-softui.dark-mode .full-player-container .full-player-play-btn,
+body.theme-softui .full-player-container .play-circle-btn,
+body.theme-softui.dark-mode .full-player-container .play-circle-btn,
+body.theme-softui .full-player-container .full-player-dock-btn,
+body.theme-softui.dark-mode .full-player-container .full-player-dock-btn {
+  background: transparent !important;
   border: none !important;
-  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4) !important;
+  box-shadow: none !important;
+  filter: none !important;
 }
 
-body.theme-softui.dark-mode .play-circle-btn {
-  background: var(--soft-primary) !important;
-  box-shadow: 0 8px 28px rgba(245, 158, 11, 0.45) !important;
+body.theme-softui .control-btn.active,
+body.theme-softui .full-player-shuffle-btn.active,
+body.theme-softui .full-player-repeat-btn.active {
+  background: transparent !important;
+  color: var(--soft-primary) !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 body.theme-softui .queue-now-playing-box {

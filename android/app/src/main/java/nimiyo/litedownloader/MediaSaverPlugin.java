@@ -16,6 +16,8 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.pm.PackageManager;
@@ -69,6 +71,29 @@ public class MediaSaverPlugin extends Plugin {
     private android.os.PowerManager.WakeLock downloadWakeLock = null;
     private final java.util.concurrent.atomic.AtomicInteger activeDownloads = new java.util.concurrent.atomic.AtomicInteger(0);
     private BroadcastReceiver becomingNoisyReceiver = null;
+    private static volatile boolean isAppForeground = true;
+
+    public static boolean isAppForeground() {
+        return isAppForeground;
+    }
+
+    @Override
+    protected void handleOnPause() {
+        super.handleOnPause();
+        isAppForeground = false;
+    }
+
+    @Override
+    protected void handleOnResume() {
+        super.handleOnResume();
+        isAppForeground = true;
+        try {
+            MusicPlaybackService s = MusicPlaybackService.getInstance();
+            if (s != null && s.isPlaying()) {
+                dispatchPlaybackProgress((long)(s.getCurrentPositionSec() * 1000), (long)(s.getCurrentDurationSec() * 1000), true, s.getCurrentTrackId());
+            }
+        } catch (Exception ignored) {}
+    }
 
     public static void dispatchMediaAction(String action, Long positionMs) {
         if (instance != null) {
@@ -78,6 +103,33 @@ public class MediaSaverPlugin extends Plugin {
                 data.put("position", positionMs / 1000.0);
             }
             instance.notifyListeners("onMusicMediaAction", data);
+        }
+    }
+
+    public static void dispatchPlaybackProgress(long positionMs, long durationMs, boolean isPlaying, String trackId) {
+        if (instance != null) {
+            JSObject data = new JSObject();
+            data.put("position", positionMs / 1000.0);
+            data.put("duration", durationMs / 1000.0);
+            data.put("positionMs", positionMs);
+            data.put("durationMs", durationMs);
+            data.put("isPlaying", isPlaying);
+            data.put("trackId", trackId);
+            instance.notifyListeners("onNativePlaybackProgress", data);
+        }
+    }
+
+    public static void dispatchTrackChange(String trackId, String title, String artist, String album, long durationMs, boolean isPlaying) {
+        if (instance != null) {
+            JSObject data = new JSObject();
+            data.put("trackId", trackId);
+            data.put("title", title);
+            data.put("artist", artist);
+            data.put("album", album);
+            data.put("duration", durationMs / 1000.0);
+            data.put("durationMs", durationMs);
+            data.put("isPlaying", isPlaying);
+            instance.notifyListeners("onNativeTrackChange", data);
         }
     }
 
@@ -112,12 +164,15 @@ public class MediaSaverPlugin extends Plugin {
             } catch (Exception ignored) {}
         }
         try {
-            Intent intent = new Intent(getContext(), MusicPlaybackService.class);
-            intent.setAction(MusicPlaybackService.ACTION_CLEAR);
-            getContext().startService(intent);
-            NotificationManager manager = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-            if (manager != null) {
-                manager.cancel(MUSIC_NOTIFICATION_ID);
+            MusicPlaybackService service = MusicPlaybackService.getInstance();
+            if (service == null || !service.isPlaying()) {
+                Intent intent = new Intent(getContext(), MusicPlaybackService.class);
+                intent.setAction(MusicPlaybackService.ACTION_CLEAR);
+                getContext().startService(intent);
+                NotificationManager manager = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+                if (manager != null) {
+                    manager.cancel(MUSIC_NOTIFICATION_ID);
+                }
             }
         } catch (Exception ignored) {}
         if (instance == this) {
@@ -246,6 +301,8 @@ public class MediaSaverPlugin extends Plugin {
         String artist = call.getString("artist", "");
         String album = call.getString("album", "");
         String artwork = call.getString("artwork", null);
+        String sourceUrl = call.getString("sourceUrl", null);
+        String trackId = call.getString("trackId", null);
         long duration = 0;
         long position = 0;
 
@@ -283,15 +340,17 @@ public class MediaSaverPlugin extends Plugin {
             final long fPosition = position;
             final boolean fIsPlaying = isPlaying;
             final float fPlaybackSpeed = playbackSpeed;
+            final String fSourceUrl = sourceUrl;
+            final String fTrackId = trackId;
             try {
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         try {
-                            runningService.updateDirectly(fTitle, fArtist, fAlbum, fDuration, fPosition, fIsPlaying, fPlaybackSpeed);
+                            runningService.updateDirectly(fTitle, fArtist, fAlbum, fDuration, fPosition, fIsPlaying, fPlaybackSpeed, fSourceUrl, fTrackId);
                         } catch (Exception ignored) {}
                     });
                 } else {
-                    runningService.updateDirectly(fTitle, fArtist, fAlbum, fDuration, fPosition, fIsPlaying, fPlaybackSpeed);
+                    runningService.updateDirectly(fTitle, fArtist, fAlbum, fDuration, fPosition, fIsPlaying, fPlaybackSpeed, fSourceUrl, fTrackId);
                 }
                 call.resolve(new JSObject().put("success", true));
                 return;
@@ -305,6 +364,12 @@ public class MediaSaverPlugin extends Plugin {
             intent.putExtra(MusicPlaybackService.EXTRA_TITLE, title);
             intent.putExtra(MusicPlaybackService.EXTRA_ARTIST, artist);
             intent.putExtra(MusicPlaybackService.EXTRA_ALBUM, album);
+            if (sourceUrl != null && !sourceUrl.isEmpty()) {
+                intent.putExtra(MusicPlaybackService.EXTRA_SOURCE_URL, sourceUrl);
+            }
+            if (trackId != null && !trackId.isEmpty()) {
+                intent.putExtra(MusicPlaybackService.EXTRA_TRACK_ID, trackId);
+            }
             // Only add artwork to Intent extra if it is NOT a huge base64 data string
             if (artwork != null && artwork.length() < 1024) {
                 intent.putExtra(MusicPlaybackService.EXTRA_ARTWORK, artwork);
@@ -326,9 +391,207 @@ public class MediaSaverPlugin extends Plugin {
                 getContext().startService(intent);
             }
 
+            final MusicPlaybackService s = MusicPlaybackService.getInstance();
+            if (s != null) {
+                s.updateDirectly(title, artist, album, duration, position, isPlaying, playbackSpeed, sourceUrl, trackId);
+            }
+
             call.resolve(new JSObject().put("success", true));
         } catch (Exception e) {
             call.reject("Music notification failed: " + e.getMessage());
+        }
+    }
+
+    @PluginMethod
+    public void nativePlayTrack(PluginCall call) {
+        JSObject trackObj = call.getObject("track");
+        String sourceUrl = call.getString("sourceUrl", "");
+        String trackId = call.getString("trackId", "");
+        String title = call.getString("title", "NIMIYO Player");
+        String artist = call.getString("artist", "");
+        String album = call.getString("album", "");
+        String artwork = call.getString("artwork", null);
+        long duration = call.getInt("duration", 0).longValue();
+        long position = call.getInt("position", 0).longValue();
+        float speed = call.getFloat("playbackSpeed", 1.0f);
+        if (call.hasOption("speed")) {
+            speed = call.getFloat("speed", speed);
+        }
+        boolean matchPitch = call.getBoolean("matchPitch", false);
+        boolean reverbEnabled = call.getBoolean("reverbEnabled", false);
+        int reverbPreset = call.getInt("reverbPreset", 4);
+        JSArray queueArr = call.getArray("queue");
+        int queueIndex = call.getInt("queueIndex", 0);
+        String queueJson = queueArr != null ? queueArr.toString() : "[]";
+
+        if (trackObj != null) {
+            if (sourceUrl == null || sourceUrl.isEmpty()) {
+                sourceUrl = trackObj.getString("sourceUrl", "");
+            }
+            if (sourceUrl == null || sourceUrl.isEmpty()) {
+                sourceUrl = trackObj.getString("contentUri", "");
+            }
+            if (sourceUrl == null || sourceUrl.isEmpty()) {
+                sourceUrl = trackObj.getString("filePath", "");
+            }
+            if (sourceUrl == null || sourceUrl.isEmpty()) {
+                sourceUrl = trackObj.getString("fileUri", "");
+            }
+            if (trackId == null || trackId.isEmpty()) {
+                trackId = trackObj.getString("id", "");
+            }
+            if (title == null || title.equals("NIMIYO Player")) {
+                title = trackObj.getString("title", "NIMIYO Player");
+            }
+            if (artist == null || artist.isEmpty()) {
+                artist = trackObj.getString("artist", "");
+            }
+            if (album == null || album.isEmpty()) {
+                album = trackObj.getString("album", "");
+            }
+            if (duration == 0) {
+                Integer d = trackObj.getInteger("duration");
+                if (d != null) duration = d.longValue();
+            }
+        }
+
+        try {
+            ensureMusicNotificationChannel();
+            Intent intent = new Intent(getContext(), MusicPlaybackService.class);
+            intent.setAction(MusicPlaybackService.ACTION_PLAY_NATIVE);
+            intent.putExtra(MusicPlaybackService.EXTRA_SOURCE_URL, sourceUrl);
+            intent.putExtra(MusicPlaybackService.EXTRA_TRACK_ID, trackId);
+            intent.putExtra(MusicPlaybackService.EXTRA_TITLE, title);
+            intent.putExtra(MusicPlaybackService.EXTRA_ARTIST, artist);
+            intent.putExtra(MusicPlaybackService.EXTRA_ALBUM, album);
+            intent.putExtra(MusicPlaybackService.EXTRA_DURATION, duration);
+            intent.putExtra(MusicPlaybackService.EXTRA_POSITION, position);
+            intent.putExtra(MusicPlaybackService.EXTRA_PLAYBACK_SPEED, speed);
+            intent.putExtra(MusicPlaybackService.EXTRA_MATCH_PITCH, matchPitch);
+            intent.putExtra(MusicPlaybackService.EXTRA_REVERB_ENABLED, reverbEnabled);
+            intent.putExtra(MusicPlaybackService.EXTRA_REVERB_PRESET, reverbPreset);
+            intent.putExtra(MusicPlaybackService.EXTRA_QUEUE_JSON, queueJson);
+            intent.putExtra(MusicPlaybackService.EXTRA_QUEUE_INDEX, queueIndex);
+            if (artwork != null && artwork.length() < 1024) {
+                intent.putExtra(MusicPlaybackService.EXTRA_ARTWORK, artwork);
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                getContext().startForegroundService(intent);
+            } else {
+                getContext().startService(intent);
+            }
+
+            final MusicPlaybackService s = MusicPlaybackService.getInstance();
+            if (s != null) {
+                s.setNativeReverb(reverbEnabled, reverbPreset);
+                s.playNativeTrack(sourceUrl, trackId, title, artist, album, artwork, duration, position, speed, matchPitch, queueJson, queueIndex);
+            }
+
+            call.resolve(new JSObject().put("success", true));
+        } catch (Exception e) {
+            call.reject("nativePlayTrack failed: " + e.getMessage());
+        }
+    }
+
+    @PluginMethod
+    public void nativePauseTrack(PluginCall call) {
+        try {
+            MusicPlaybackService s = MusicPlaybackService.getInstance();
+            if (s != null) {
+                s.pauseNativePlayback();
+            }
+            call.resolve(new JSObject().put("success", true));
+        } catch (Exception e) {
+            call.reject("nativePauseTrack failed: " + e.getMessage());
+        }
+    }
+
+    @PluginMethod
+    public void nativeResumeTrack(PluginCall call) {
+        try {
+            MusicPlaybackService s = MusicPlaybackService.getInstance();
+            if (s != null) {
+                s.resumeNativePlayback();
+            }
+            call.resolve(new JSObject().put("success", true));
+        } catch (Exception e) {
+            call.reject("nativeResumeTrack failed: " + e.getMessage());
+        }
+    }
+
+    @PluginMethod
+    public void nativeSeekTrack(PluginCall call) {
+        try {
+            Double posSec = call.getDouble("position");
+            long posMs = posSec != null ? (long) (posSec * 1000) : call.getInt("positionMs", 0).longValue();
+            MusicPlaybackService s = MusicPlaybackService.getInstance();
+            if (s != null) {
+                s.seekNativePlayback(posMs);
+            }
+            call.resolve(new JSObject().put("success", true));
+        } catch (Exception e) {
+            call.reject("nativeSeekTrack failed: " + e.getMessage());
+        }
+    }
+
+    @PluginMethod
+    public void nativeSetSpeed(PluginCall call) {
+        try {
+            float speed = call.getFloat("speed", 1.0f);
+            boolean matchPitch = call.getBoolean("matchPitch", false);
+            MusicPlaybackService s = MusicPlaybackService.getInstance();
+            if (s != null) {
+                s.setNativeSpeed(speed, matchPitch);
+            }
+            call.resolve(new JSObject().put("success", true));
+        } catch (Exception e) {
+            call.reject("nativeSetSpeed failed: " + e.getMessage());
+        }
+    }
+
+    @PluginMethod
+    public void nativeSetReverb(PluginCall call) {
+        try {
+            boolean enabled = call.getBoolean("enabled", false);
+            int preset = call.getInt("preset", 4);
+            MusicPlaybackService s = MusicPlaybackService.getInstance();
+            if (s != null) {
+                s.setNativeReverb(enabled, preset);
+            }
+            call.resolve(new JSObject().put("success", true));
+        } catch (Exception e) {
+            call.reject("nativeSetReverb failed: " + e.getMessage());
+        }
+    }
+
+    @PluginMethod
+    public void getNativePlaybackState(PluginCall call) {
+        try {
+            MusicPlaybackService service = MusicPlaybackService.getInstance();
+            JSObject ret = new JSObject();
+            if (service != null && service.isNativePlayerActive()) {
+                ret.put("isRunning", true);
+                ret.put("isPlaying", service.isPlaying());
+                ret.put("position", service.getCurrentPositionSec());
+                ret.put("duration", service.getCurrentDurationSec());
+                ret.put("trackId", service.getCurrentTrackId());
+                ret.put("sourceUrl", service.getCurrentSourceUrl());
+                ret.put("title", service.getCurrentTitle());
+                ret.put("artist", service.getCurrentArtist());
+                ret.put("album", service.getCurrentAlbum());
+                ret.put("speed", service.getCurrentPlaybackSpeed());
+                ret.put("isNativeActive", true);
+            } else {
+                ret.put("isRunning", false);
+                ret.put("isPlaying", false);
+                ret.put("position", 0);
+                ret.put("duration", 0);
+                ret.put("isNativeActive", false);
+            }
+            call.resolve(ret);
+        } catch (Exception e) {
+            call.reject("Failed to get playback state: " + e.getMessage());
         }
     }
 
@@ -608,6 +871,10 @@ public class MediaSaverPlugin extends Plugin {
                         headers.put("Referer", "https://www.instagram.com/");
                     } else if (url.contains("spotidown") || url.contains("spotify")) {
                         headers.put("Referer", "https://spotidown.app/");
+                    } else if (url.contains("forhub.io") || url.contains("dl.forhub.io")) {
+                        headers.put("Referer", "https://www.forhub.io/download.php");
+                    } else if (url.contains("klickaud.org") || url.contains("dl.klickaud.org")) {
+                        headers.put("Referer", "https://www.klickaud.org/download.php");
                     }
                 }
 

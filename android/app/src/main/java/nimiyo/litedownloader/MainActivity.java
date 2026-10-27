@@ -110,14 +110,15 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onDestroy() {
         try {
-            android.content.Intent intent = new android.content.Intent(this, MusicPlaybackService.class);
-            intent.setAction(MusicPlaybackService.ACTION_CLEAR);
-            startService(intent);
-        } catch (Exception ignored) {}
-        try {
-            android.app.NotificationManager manager = (android.app.NotificationManager) getSystemService(android.content.Context.NOTIFICATION_SERVICE);
-            if (manager != null) {
-                manager.cancel(MusicPlaybackService.MUSIC_NOTIFICATION_ID);
+            MusicPlaybackService service = MusicPlaybackService.getInstance();
+            if (service == null || !service.isPlaying()) {
+                android.content.Intent intent = new android.content.Intent(this, MusicPlaybackService.class);
+                intent.setAction(MusicPlaybackService.ACTION_CLEAR);
+                startService(intent);
+                android.app.NotificationManager manager = (android.app.NotificationManager) getSystemService(android.content.Context.NOTIFICATION_SERVICE);
+                if (manager != null) {
+                    manager.cancel(MusicPlaybackService.MUSIC_NOTIFICATION_ID);
+                }
             }
         } catch (Exception ignored) {}
         super.onDestroy();

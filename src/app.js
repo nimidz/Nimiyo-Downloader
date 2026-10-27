@@ -182,6 +182,7 @@ const translations = {
     mixtoolsReverbDry: "◀ Dry",
     mixtoolsReverbWet: "Wet ▶",
     mixtoolsReverbHint: "Up = Wide • Right = Wet",
+    mixtoolsReverbNotice: "Reverb is active in app / background. If app is closed from Recents, music continues in standard mode.",
     mixtoolsResetSuccess: "MixTools reset to default",
     mixtoolsStatusDecay: "Decay",
     editLyricsTitle: "Edit Lyrics",
@@ -194,12 +195,26 @@ const translations = {
     editLyricsDownloadLrcTitle: "Download .LRC file",
     resetLyricsTitle: "Reset Lyrics Options",
     resetLyricsSubtitle: "Choose lyrics search source",
-    resetLyricsOptDefaultTitle: "Auto Search (Default / LRCLIB)",
-    resetLyricsOptDefaultDesc: "Clear local lyrics & re-fetch synced lyrics from online database",
+    resetLyricsOptKugouTitle: "Search on KuGou (Studio Precision)",
+    resetLyricsOptKugouDesc: "Fetch high-precision studio synced lyrics from KuGou database",
+    resetLyricsOptLrclibTitle: "Search on LRCLIB (Global Community)",
+    resetLyricsOptLrclibDesc: "Fetch synced lyrics from LRCLIB global community database",
     resetLyricsOptLyricsifyTitle: "Search on Lyricsify.com",
     resetLyricsOptLyricsifyDesc: "Open this song on Lyricsify via browser to copy .LRC lyrics",
     resetLyricsOptImportTitle: "Import Local .LRC File",
     resetLyricsOptImportDesc: "Select .lrc or .txt lyrics file stored on your device",
+    ttmlModeTitle: "TTML Mode (Word-by-Word)",
+    spotlightTtmlTitle: "TTML Mode",
+    spotlightTtmlDesc: "Tap here to switch to dynamic word-by-word synced lyrics.",
+    spotlightTtmlGotIt: "Got it",
+    editTtmlTitle: "Edit TTML Lyrics",
+    editTtmlSubtitle: "Word-by-Word (Apple Music TTML)",
+    editTtmlFormatHelp: "Format: TTML XML document with word-level timing <p begin=\"..\"><span begin=\"..\">Word</span></p>",
+    editTtmlRefreshTitle: "Search TTML on BetterLyrics",
+    editTtmlImportTitle: "Import local .TTML or .XML lyrics file",
+    toastTtmlSearchingBetterLyrics: "Searching TTML lyrics (BetterLyrics)...",
+    toastTtmlSavedSuccess: "TTML lyrics edited and saved locally",
+    toastTtmlNotFound: "TTML not found on BetterLyrics, using intelligent word interpolation",
     toastSelectSongFirst: "Please select a song first",
     toastLyricsSearchingOnline: "Searching lyrics automatically (LRCLIB)...",
     toastLyricsResetSuccess: "Lyrics reset successfully from online database!",
@@ -227,6 +242,10 @@ const translations = {
     musicShuffleAllStarted: "Shuffling all songs",
     musicTapForLyrics: "Lyrics",
     musicTapToFlip: "Tap for cover",
+    labelStartupPage: "Startup Page",
+    optStartupHome: "Home",
+    optStartupPlayer: "Player",
+    optStartupHistory: "History",
     labelUiTheme: "UI Design",
     optThemeNeobrutalism: "Neo-Brutalism (Bold)",
     optThemeSoftUi: "Soft UI (Neumorphic Glass)",
@@ -303,7 +322,7 @@ const translations = {
     btnResetSettings: "RESET ALL SETTINGS TO DEFAULT",
     groupAbout: "About & Help",
     menuAboutDesc: "Version, Info & Developer",
-    aboutVersion: "Version 2.1.1 (Lite)",
+    aboutVersion: "Version 2.3.0 (Lite)",
     aboutDesc: "A premium, modern, and lightweight media downloader engine built on scrapr.",
     aboutThanks: "Thanks to:",
     toastClipboardEmpty: "Clipboard is empty or does not contain a text link.",
@@ -376,7 +395,7 @@ const translations = {
     btnPermissionAllow: "Allow",
     btnPermissionGranted: "Enabled",
     btnCheckUpdate: "Check for Updates",
-    updateModalTitle: "Update Available 🚀",
+    updateModalTitle: "Update Available",
     updateChangelogTitle: "Changelog:",
     updateDownloading: "Downloading update...",
     btnLater: "Remind Me Later",
@@ -406,13 +425,13 @@ const translations = {
     btnRules: "Rules & Terms",
     rulesModalTitle: "Terms of Use & Guidelines",
     rulesIntroText: "Welcome to NIMIYO Downloader. By accessing or using this app, you agree to comply with the following terms & guidelines:",
-    rulesBadgeProhibited: "❌ STRICTLY PROHIBITED",
+    rulesBadgeProhibited: "STRICTLY PROHIBITED",
     rulesProhibitedTitle: "Prohibited Content:",
     rulesItemNsfw: "Pornography & NSFW (18+): Any sexually explicit, nudity, or adult media.",
     rulesItemViolence: "Violence & Gore: Extreme violence, physical harm, brutality, or dangerous acts.",
     rulesItemHate: "Hate Speech & Harassment: Discrimination, hate speech, or cyberbullying.",
     rulesItemIllegal: "Illegal Content: Unlawful acts, extremist propaganda, or narcotics.",
-    rulesBadgeDisclaimer: "⚖️ TERMS & COPYRIGHT",
+    rulesBadgeDisclaimer: "TERMS & COPYRIGHT",
     rulesDisclaimerTitle: "Copyright & Disclaimer:",
     rulesItemPersonal: "NIMIYO is a tool for personal offline archiving purposes only.",
     rulesItemCopyright: "Respect creator copyright. Commercial redistribution without permission is strictly prohibited.",
@@ -462,7 +481,7 @@ const translations = {
     "btnSave": "Save",
     "addToPlaylistTitle": "Add to Playlist",
     "addToPlaylistSubtitle": "Choose target playlist",
-    "quickItemAlreadyAdded": "✓ Added",
+    "quickItemAlreadyAdded": "Added",
     "quickItemAdd": "+ Add",
     "selectionAll": "All",
     "selectionMove": "Move",
@@ -506,7 +525,7 @@ const translations = {
     "musicSelectSong": "Select Song",
     "musicDurationHour": "hr",
     "musicDurationMin": "min",
-    "about-text": "Nimidz is a fast and versatile media downloader. Built with love by coflyn.",
+    "about-text": "NIMIYO is a fast and versatile media downloader. Built with love by nimidz.",
     "anim-fast": "Fast",
     "anim-normal": "Normal",
     "anim-off": "Off",
@@ -740,9 +759,9 @@ const translations = {
     "share-err-failed": "Failed to parse link.",
     "share-err-no-links": "No download links found.",
     "share-err-unsupported": "Unsupported platform link.",
-    "share-msg": "Check out Nimidz, an awesome app to download media from anywhere! https://github.com/coflyn/Nimidz",
+    "share-msg": "Check out NIMIYO, an awesome app to download media from anywhere! https://github.com/nimidz/Nimiyo-Downloader",
     "share-panel-sub": "Configure & download media",
-    "share-panel-title": "Nimidz Quick Save",
+    "share-panel-title": "NIMIYO Quick Save",
     "text-large": "Large",
     "text-medium": "Medium",
     "text-small": "Small",
@@ -934,6 +953,7 @@ const translations = {
     mixtoolsReverbDry: "◀ Dry",
     mixtoolsReverbWet: "Wet ▶",
     mixtoolsReverbHint: "Atas = Luas • Kanan = Gema",
+    mixtoolsReverbNotice: "Reverb aktif saat app berjalan / layar mati. Jika app ditutup dari Recent Apps, lagu lanjut tanpa Reverb.",
     mixtoolsResetSuccess: "MixTools di-reset ke default",
     mixtoolsStatusDecay: "Gema",
     editLyricsTitle: "Edit Lirik",
@@ -946,12 +966,26 @@ const translations = {
     editLyricsDownloadLrcTitle: "Download file .LRC",
     resetLyricsTitle: "Pilihan Reset Lirik",
     resetLyricsSubtitle: "Pilih sumber pencarian lirik",
-    resetLyricsOptDefaultTitle: "Cari Otomatis (Default / LRCLIB)",
-    resetLyricsOptDefaultDesc: "Hapus lirik lokal & ambil ulang lirik asli sinkron dari database online",
+    resetLyricsOptKugouTitle: "Cari di KuGou (Presisi Studio / Sinkron)",
+    resetLyricsOptKugouDesc: "Ambil lirik sinkron presisi tinggi dari database studio KuGou",
+    resetLyricsOptLrclibTitle: "Cari di LRCLIB (Komunitas Global)",
+    resetLyricsOptLrclibDesc: "Ambil lirik sinkron dari database komunitas global LRCLIB",
     resetLyricsOptLyricsifyTitle: "Cari di Lyricsify.com",
     resetLyricsOptLyricsifyDesc: "Buka pencarian lagu ini di Lyricsify via browser untuk salin lirik .LRC",
     resetLyricsOptImportTitle: "Import File .LRC Lokal",
     resetLyricsOptImportDesc: "Pilih file lirik .lrc atau .txt yang tersimpan di HP Anda",
+    ttmlModeTitle: "Mode TTML (Kata-per-Kata)",
+    spotlightTtmlTitle: "Mode TTML",
+    spotlightTtmlDesc: "Ketuk tombol ini untuk beralih ke lirik kata-per-kata yang bergerak dinamis.",
+    spotlightTtmlGotIt: "Mengerti",
+    editTtmlTitle: "Edit Lirik TTML",
+    editTtmlSubtitle: "Kata-per-Kata (Apple Music TTML)",
+    editTtmlFormatHelp: "Format: Dokumen XML TTML kata-per-kata <p begin=\"..\"><span begin=\"..\">Kata</span></p>",
+    editTtmlRefreshTitle: "Cari TTML di BetterLyrics",
+    editTtmlImportTitle: "Import file lirik .TTML atau .XML lokal",
+    toastTtmlSearchingBetterLyrics: "Mencari lirik TTML (BetterLyrics)...",
+    toastTtmlSavedSuccess: "Lirik TTML berhasil diedit dan disimpan secara lokal",
+    toastTtmlNotFound: "Lirik TTML tidak ditemukan di BetterLyrics, menggunakan interpolasi kata otomatis",
     toastSelectSongFirst: "Pilih lagu terlebih dahulu",
     toastLyricsSearchingOnline: "Mencari lirik otomatis (LRCLIB)...",
     toastLyricsResetSuccess: "Lirik berhasil di-reset dari database online!",
@@ -979,6 +1013,10 @@ const translations = {
     musicShuffleAllStarted: "Memutar acak semua lagu",
     musicTapForLyrics: "Lirik",
     musicTapToFlip: "Ketuk untuk cover",
+    labelStartupPage: "Halaman Awal",
+    optStartupHome: "Home",
+    optStartupPlayer: "Player",
+    optStartupHistory: "Riwayat",
     labelUiTheme: "Desain UI",
     optThemeNeobrutalism: "Neo-Brutalism (Tegas)",
     optThemeSoftUi: "Soft UI (Lembut & Kaca)",
@@ -1055,7 +1093,7 @@ const translations = {
     btnResetSettings: "KEMBALIKAN SEMUA SETELAN KE DEFAULT",
     groupAbout: "Tentang & Bantuan",
     menuAboutDesc: "Versi, Info & Pengembang",
-    aboutVersion: "Versi 2.1.1 (Lite)",
+    aboutVersion: "Versi 2.3.0 (Lite)",
     aboutDesc: "Mesin pengunduh media premium, modern, dan ringan yang dibangun di atas scrapr.",
     aboutThanks: "Terima kasih kepada:",
     toastClipboardEmpty: "Papan klip kosong atau tidak berisi tautan teks.",
@@ -1128,7 +1166,7 @@ const translations = {
     btnPermissionAllow: "Izinkan",
     btnPermissionGranted: "Diaktifkan",
     btnCheckUpdate: "Periksa Pembaruan",
-    updateModalTitle: "Pembaruan Tersedia 🚀",
+    updateModalTitle: "Pembaruan Tersedia",
     updateChangelogTitle: "Catatan Pembaruan:",
     updateDownloading: "Mengunduh pembaruan...",
     btnLater: "Nanti ingatkan kembali",
@@ -1158,13 +1196,13 @@ const translations = {
     btnRules: "Ketentuan & Aturan",
     rulesModalTitle: "Ketentuan & Aturan Aplikasi",
     rulesIntroText: "Selamat datang di NIMIYO Downloader. Dengan menggunakan aplikasi ini, Anda setuju untuk mematuhi aturan dan ketentuan berikut:",
-    rulesBadgeProhibited: "❌ DILARANG KERAS",
+    rulesBadgeProhibited: "DILARANG KERAS",
     rulesProhibitedTitle: "Konten yang Dilarang Diunduh:",
     rulesItemNsfw: "Pornografi & NSFW (18+): Segala bentuk konten dewasa, ketelanjangan, atau materi seksual eksplisit.",
     rulesItemViolence: "Kekerasan & Kebrutalan: Adegan kekerasan ekstrem, penyiksaan, darah/gore, atau tindakan berbahaya.",
     rulesItemHate: "Pelecehan & Kebencian: Ujaran kebencian (SARA), perundungan siber, atau tindakan intimidasi.",
     rulesItemIllegal: "Aktivitas Ilegal: Materi pelanggaran hukum, promosi senjata ilegal, atau narkotika.",
-    rulesBadgeDisclaimer: "⚖️ KETENTUAN & HAK CIPTA",
+    rulesBadgeDisclaimer: "KETENTUAN & HAK CIPTA",
     rulesDisclaimerTitle: "Hak Cipta & Disclaimer:",
     rulesItemPersonal: "NIMIYO adalah utilitas bantu untuk keperluan arsip pribadi (personal backup / offline consumption).",
     rulesItemCopyright: "Hormati hak cipta kreator. Dilarang mengomersialkan hasil unduhan tanpa izin pemilik hak cipta resmi.",
@@ -1214,7 +1252,7 @@ const translations = {
     "btnSave": "Simpan",
     "addToPlaylistTitle": "Tambah ke Playlist",
     "addToPlaylistSubtitle": "Pilih playlist tujuan",
-    "quickItemAlreadyAdded": "✓ Sudah ada",
+    "quickItemAlreadyAdded": "Sudah ada",
     "quickItemAdd": "+ Tambah",
     "selectionAll": "All",
     "selectionMove": "Pindah",
@@ -1258,7 +1296,7 @@ const translations = {
     "musicSelectSong": "Pilih Lagu",
     "musicDurationHour": "jam",
     "musicDurationMin": "min",
-    "about-text": "Nimidz adalah pengunduh media yang cepat dan serbaguna. Dibuat dengan cinta oleh coflyn.",
+    "about-text": "NIMIYO adalah pengunduh media yang cepat dan serbaguna. Dibuat dengan cinta oleh nimidz.",
     "anim-fast": "Cepat",
     "anim-normal": "Normal",
     "anim-off": "Mati",
@@ -1492,9 +1530,9 @@ const translations = {
     "share-err-failed": "Gagal memproses tautan.",
     "share-err-no-links": "Tidak ada tautan unduhan ditemukan.",
     "share-err-unsupported": "Tautan platform tidak didukung.",
-    "share-msg": "Cobain Nimidz, aplikasi keren untuk mengunduh media dari mana saja! https://github.com/coflyn/Nimidz",
+    "share-msg": "Cobain NIMIYO, aplikasi keren untuk mengunduh media dari mana saja! https://github.com/nimidz/Nimiyo-Downloader",
     "share-panel-sub": "Konfigurasi & unduh media",
-    "share-panel-title": "Nimidz Simpan Cepat",
+    "share-panel-title": "NIMIYO Simpan Cepat",
     "text-large": "Besar",
     "text-medium": "Sedang",
     "text-small": "Kecil",
@@ -1684,6 +1722,7 @@ const translations = {
     mixtoolsReverbDry: "◀ Dry",
     mixtoolsReverbWet: "Wet ▶",
     mixtoolsReverbHint: "向上 = 开阔 • 向右 = 混响",
+    mixtoolsReverbNotice: "混响仅在应用运行或后台息屏时生效。从最近任务清除后将继续以标准模式播放。",
     mixtoolsResetSuccess: "MixTools 已重置为默认值",
     mixtoolsStatusDecay: "衰减",
     editLyricsTitle: "编辑歌词",
@@ -1696,12 +1735,26 @@ const translations = {
     editLyricsDownloadLrcTitle: "下载 .LRC 歌词文件",
     resetLyricsTitle: "重置歌词选项",
     resetLyricsSubtitle: "选择歌词搜索来源",
-    resetLyricsOptDefaultTitle: "自动搜索 (默认 / LRCLIB)",
-    resetLyricsOptDefaultDesc: "清除本地歌词并从在线数据库重新获取同步歌词",
+    resetLyricsOptKugouTitle: "在酷狗搜索 (高精度伴奏同步)",
+    resetLyricsOptKugouDesc: "从酷狗音乐数据库获取毫秒级专业精准同步歌词",
+    resetLyricsOptLrclibTitle: "在 LRCLIB 搜索 (全球社区)",
+    resetLyricsOptLrclibDesc: "从 LRCLIB 全球开源数据库获取同步歌词",
     resetLyricsOptLyricsifyTitle: "在 Lyricsify.com 搜索",
     resetLyricsOptLyricsifyDesc: "在浏览器中打开 Lyricsify 页面以复制 .LRC 歌词",
     resetLyricsOptImportTitle: "导入本地 .LRC 文件",
     resetLyricsOptImportDesc: "选择存储在设备上的 .lrc 或 .txt 歌词文件",
+    ttmlModeTitle: "TTML 模式 (逐字同步)",
+    spotlightTtmlTitle: "TTML 模式",
+    spotlightTtmlDesc: "点击此处切换至随歌声动态滚动的逐字歌词。",
+    spotlightTtmlGotIt: "知道了",
+    editTtmlTitle: "编辑 TTML 歌词",
+    editTtmlSubtitle: "逐字卡拉OK (Apple Music TTML)",
+    editTtmlFormatHelp: "格式：TTML XML 逐字时间文档 <p begin=\"..\"><span begin=\"..\">词</span></p>",
+    editTtmlRefreshTitle: "在 BetterLyrics 搜索 TTML",
+    editTtmlImportTitle: "导入本地 .TTML 或 .XML 歌词文件",
+    toastTtmlSearchingBetterLyrics: "正在搜索 TTML 歌词 (BetterLyrics)...",
+    toastTtmlSavedSuccess: "TTML 歌词已成功编辑并保存在本地",
+    toastTtmlNotFound: "未在 BetterLyrics 找到 TTML，已使用智能逐字插值",
     toastSelectSongFirst: "请先选择一首歌曲",
     toastLyricsSearchingOnline: "正在自动搜索歌词 (LRCLIB)...",
     toastLyricsResetSuccess: "歌词已成功从在线数据库重置！",
@@ -1729,6 +1782,10 @@ const translations = {
     musicShuffleAllStarted: "正在随机播放所有歌曲",
     musicTapForLyrics: "歌词",
     musicTapToFlip: "点击查看封面",
+    labelStartupPage: "启动页",
+    optStartupHome: "主页",
+    optStartupPlayer: "播放器",
+    optStartupHistory: "历史记录",
     labelUiTheme: "界面设计",
     optThemeNeobrutalism: "新野兽派 (经典硬朗)",
     optThemeSoftUi: "拟态拟物 (柔和玻璃质感)",
@@ -1805,7 +1862,7 @@ const translations = {
     btnResetSettings: "恢复所有设置到默认值",
     groupAbout: "关于与帮助",
     menuAboutDesc: "版本信息、开源与开发团队",
-    aboutVersion: "版本 2.1.1 (Lite)",
+    aboutVersion: "版本 2.3.0 (Lite)",
     aboutDesc: "基于 scrapr 构建的高级、现代且轻量级的媒体下载引擎。",
     aboutThanks: "致谢:",
     toastClipboardEmpty: "剪贴板为空或不包含文本链接。",
@@ -1878,7 +1935,7 @@ const translations = {
     btnPermissionAllow: "授权",
     btnPermissionGranted: "已启用",
     btnCheckUpdate: "检查更新",
-    updateModalTitle: "发现新版本 🚀",
+    updateModalTitle: "发现新版本",
     updateChangelogTitle: "更新日志:",
     updateDownloading: "正在下载更新...",
     btnLater: "稍后提醒我",
@@ -1908,13 +1965,13 @@ const translations = {
     btnRules: "用户条款与规范",
     rulesModalTitle: "使用条款与社区规范",
     rulesIntroText: "欢迎使用 NIMIYO 下载器。使用本应用即表示您同意遵守以下规则与条款：",
-    rulesBadgeProhibited: "❌ 严禁下载",
+    rulesBadgeProhibited: "严禁下载",
     rulesProhibitedTitle: "禁止下载的内容：",
     rulesItemNsfw: "色情与成人内容 (18+)：任何形式的露骨色情、裸露或成人媒体。",
     rulesItemViolence: "暴力与血腥：极端暴力、人身伤害、残虐行为或危险活动。",
     rulesItemHate: "仇恨言论与骚扰：仇恨言论、歧视或网络霸凌。",
     rulesItemIllegal: "违法活动：违法犯罪行为、极端主义宣传或违禁品。",
-    rulesBadgeDisclaimer: "⚖️ 版权与免责声明",
+    rulesBadgeDisclaimer: "版权与免责声明",
     rulesDisclaimerTitle: "版权与责任归属：",
     rulesItemPersonal: "NIMIYO 仅为个人离线归档的辅助工具。",
     rulesItemCopyright: "请尊重创作者版权。严禁未经授权将下载内容用于商业盈利。",
@@ -1966,7 +2023,7 @@ const translations = {
     "btnSave": "保存",
     "addToPlaylistTitle": "添加到播放列表",
     "addToPlaylistSubtitle": "选择目标播放列表",
-    "quickItemAlreadyAdded": "✓ 已添加",
+    "quickItemAlreadyAdded": "已添加",
     "quickItemAdd": "+ 添加",
     "selectionAll": "全选",
     "selectionMove": "移动",
@@ -2010,7 +2067,7 @@ const translations = {
     "musicSelectSong": "选择歌曲",
     "musicDurationHour": "小时",
     "musicDurationMin": "分钟",
-    "about-text": "Nimidz 是一款快速且多功能的媒体下载器。由 coflyn 用心制作。",
+    "about-text": "NIMIYO 是一款快速且多功能的媒体下载器。由 nimidz 用心制作。",
     "anim-fast": "快速",
     "anim-normal": "正常",
     "anim-off": "关闭",
@@ -2244,9 +2301,9 @@ const translations = {
     "share-err-failed": "解析链接失败。",
     "share-err-no-links": "未找到下载链接。",
     "share-err-unsupported": "不支持的平台链接。",
-    "share-msg": "快来看看 Nimidz，这是一款超棒的媒体下载应用！https://github.com/coflyn/Nimidz",
+    "share-msg": "快来看看 NIMIYO，这是一款超棒的媒体下载应用！https://github.com/nimidz/Nimiyo-Downloader",
     "share-panel-sub": "配置并下载媒体",
-    "share-panel-title": "Nimidz 快速保存",
+    "share-panel-title": "NIMIYO 快速保存",
     "text-large": "大",
     "text-medium": "中",
     "text-small": "小",
@@ -2436,6 +2493,7 @@ const translations = {
     mixtoolsReverbDry: "◀ Dry",
     mixtoolsReverbWet: "Wet ▶",
     mixtoolsReverbHint: "上 = 空間 • 右 = 残響",
+    mixtoolsReverbNotice: "リバーブはアプリ実行中・画面オフ時に有効です。タスクを消去すると通常再生に切り替わります。",
     mixtoolsResetSuccess: "MixTools がデフォルトにリセットされました",
     mixtoolsStatusDecay: "減衰",
     editLyricsTitle: "歌詞を編集",
@@ -2448,12 +2506,26 @@ const translations = {
     editLyricsDownloadLrcTitle: ".LRC ファイルをダウンロード",
     resetLyricsTitle: "歌詞リセットオプション",
     resetLyricsSubtitle: "歌詞の検索元を選択",
-    resetLyricsOptDefaultTitle: "自動検索 (デフォルト / LRCLIB)",
-    resetLyricsOptDefaultDesc: "ローカル歌詞を削除し、オンラインから同期歌詞を再取得",
+    resetLyricsOptKugouTitle: "KuGou で検索 (高精度スタジオ同期)",
+    resetLyricsOptKugouDesc: "KuGou データベースから高精度のスタジオ同期歌詞を取得",
+    resetLyricsOptLrclibTitle: "LRCLIB で検索 (グローバルコミュニティ)",
+    resetLyricsOptLrclibDesc: "LRCLIB グローバルコミュニティから同期歌詞を取得",
     resetLyricsOptLyricsifyTitle: "Lyricsify.com で検索",
     resetLyricsOptLyricsifyDesc: "ブラウザで Lyricsify を開き、.LRC 歌詞をコピー",
     resetLyricsOptImportTitle: "ローカル .LRC ファイルをインポート",
     resetLyricsOptImportDesc: "端末に保存されている .lrc または .txt 歌詞ファイルを選択",
+    ttmlModeTitle: "TTML モード (ワード単位)",
+    spotlightTtmlTitle: "TTML モード",
+    spotlightTtmlDesc: "タップしてボーカルに合わせて流れる単語単位の歌詞に切り替えます。",
+    spotlightTtmlGotIt: "了解",
+    editTtmlTitle: "TTML 歌詞を編集",
+    editTtmlSubtitle: "ワード単位 (Apple Music TTML)",
+    editTtmlFormatHelp: "形式：TTML XML 形式のワード単位歌詞 <p begin=\"..\"><span begin=\"..\">単語</span></p>",
+    editTtmlRefreshTitle: "BetterLyrics で TTML を検索",
+    editTtmlImportTitle: "ローカル .TTML または .XML 歌詞ファイルをインポート",
+    toastTtmlSearchingBetterLyrics: "TTML 歌詞を検索中 (BetterLyrics)...",
+    toastTtmlSavedSuccess: "TTML 歌詞を編集しローカルに保存しました",
+    toastTtmlNotFound: "BetterLyrics に TTML が見つかりませんでした。自動ワード補間を使用します",
     toastSelectSongFirst: "先に曲を選択してください",
     toastLyricsSearchingOnline: "歌詞を自動検索中 (LRCLIB)...",
     toastLyricsResetSuccess: "オンラインデータベースから歌詞をリセットしました！",
@@ -2481,6 +2553,10 @@ const translations = {
     musicShuffleAllStarted: "すべての曲をシャッフル再生中",
     musicTapForLyrics: "歌詞",
     musicTapToFlip: "タップでカバーへ",
+    labelStartupPage: "起動ページ",
+    optStartupHome: "ホーム",
+    optStartupPlayer: "プレイヤー",
+    optStartupHistory: "履歴",
     labelUiTheme: "UIデザイン",
     optThemeNeobrutalism: "ネオブュータリズム (大胆)",
     optThemeSoftUi: "ソフトUI (ニューモフィズム)",
@@ -2557,7 +2633,7 @@ const translations = {
     btnResetSettings: "すべての設定を初期値に戻す",
     groupAbout: "アプリについてとヘルプ",
     menuAboutDesc: "バージョン、情報と開発チーム",
-    aboutVersion: "バージョン 2.1.1 (Lite)",
+    aboutVersion: "バージョン 2.3.0 (Lite)",
     aboutDesc: "scrapr をベースに構築されたプレミアムでモダン、軽量なメディアダウンローダー。",
     aboutThanks: "スペシャルサンクス:",
     toastClipboardEmpty: "クリップボードが空か、有効なテキストリンクが含まれていません。",
@@ -2630,7 +2706,7 @@ const translations = {
     btnPermissionAllow: "許可",
     btnPermissionGranted: "有効",
     btnCheckUpdate: "更新を確認",
-    updateModalTitle: "アップデートが利用可能です 🚀",
+    updateModalTitle: "アップデートが利用可能です",
     updateChangelogTitle: "更新履歴:",
     updateDownloading: "更新をダウンロード中...",
     btnLater: "後で通知する",
@@ -2660,13 +2736,13 @@ const translations = {
     btnRules: "利用規約とルール",
     rulesModalTitle: "利用規約とガイドライン",
     rulesIntroText: "NIMIYO ダウンローダーへようこそ。本アプリを使用することにより、以下の規約に同意したものとみなされます：",
-    rulesBadgeProhibited: "❌ 厳格な禁止事項",
+    rulesBadgeProhibited: "厳格な禁止事項",
     rulesProhibitedTitle: "ダウンロード禁止コンテンツ：",
     rulesItemNsfw: "ポルノおよび成人向け (18+)：あらゆる露骨な性的コンテンツ、ヌード、成人向けメディア。",
     rulesItemViolence: "暴力および残虐表現：過激な暴力、身体的危害、残虐行為、危険な活動。",
     rulesItemHate: "ヘイトスピーチおよび嫌がらせ：差別的表現やネットいじめ。",
     rulesItemIllegal: "違法コンテンツ：法律違反、過激派の宣伝、違法薬物。",
-    rulesBadgeDisclaimer: "⚖️ 規約と免責事項",
+    rulesBadgeDisclaimer: "規約と免責事項",
     rulesDisclaimerTitle: "著作権と免責事項：",
     rulesItemPersonal: "NIMIYO は個人利用のオフライン保存専用ユーティリティです。",
     rulesItemCopyright: "著作権を尊重してください。無断での商用再配布は禁止されています。",
@@ -2718,7 +2794,7 @@ const translations = {
     "btnSave": "保存",
     "addToPlaylistTitle": "プレイリストに追加",
     "addToPlaylistSubtitle": "対象のプレイリストを選択",
-    "quickItemAlreadyAdded": "✓ 追加済み",
+    "quickItemAlreadyAdded": "追加済み",
     "quickItemAdd": "+ 追加",
     "selectionAll": "全選択",
     "selectionMove": "移動",
@@ -2762,7 +2838,7 @@ const translations = {
     "musicSelectSong": "曲を選択",
     "musicDurationHour": "時間",
     "musicDurationMin": "分",
-    "about-text": "Nimidzは高速で多機能なメディアダウンローダーです。coflynによって愛を込めて作られました。",
+    "about-text": "NIMIYOは高速で多機能なメディアダウンローダーです。nimidzによって愛を込めて作られました。",
     "anim-fast": "速い",
     "anim-normal": "普通",
     "anim-off": "オフ",
@@ -2996,9 +3072,9 @@ const translations = {
     "share-err-failed": "リンクの解析に失敗しました。",
     "share-err-no-links": "ダウンロードリンクが見つかりませんでした。",
     "share-err-unsupported": "サポートされていないプラットフォームのリンクです。",
-    "share-msg": "どこからでもメディアをダウンロードできる素晴らしいアプリ、Nimidzをチェックしてください！ https://github.com/coflyn/Nimidz",
+    "share-msg": "どこからでもメディアをダウンロードできる素晴らしいアプリ、NIMIYOをチェックしてください！ https://github.com/nimidz/Nimiyo-Downloader",
     "share-panel-sub": "メディアの設定とダウンロード",
-    "share-panel-title": "Nimidz クイック保存",
+    "share-panel-title": "NIMIYO クイック保存",
     "text-large": "大",
     "text-medium": "中",
     "text-small": "小",
@@ -3110,6 +3186,7 @@ function detectSystemLanguage() {
 // Default Settings
 let settings = {
   language: detectSystemLanguage(),
+  startupPage: 'home',       // 'home' | 'player' | 'history'
   uiTheme: 'neobrutalism',   // 'neobrutalism' | 'softui'
   accentColor: 'yellow',     // 'yellow' | 'blue' | 'red' | 'gray'
   autoPaste: false,
@@ -3160,6 +3237,7 @@ const platformMapping = {
   twitter: { name: "Twitter / X", domains: /(twitter\.com|x\.com)/i, color: "#1DA1F2" },
   spotify: { name: "Spotify", domains: /(spotify\.com)/i, color: "#1ED760" },
   applemusic: { name: "Apple Music", domains: /(music\.apple\.com)/i, color: "#FA576E" },
+  soundcloud: { name: "SoundCloud", domains: /(soundcloud\.com|on\.soundcloud\.com)/i, color: "#FF5500" },
   facebook: { name: "Facebook", domains: /(facebook\.com|fb\.watch|fb\.com)/i, color: "#1877F2" },
   threads: { name: "Threads", domains: /(threads\.(?:net|com))/i, color: "#000000" },
   pinterest: { name: "Pinterest", domains: /(pinterest\.com|pin\.it)/i, color: "#E60023" },
@@ -3177,6 +3255,7 @@ const fallbackChains = {
   instagram: ['snapsave', 'indown', 'direct'],
   facebook: ['snapsave', 'direct'],
   spotify: ['spotidown', 'soundloaders', 'direct'],
+  soundcloud: ['forhub', 'klickaud', 'direct'],
   twitter: ['direct', 'tweeload', 'tvd'],
   youtube: ['ytmp3', 'direct'],
   applemusic: ['aplmate', 'direct'],
@@ -3187,12 +3266,12 @@ const fallbackChains = {
   bandcamp: ['bandcampdownloader', 'direct'],
   pixiv: ['direct'],
   rednote: ['direct'],
-  shopee: ['svxtract', 'direct']
+  shopee: ['direct', 'svxtract']
 };
 
 // App Version Constants & GitHub Auto-Update Engine
-const APP_VERSION_NAME = "2.2.1";
-const APP_VERSION_CODE = 6;
+const APP_VERSION_NAME = "2.3.0";
+const APP_VERSION_CODE = 7;
 const UPDATE_MANIFEST_URL = "https://raw.githubusercontent.com/nimidz/Nimiyo-Downloader/main/version.json";
 let latestUpdateInfo = null;
 
@@ -3203,12 +3282,24 @@ document.addEventListener("DOMContentLoaded", () => {
   initUI();
   setupEventListeners();
 
+  // Route directly to user-chosen startup page without flashing Home
+  const startup = settings.startupPage || 'home';
+  if (startup !== 'home') {
+    switchTab('tab-' + startup);
+  } else {
+    updateTabIndicator();
+  }
+
   // Smooth Coldstart Render Veil Dismissal
   // Allows micro-delay for all theme styles, dark mode, fonts, translations, and tab indicators to render smoothly
   requestAnimationFrame(() => {
     const activeTabBtn = document.querySelector(".tab-btn.active") || document.querySelector(".tab-btn");
     if (activeTabBtn && typeof updateTabIndicator === "function") {
       updateTabIndicator(activeTabBtn);
+    }
+    if (startup === 'player') {
+      const player = window.nimiyoMusicPlayer || (typeof window.initGlobalMusicPlayer === "function" ? window.initGlobalMusicPlayer() : null);
+      if (player) player.updateSubTabIndicator();
     }
     setTimeout(() => {
       const veil = document.getElementById("appLaunchVeil");
@@ -3217,6 +3308,15 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
           if (veil && veil.parentNode) veil.parentNode.removeChild(veil);
         }, 400);
+      }
+      // Re-trigger indicator positioning right after veil dismissal for 100% precision
+      const finalBtn = document.querySelector(".tab-btn.active");
+      if (finalBtn && typeof updateTabIndicator === "function") {
+        updateTabIndicator(finalBtn);
+      }
+      if (startup === 'player') {
+        const player = window.nimiyoMusicPlayer || (typeof window.initGlobalMusicPlayer === "function" ? window.initGlobalMusicPlayer() : null);
+        if (player) player.updateSubTabIndicator();
       }
     }, 240); // 240ms rendering delay ensures butter-smooth 60fps start without flashing old UI
   });
@@ -3261,6 +3361,9 @@ function loadSettings() {
   }
   if (!settings.preferredServer) {
     settings.preferredServer = 'auto';
+  }
+  if (!settings.startupPage) {
+    settings.startupPage = 'home';
   }
   currentLanguage = settings.language || systemLang;
   applyDarkMode(settings.darkMode);
@@ -3837,6 +3940,7 @@ function initUI() {
     if (el) el.checked = Boolean(val);
   };
 
+  setVal("settingStartupPage", settings.startupPage || 'home');
   setVal("settingLanguage", settings.language || 'en');
   setVal("settingUiTheme", settings.uiTheme || 'neobrutalism');
   setVal("settingAccentColor", settings.accentColor || 'yellow');
@@ -4021,40 +4125,68 @@ function setupEventListeners() {
   });
 
   // ===================== BOTTOM TAB BAR SWITCHING =====================
-  function updateTabIndicator(activeBtn) {
+  function updateTabIndicator(activeBtn, retryCount = 0) {
     const indicator = document.getElementById("tabIndicator");
     const tabBar = document.getElementById("tabBar");
-    if (!indicator || !tabBar || !activeBtn) return;
+    const targetBtn = activeBtn || document.querySelector(".tab-btn.active") || document.getElementById("btn-home");
+    if (!indicator || !tabBar || !targetBtn) return;
     const barRect = tabBar.getBoundingClientRect();
-    const btnRect = activeBtn.getBoundingClientRect();
-    const targetX = (btnRect.left - barRect.left) + (btnRect.width / 2) - (indicator.offsetWidth / 2);
-    indicator.style.transform = `translateX(${targetX}px)`;
+    const btnRect = targetBtn.getBoundingClientRect();
+    if (btnRect.width === 0 || barRect.width === 0) {
+      if (retryCount < 6) {
+        requestAnimationFrame(() => updateTabIndicator(targetBtn, retryCount + 1));
+        if (retryCount === 0) {
+          setTimeout(() => updateTabIndicator(targetBtn, retryCount + 1), 60);
+        }
+      }
+      return;
+    }
+    const indicatorWidth = indicator.offsetWidth || 28;
+    const targetX = (btnRect.left - barRect.left) + (btnRect.width / 2) - (indicatorWidth / 2);
+    indicator.style.transform = `translateX(${Math.round(targetX)}px)`;
   }
 
   function switchTab(tabId) {
     // Hide all tab panes
-    document.querySelectorAll(".tab-pane").forEach(pane => pane.classList.add("hidden"));
+    document.querySelectorAll(".tab-pane").forEach(pane => {
+      pane.classList.add("hidden");
+      pane.classList.remove("active");
+    });
     // Remove active from all tab buttons
     document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
     // Show target tab
     const target = document.getElementById(tabId);
-    if (target) target.classList.remove("hidden");
+    if (target) {
+      target.classList.remove("hidden");
+      target.classList.add("active");
+    }
     // Mark corresponding button active
     const tabBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
     if (tabBtn) {
       tabBtn.classList.add("active");
       updateTabIndicator(tabBtn);
+      requestAnimationFrame(() => updateTabIndicator(tabBtn));
+      setTimeout(() => updateTabIndicator(tabBtn), 60);
+      setTimeout(() => updateTabIndicator(tabBtn), 200);
     }
     // Trigger tab-specific actions
     if (tabId === "tab-history") {
       loadHistory().then(() => renderHistory());
     } else if (tabId === "tab-player") {
-      if (window.nimiyoMusicPlayer) {
-        window.nimiyoMusicPlayer.autoCheckPermissionOnResume().catch(() => {});
-        window.nimiyoMusicPlayer.renderCurrentTab();
+      const player = window.nimiyoMusicPlayer || (typeof window.initGlobalMusicPlayer === "function" ? window.initGlobalMusicPlayer() : null);
+      if (player) {
+        player.autoCheckPermissionOnResume().catch(() => {});
+        player.renderCurrentTab();
+        player.updateSubTabIndicator();
         requestAnimationFrame(() => {
-          window.nimiyoMusicPlayer.updateSubTabIndicator();
+          player.updateSubTabIndicator();
         });
+        setTimeout(() => {
+          player.updateSubTabIndicator();
+        }, 60);
+        setTimeout(() => {
+          player.updateSubTabIndicator();
+        }, 200);
       }
     } else if (tabId === "tab-settings") {
       updateStorageSizeDisplay();
@@ -4075,21 +4207,34 @@ function setupEventListeners() {
   });
 
   // Initial tab indicator placement
-  const initialActiveTabBtn = document.querySelector(".tab-btn.active") || document.querySelector(".tab-btn");
-  if (initialActiveTabBtn) {
-    requestAnimationFrame(() => updateTabIndicator(initialActiveTabBtn));
-    setTimeout(() => updateTabIndicator(initialActiveTabBtn), 100);
-  }
-  window.addEventListener("resize", () => {
-    const activeBtn = document.querySelector(".tab-btn.active");
+  function refreshTabIndicator() {
+    const activeBtn = document.querySelector(".tab-btn.active") || document.querySelector(".tab-btn");
     if (activeBtn) updateTabIndicator(activeBtn);
-  });
+  }
+  requestAnimationFrame(refreshTabIndicator);
+  setTimeout(refreshTabIndicator, 60);
+  setTimeout(refreshTabIndicator, 180);
+  setTimeout(refreshTabIndicator, 360);
+
+  window.addEventListener("resize", refreshTabIndicator);
 
   // Make switchTab accessible globally
   window.switchTab = switchTab;
 
   // Global Hardware Back Button Handler
   window.handleAppBackButton = function() {
+    // 0. Close TTML spotlight guide if open
+    const spotlight = document.getElementById("ttmlSpotlightOverlay");
+    if (spotlight && !spotlight.classList.contains("hidden")) {
+      if (window.nimiyoMusicPlayer && typeof window.nimiyoMusicPlayer.dismissTtmlSpotlight === "function") {
+        window.nimiyoMusicPlayer.dismissTtmlSpotlight();
+      } else {
+        spotlight.classList.add("hidden");
+        try { localStorage.setItem("nimiyo_ttml_spotlight_v2", "true"); } catch (_) {}
+      }
+      return true;
+    }
+
     // 1. Close Lyrics modal if open
     const lyricsModal = document.getElementById("musicLyricsModal");
     if (lyricsModal && !lyricsModal.classList.contains("hidden")) {
@@ -4179,6 +4324,7 @@ function setupEventListeners() {
     });
   };
 
+  bindChange("settingStartupPage", "startupPage");
   bindChange("settingLanguage", "language");
   bindChange("settingUiTheme", "uiTheme", false, applyUiTheme);
   bindChange("settingAccentColor", "accentColor", false, applyAccentColor);
@@ -5142,7 +5288,7 @@ function renderResult(result, platform, activeMethod) {
     // Single image/video/audio preview
     let detectedMainType = result.type;
     if (!detectedMainType) {
-      if (platform === "spotify" || platform === "applemusic" || platform === "bandcamp") {
+      if (platform === "spotify" || platform === "applemusic" || platform === "bandcamp" || platform === "soundcloud") {
         detectedMainType = "audio";
       } else if (photoUrls.length > 0) {
         detectedMainType = "photo";
@@ -5719,27 +5865,27 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
 
       if (window.scrapr?.scraperFetch) {
         resData = await window.scrapr.scraperFetch({
-          url: "https://soundloaders.app/action/tracks",
+          url: "https://spotimate.io/action/tracks",
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
             "X-Requested-With": "XMLHttpRequest",
-            Referer: "https://soundloaders.app/",
-            Origin: "https://soundloaders.app"
+            Referer: "https://spotimate.io/",
+            Origin: "https://spotimate.io"
           },
           data: formBody,
           rawResponse: true
-        }, "SoundLoaders Track Resolve");
+        }, "Spotimate Track Resolve");
       } else {
-        const res = await fetch("https://soundloaders.app/action/tracks", {
+        const res = await fetch("https://spotimate.io/action/tracks", {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
             "X-Requested-With": "XMLHttpRequest",
-            Referer: "https://soundloaders.app/",
-            Origin: "https://soundloaders.app"
+            Referer: "https://spotimate.io/",
+            Origin: "https://spotimate.io"
           },
           body: formBody
         });
@@ -5769,13 +5915,13 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
       let resolvedUrl = "";
       doc.querySelectorAll("a").forEach(a => {
         const link = a.getAttribute("href");
-        if (link && link.startsWith("http") && !link.includes("soundloaders.app")) {
+        if (link && link.startsWith("http") && !link.includes("spotimate.io") && !link.includes("soundloaders.app")) {
           resolvedUrl = link;
         }
       });
 
       if (!resolvedUrl) {
-        throw new Error("[NETWORK DOWNLOAD FAILED] Could not find download link in SoundLoaders response.");
+        throw new Error("[NETWORK DOWNLOAD FAILED] Could not find download link in Spotimate response.");
       }
       downloadUrl = resolvedUrl;
     } catch (e) {

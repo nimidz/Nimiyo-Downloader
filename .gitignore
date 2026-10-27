@@ -24,12 +24,23 @@ android/**/build/
 /*Screenshot*.jpg
 /*.woff2
 *.log
+logcat*.txt
+check_screen*.png
+*.mp4
+!assets/**
+
+# Reference & external scrapers (non-Nimiyo sources)
+ContohJS_untukScraper_PastikanHanyaMenyontekCode/
+edjing_dump/
+search_contoh.js
 
 # Explicitly track assets directory
 !assets/
 !assets/**
 
-# IDE & OS
+# IDE, Agent, & OS
+.agents/
+Rules/
 .idea/
 .vscode/
 *.swp

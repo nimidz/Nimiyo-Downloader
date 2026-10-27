@@ -3,7 +3,7 @@
 // Localization dictionary for Share Dialog
 const shareTranslations = {
   en: {
-    panelTitle: "NIMIYO Quick Save 🐤",
+    panelTitle: "NIMIYO Quick Save",
     panelSub: "Analyze & download media",
     analyzing: "Analyzing link...",
     cancel: "Cancel",
@@ -44,7 +44,7 @@ const shareTranslations = {
     downloadFailedManualServer: "Download Failed - Switch Server"
   },
   id: {
-    panelTitle: "NIMIYO Simpan 🐤",
+    panelTitle: "NIMIYO Simpan",
     panelSub: "Analisis & unduh media",
     analyzing: "Menganalisis tautan...",
     cancel: "Batal",
@@ -85,7 +85,7 @@ const shareTranslations = {
     downloadFailedManualServer: "Download Gagal - Ganti Server"
   },
   zh: {
-    panelTitle: "NIMIYO 保存 🐤",
+    panelTitle: "NIMIYO 保存",
     panelSub: "解析并下载媒体",
     analyzing: "正在解析链接...",
     cancel: "取消",
@@ -126,7 +126,7 @@ const shareTranslations = {
     downloadFailedManualServer: "下载失败 - 请切换服务器"
   },
   ja: {
-    panelTitle: "NIMIYO 保存 🐤",
+    panelTitle: "NIMIYO 保存",
     panelSub: "メディアの解析とダウンロード",
     analyzing: "リンクを解析中...",
     cancel: "キャンセル",
@@ -184,6 +184,7 @@ const platformMapping = {
   twitter: { name: "Twitter / X", domains: /(twitter\.com|x\.com)/i, color: "#1DA1F2" },
   spotify: { name: "Spotify", domains: /(spotify\.com)/i, color: "#1ED760" },
   applemusic: { name: "Apple Music", domains: /(music\.apple\.com)/i, color: "#FA576E" },
+  soundcloud: { name: "SoundCloud", domains: /(soundcloud\.com|on\.soundcloud\.com)/i, color: "#FF5500" },
   facebook: { name: "Facebook", domains: /(facebook\.com|fb\.watch|fb\.com)/i, color: "#1877F2" },
   threads: { name: "Threads", domains: /(threads\.(?:net|com))/i, color: "#000000" },
   pinterest: { name: "Pinterest", domains: /(pinterest\.com|pin\.it)/i, color: "#E60023" },
@@ -200,6 +201,7 @@ const fallbackChains = {
   instagram: ['snapsave', 'indown', 'direct'],
   facebook: ['snapsave', 'direct'],
   spotify: ['spotidown', 'soundloaders', 'direct'],
+  soundcloud: ['forhub', 'klickaud', 'direct'],
   twitter: ['direct', 'tweeload', 'tvd'],
   youtube: ['ytmp3', 'direct'],
   applemusic: ['aplmate', 'direct'],
@@ -210,7 +212,7 @@ const fallbackChains = {
   bandcamp: ['bandcampdownloader', 'direct'],
   pixiv: ['direct'],
   rednote: ['direct'],
-  shopee: ['svxtract', 'direct']
+  shopee: ['direct', 'svxtract']
 };
 
 function t(key, params = {}) {
@@ -428,6 +430,7 @@ function detectMediaCategory(dlItem, mediaResult) {
     platform === "spotify" ||
     platform === "applemusic" ||
     platform === "bandcamp" ||
+    platform === "soundcloud" ||
     itemType.includes("[MP3]") ||
     itemType.includes("MP3") ||
     itemType.includes("AUDIO") ||
@@ -1113,12 +1116,13 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
           window.__nimiyoShareCallbacks[reqId] = resolve;
           window.NimiyoShareBridge.httpRequestAsync(
             JSON.stringify({
-              url: "https://soundloaders.app/action/tracks",
+              url: "https://spotimate.io/action/tracks",
               method: "POST",
               data: formBody,
               headers: {
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-                "Referer": "https://soundloaders.app/"
+                "Referer": "https://spotimate.io/",
+                "Origin": "https://spotimate.io"
               }
             }),
             reqId
@@ -1127,12 +1131,13 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
         resData = typeof rawRes === "object" ? rawRes : JSON.parse(rawRes);
       } else if (window.scrapr?.scraperFetch) {
         resData = await window.scrapr.scraperFetch({
-          url: "https://soundloaders.app/action/tracks",
+          url: "https://spotimate.io/action/tracks",
           method: "POST",
           data: formBody,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "Referer": "https://soundloaders.app/"
+            "Referer": "https://spotimate.io/",
+            "Origin": "https://spotimate.io"
           }
         });
       }
@@ -1147,11 +1152,11 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
       let resolvedUrl = "";
       doc.querySelectorAll("a").forEach(a => {
         const link = a.getAttribute("href");
-        if (link && link.startsWith("http") && !link.includes("soundloaders.app")) {
+        if (link && link.startsWith("http") && !link.includes("spotimate.io") && !link.includes("soundloaders.app")) {
           resolvedUrl = link;
         }
       });
-      if (!resolvedUrl) throw new Error("Could not resolve SoundLoaders download link.");
+      if (!resolvedUrl) throw new Error("Could not resolve Spotimate download link.");
       downloadUrl = resolvedUrl;
     }
 
@@ -1215,7 +1220,7 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
       if (res && res.success) {
         saveToHistory(sanitizedFilename, result, dlItem, isAudio ? "audio" : mediaCategory);
         if (optBtn) {
-          optBtn.innerText = "✓ Selesai";
+          optBtn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Selesai';
           optBtn.disabled = true;
         }
 
@@ -1251,7 +1256,7 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
       a.download = sanitizedFilename;
       a.click();
       if (optBtn) {
-        optBtn.innerText = "✓ Selesai";
+        optBtn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Selesai';
         optBtn.disabled = true;
       }
       saveToHistory(sanitizedFilename, result, dlItem, isAudio ? "audio" : mediaCategory);
@@ -1391,7 +1396,7 @@ async function executeBatchDownload(items, result) {
       );
     }
   } else {
-    updateDownloadProgressCard(true, `✓ ${successCount}/${total} berkas selesai diunduh!`, 100);
+    updateDownloadProgressCard(true, `${successCount}/${total} berkas selesai diunduh!`, 100);
 
     if (window.NimiyoShareBridge && window.NimiyoShareBridge.showBatchNotification) {
       window.NimiyoShareBridge.showBatchNotification(
@@ -1406,7 +1411,7 @@ async function executeBatchDownload(items, result) {
   }
 
   if (allBtn) {
-    allBtn.innerText = `✓ SEMUA SELESAI (${successCount}/${total})`;
+    allBtn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg> ' + `SEMUA SELESAI (${successCount}/${total})`;
     allBtn.disabled = true;
   }
 

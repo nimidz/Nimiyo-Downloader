@@ -51,14 +51,17 @@
         var theme = "neobrutalism";
         var darkMode = false;
         var accent = "yellow";
+        var startup = "home";
         if (raw) {
           var s = JSON.parse(raw);
           if (s.uiTheme) theme = s.uiTheme;
           if (typeof s.darkMode === "boolean") darkMode = s.darkMode;
           if (s.accentColor) accent = s.accentColor;
+          if (s.startupPage) startup = s.startupPage;
         }
         document.body.className = "theme-" + theme + (darkMode ? " dark-mode" : " light-mode");
         document.body.setAttribute("data-accent", accent);
+        window.__NIMIYO_STARTUP_PAGE__ = startup;
       } catch (e) {}
     })();
   </script>
@@ -293,7 +296,7 @@
               <img src="icon_untukdi_aboutthisapp.webp" alt="Nimiyo App Logo" class="about-logo">
               <div class="about-title-group">
                 <h4>NIMIYO Downloader</h4>
-                <div class="about-badge-pill" data-i18n="aboutVersion">v2.2.1 (Lite)</div>
+                <div class="about-badge-pill" data-i18n="aboutVersion">v2.3.0 (Lite)</div>
               </div>
             </div>
 
@@ -343,12 +346,12 @@
 
             <!-- Support / Trakteer Button -->
             <a href="https://trakteer.id/nimidz" target="_blank" class="trakteer-btn">
-              <span class="trakteer-icon">☕</span>
+              <span class="trakteer-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg></span>
               <div class="trakteer-text-group">
                 <span class="trakteer-title" data-i18n="btnSupportMe">Dukung Saya (Trakteer)</span>
                 <span class="trakteer-sub" data-i18n="supportDesc">Bantu pengembangan NIMIYO agar terus update</span>
               </div>
-              <span class="trakteer-arrow">➔</span>
+              <span class="trakteer-arrow"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span>
             </a>
 
             <!-- Thanks To -->
@@ -435,6 +438,14 @@
           </div>
           <div class="settings-list">
             <div class="setting-item">
+              <label for="settingStartupPage" data-i18n="labelStartupPage">Startup Page</label>
+              <select id="settingStartupPage">
+                <option value="home" data-i18n="optStartupHome">Home</option>
+                <option value="player" data-i18n="optStartupPlayer">Player</option>
+                <option value="history" data-i18n="optStartupHistory">Riwayat</option>
+              </select>
+            </div>
+            <div class="setting-item">
               <label for="settingUiTheme" data-i18n="labelUiTheme">UI Design</label>
               <select id="settingUiTheme">
                 <option value="neobrutalism" data-i18n="optThemeNeobrutalism">Neo-Brutalism</option>
@@ -494,9 +505,9 @@
             <div class="setting-item stacked">
               <label data-i18n="labelStoragePaths">Storage Paths</label>
               <div class="storage-info-chips">
-                <span class="info-chip">🎬 Downloads/Nimiyo/VideoYo</span>
-                <span class="info-chip">🎵 Downloads/Nimiyo/AudioYo</span>
-                <span class="info-chip">🖼️ Downloads/Nimiyo/ImageYo</span>
+                <span class="info-chip"><svg class="chip-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>Downloads/Nimiyo/VideoYo</span>
+                <span class="info-chip"><svg class="chip-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>Downloads/Nimiyo/AudioYo</span>
+                <span class="info-chip"><svg class="chip-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>Downloads/Nimiyo/ImageYo</span>
               </div>
             </div>
             <div class="setting-item">
@@ -716,7 +727,7 @@
       <div class="tab-body player-body">
         <!-- Permission Prompt Card (shown when audio permission is not yet granted) -->
         <div id="playerPermissionPrompt" class="player-permission-card hidden">
-          <div class="perm-icon">🔐</div>
+          <div class="perm-icon"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
           <div class="perm-content">
             <h4 data-i18n="musicPermRequiredTitle">Lagu tidak terdeteksi</h4>
             <p data-i18n="musicPermRequiredDesc">Izinkan aplikasi untuk mengelola seluruh file musik di perangkat, Tentu ini aman.</p>
@@ -797,13 +808,6 @@
           </div>
         </div>
         <div class="mini-player-right">
-          <!-- Mini Visualizer -->
-          <div id="miniPlayerVisualizer" class="mini-visualizer">
-            <span class="visualizer-bar bar-1"></span>
-            <span class="visualizer-bar bar-2"></span>
-            <span class="visualizer-bar bar-3"></span>
-            <span class="visualizer-bar bar-4"></span>
-          </div>
           <button id="miniPlayerPlayBtn" class="icon-btn mini-player-btn play-btn" aria-label="Play/Pause">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
               <polygon points="5 3 19 12 5 21 5 3"></polygon>
@@ -870,6 +874,29 @@
         <span data-i18n="tabSettings">SETTINGS</span>
       </button>
     </nav>
+    <script>
+      (function() {
+        try {
+          var startup = window.__NIMIYO_STARTUP_PAGE__;
+          if (startup && startup !== 'home') {
+            var homePane = document.getElementById('tab-home');
+            var targetPane = document.getElementById('tab-' + startup);
+            if (homePane && targetPane) {
+              homePane.classList.add('hidden');
+              homePane.classList.remove('active');
+              targetPane.classList.remove('hidden');
+              targetPane.classList.add('active');
+            }
+            var homeBtn = document.getElementById('btn-home');
+            var targetBtn = document.getElementById('btn-' + startup);
+            if (homeBtn && targetBtn) {
+              homeBtn.classList.remove('active');
+              targetBtn.classList.add('active');
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
 
   </div>
 
@@ -955,7 +982,7 @@
   <div id="updateModal" class="window-popup-overlay hidden">
     <div class="window-popup-card update-modal-card">
       <div class="modal-header">
-        <h3 data-i18n="updateModalTitle">Pembaruan Tersedia 🚀</h3>
+        <h3 data-i18n="updateModalTitle"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 6px;"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>Pembaruan Tersedia</h3>
         <button id="closeUpdateModalBtn" class="icon-btn" aria-label="Close">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"
             stroke-linecap="round" stroke-linejoin="round">
@@ -966,7 +993,7 @@
       </div>
       <div class="modal-body update-modal-body">
         <div class="update-banner">
-          <div class="update-version-badge" id="updateVersionBadge">v2.2.1</div>
+          <div class="update-version-badge" id="updateVersionBadge">v2.3.0</div>
           <div class="update-app-title">NIMIYO Downloader (Lite)</div>
         </div>
         <div class="update-changelog-box">
@@ -1021,7 +1048,7 @@
     <div class="window-popup-card rules-modal-card">
       <div class="modal-header">
         <div class="modal-header-icon-title">
-          <span class="rules-shield-icon">🛡️</span>
+          <span class="rules-shield-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></span>
           <h3 data-i18n="rulesModalTitle">Ketentuan & Aturan Aplikasi</h3>
         </div>
         <button id="closeRulesModalBtn" class="icon-btn" aria-label="Close">
@@ -1040,7 +1067,7 @@
 
         <div class="rules-section-box danger-box">
           <div class="rules-box-heading">
-            <span class="rules-box-badge danger" data-i18n="rulesBadgeProhibited">❌ DILARANG KERAS</span>
+            <span class="rules-box-badge danger"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg><span data-i18n="rulesBadgeProhibited">DILARANG KERAS</span></span>
             <span class="rules-box-title" data-i18n="rulesProhibitedTitle">Konten yang Dilarang Diunduh:</span>
           </div>
           <ul class="rules-items-list" id="rulesProhibitedList">
@@ -1057,7 +1084,7 @@
 
         <div class="rules-section-box info-box">
           <div class="rules-box-heading">
-            <span class="rules-box-badge info" data-i18n="rulesBadgeDisclaimer">⚖️ KETENTUAN & HAK CIPTA</span>
+            <span class="rules-box-badge info"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10"></path><path d="M12 3v18"></path><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path></svg><span data-i18n="rulesBadgeDisclaimer">KETENTUAN & HAK CIPTA</span></span>
             <span class="rules-box-title" data-i18n="rulesDisclaimerTitle">Hak Cipta & Disclaimer:</span>
           </div>
           <ul class="rules-items-list" id="rulesDisclaimerList">
@@ -1081,12 +1108,14 @@
 
   <!-- Full Player Modal / Bottom Sheet -->
   <div id="fullPlayerModal" class="full-player-overlay hidden">
+    <div class="full-player-backdrop-art" id="fullPlayerBackdropArt"></div>
+    <div class="full-player-backdrop-scrim" id="fullPlayerBackdropScrim"></div>
     <div class="full-player-backdrop-glow" id="fullPlayerBackdropGlow"></div>
     <div class="full-player-container">
       <!-- Header -->
       <div class="full-player-header">
-        <button id="closeFullPlayerBtn" class="icon-btn full-player-close-btn" aria-label="Minimize">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <button id="closeFullPlayerBtn" class="full-player-icon-btn full-player-close-btn" aria-label="Minimize">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="6 9 12 15 18 9"></polyline>
           </svg>
         </button>
@@ -1094,8 +1123,8 @@
           <span class="now-playing-label" data-i18n="musicNowPlaying">NOW PLAYING</span>
         </div>
         <div class="full-player-header-actions">
-          <button id="fullPlayerQueueBtn" class="icon-btn" aria-label="Queue" title="Queue">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <button id="fullPlayerQueueBtn" class="full-player-icon-btn full-player-queue-btn" aria-label="Queue" title="Queue">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="8" y1="6" x2="21" y2="6"></line>
               <line x1="8" y1="12" x2="21" y2="12"></line>
               <line x1="8" y1="18" x2="21" y2="18"></line>
@@ -1104,8 +1133,8 @@
               <line x1="3" y1="18" x2="3.01" y2="18"></line>
             </svg>
           </button>
-          <button id="fullPlayerMoreBtn" class="icon-btn" aria-label="More Options" title="Options">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5">
+          <button id="fullPlayerMoreBtn" class="full-player-icon-btn full-player-more-btn" aria-label="More Options" title="Options">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5">
               <circle cx="12" cy="12" r="1.5"></circle>
               <circle cx="12" cy="5" r="1.5"></circle>
               <circle cx="12" cy="19" r="1.5"></circle>
@@ -1116,7 +1145,7 @@
 
       <!-- Stage Section (Holds both Big Artwork Stage and Flowing Full-Stage Lyrics Stage) -->
       <div class="full-player-stage" id="fullPlayerStage">
-        <!-- Stage 1: Big Album Artwork & Visualizer -->
+        <!-- Stage 1: Big Album Artwork -->
         <div id="fullPlayerArtStage" class="full-player-art-stage">
           <div id="fullPlayerArtCard" class="full-player-art-card" title="Ketuk untuk membuka lirik lagu">
             <img id="fullPlayerArt" src="" alt="Album Artwork">
@@ -1126,15 +1155,6 @@
               </svg>
               <span data-i18n="musicTapForLyrics">Lirik Lagu</span>
             </div>
-          </div>
-
-          <div id="fullPlayerVisualizer" class="full-visualizer">
-            <span class="visualizer-bar bar-1"></span>
-            <span class="visualizer-bar bar-2"></span>
-            <span class="visualizer-bar bar-3"></span>
-            <span class="visualizer-bar bar-4"></span>
-            <span class="visualizer-bar bar-5"></span>
-            <span class="visualizer-bar bar-6"></span>
           </div>
         </div>
 
@@ -1149,16 +1169,11 @@
               </div>
             </div>
             <div class="lyrics-stage-actions">
-              <button id="toggleLyricsCoverBtn" class="lyrics-action-icon-btn lyrics-cover-toggle-btn" title="Tampilkan Cover" aria-label="Cover">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                  <polyline points="21 15 16 10 5 21"></polyline>
-                </svg>
+              <button id="toggleTtmlModeBtn" class="full-player-icon-btn lyrics-ttml-toggle-btn hidden" style="display: none;" data-i18n-title="ttmlModeTitle" title="Ganti Mode Lirik" aria-label="Ganti Mode Lirik">
+                <span class="ttml-btn-badge" id="ttmlBtnBadge">TTML⇋</span>
               </button>
-
-              <button id="openEditLyricsBtn" class="lyrics-action-icon-btn lyrics-edit-toggle-btn" data-i18n-title="editLyricsTitle" title="Edit Lirik" aria-label="Edit Lirik">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <button id="openEditLyricsBtn" class="full-player-icon-btn lyrics-edit-toggle-btn" data-i18n-title="editLyricsTitle" title="Edit Lirik" aria-label="Edit Lirik">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M4 6h8"></path>
                   <path d="M4 12h6"></path>
                   <path d="M4 18h8"></path>
@@ -1170,13 +1185,9 @@
 
           <!-- Flowing Lyrics Scroll Area -->
           <div id="fullPlayerLyricsScroll" class="full-player-flowing-lyrics">
-            <!-- Dynamically populated synced lyrics lines -->
-          </div>
-
-          <!-- Floating Seek Indicator when User Scrolls / Drags Lyrics -->
-          <div id="lyricsSeekPill" class="lyrics-seek-pill hidden">
-            <span class="seek-icon">▶</span>
-            <span id="lyricsSeekTime">00:00</span>
+            <div id="fullPlayerLyricsTrack" class="full-player-lyrics-track">
+              <!-- Dynamically populated synced lyrics lines -->
+            </div>
           </div>
         </div>
       </div>
@@ -1204,8 +1215,8 @@
 
       <!-- Controls -->
       <div class="full-player-controls-section">
-        <button id="fullPlayerShuffleBtn" class="icon-btn control-btn" aria-label="Shuffle" title="Shuffle">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <button id="fullPlayerShuffleBtn" class="full-player-icon-btn full-player-shuffle-btn" aria-label="Shuffle" title="Shuffle">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="16 3 21 3 21 8"></polyline>
             <line x1="4" y1="20" x2="21" y2="3"></line>
             <polyline points="21 16 21 21 16 21"></polyline>
@@ -1213,25 +1224,25 @@
             <line x1="4" y1="4" x2="9" y2="9"></line>
           </svg>
         </button>
-        <button id="fullPlayerPrevBtn" class="icon-btn control-btn" aria-label="Previous" title="Previous">
-          <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+        <button id="fullPlayerPrevBtn" class="full-player-icon-btn full-player-prev-btn" aria-label="Previous" title="Previous">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
             <polygon points="19 20 9 12 19 4 19 20"></polygon>
             <line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="3" stroke-linecap="round"></line>
           </svg>
         </button>
-        <button id="fullPlayerPlayBtn" class="btn primary-btn play-circle-btn" aria-label="Play/Pause">
-          <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor">
+        <button id="fullPlayerPlayBtn" class="full-player-icon-btn full-player-play-btn" aria-label="Play/Pause">
+          <svg viewBox="0 0 24 24" width="36" height="36" fill="currentColor">
             <polygon points="5 3 19 12 5 21 5 3"></polygon>
           </svg>
         </button>
-        <button id="fullPlayerNextBtn" class="icon-btn control-btn" aria-label="Next" title="Next">
-          <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+        <button id="fullPlayerNextBtn" class="full-player-icon-btn full-player-next-btn" aria-label="Next" title="Next">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
             <polygon points="5 4 15 12 5 20 5 4"></polygon>
             <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="3" stroke-linecap="round"></line>
           </svg>
         </button>
-        <button id="fullPlayerRepeatBtn" class="icon-btn control-btn repeat-btn" aria-label="Repeat" title="Repeat">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <button id="fullPlayerRepeatBtn" class="full-player-icon-btn full-player-repeat-btn" aria-label="Repeat" title="Repeat">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="17 1 21 5 17 9"></polyline>
             <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
             <polyline points="7 23 3 19 7 15"></polyline>
@@ -1241,29 +1252,18 @@
         </button>
       </div>
 
-      <!-- Volume Bar Section -->
-      <div class="full-player-volume-section">
-        <button id="fullPlayerVolumeIconBtn" class="icon-btn volume-icon-btn" aria-label="Mute/Unmute">
-          <svg id="fullPlayerVolumeIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-          </svg>
-        </button>
-        <input type="range" id="fullPlayerVolumeSlider" class="volume-slider" min="0" max="100" value="100" step="1">
-      </div>
-
       <!-- Secondary Action Dock (Sleep Timer, Playback Speed) -->
       <div class="full-player-secondary-dock">
-        <button id="fullPlayerSleepTimerBtn" class="dock-action-btn">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <button id="fullPlayerSleepTimerBtn" class="full-player-dock-btn">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <polyline points="12 6 12 12 16 14"></polyline>
           </svg>
           <span data-i18n="musicSleepTimerBtn">TIMER</span>
           <span id="fullPlayerSleepTimerBadge" class="action-mini-badge hidden"></span>
         </button>
-        <button id="fullPlayerSpeedBtn" class="dock-action-btn" data-i18n-title="mixtoolsTitle" title="MixTools">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <button id="fullPlayerSpeedBtn" class="full-player-dock-btn" data-i18n-title="mixtoolsTitle" title="MixTools">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="4" y1="21" x2="4" y2="14"></line>
             <line x1="4" y1="10" x2="4" y2="3"></line>
             <line x1="12" y1="21" x2="12" y2="12"></line>
@@ -1285,7 +1285,7 @@
     <div class="window-popup-card queue-modal-card">
       <div class="modal-header">
         <div class="modal-header-icon-title">
-          <span class="queue-icon">📜</span>
+          <span class="queue-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></span>
           <h3 data-i18n="musicQueueTitle">Antrean Musik</h3>
         </div>
         <button id="closeQueueModalBtn" class="icon-btn" aria-label="Close">
@@ -1320,7 +1320,7 @@
     <div class="window-popup-card lyrics-modal-card">
       <div class="modal-header">
         <div class="modal-header-icon-title">
-          <span class="lyrics-icon">🎤</span>
+          <span class="lyrics-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg></span>
           <div>
             <h3 id="lyricsModalTitle" class="lyrics-header-title">Lirik Lagu</h3>
             <span id="lyricsModalArtist" class="lyrics-header-artist">Artist</span>
@@ -1349,7 +1349,7 @@
     <div class="window-popup-card edit-lyrics-modal-card">
       <div class="modal-header">
         <div class="modal-header-icon-title">
-          <span class="modal-icon">📝</span>
+          <span class="modal-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg></span>
           <div>
             <h3 class="modal-title" data-i18n="editLyricsTitle">Edit Lirik</h3>
             <span id="editLyricsTrackTitle" class="modal-subtitle">Track Title</span>
@@ -1364,7 +1364,7 @@
       </div>
       <div class="modal-body edit-lyrics-modal-body">
         <div class="edit-lyrics-help-banner">
-          <span class="help-icon">💡</span>
+          <span class="help-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"></path></svg></span>
           <span class="help-text" data-i18n="editLyricsFormatHelp">Format: <code>[00:00.00] Lirik di sini</code> (menit:detik.milidetik)</span>
         </div>
         <textarea id="editLyricsTextarea" class="edit-lyrics-textarea" data-i18n-placeholder="editLyricsPlaceholder" placeholder="[00:00.00] Baris lirik pertama...&#10;[00:15.30] Baris lirik kedua..." spellcheck="false"></textarea>
@@ -1403,12 +1403,71 @@
     </div>
   </div>
 
+  <!-- Edit TTML Lyrics Modal (Word-by-Word / Syllable Synced) -->
+  <div id="editTtmlModal" class="window-popup-overlay hidden">
+    <div class="window-popup-card edit-lyrics-modal-card">
+      <div class="modal-header">
+        <div class="modal-header-icon-title">
+          <span class="modal-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></span>
+          <div>
+            <h3 class="modal-title" data-i18n="editTtmlTitle">Edit Lirik TTML</h3>
+            <span id="editTtmlTrackTitle" class="modal-subtitle">Track Title • Word-by-Word</span>
+          </div>
+        </div>
+        <button id="closeEditTtmlModalBtn" class="icon-btn" data-i18n-title="btnClose" aria-label="Tutup">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body edit-lyrics-modal-body">
+        <div class="edit-lyrics-help-banner">
+          <span class="help-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"></path></svg></span>
+          <span class="help-text" data-i18n="editTtmlFormatHelp">Format: Dokumen XML TTML kata-per-kata <code>&lt;p begin=".."&gt;&lt;span begin=".."&gt;Kata&lt;/span&gt;&lt;/p&gt;</code></span>
+        </div>
+        <textarea id="editTtmlTextarea" class="edit-lyrics-textarea" placeholder="&lt;tt&gt;...&lt;/tt&gt;" spellcheck="false"></textarea>
+
+        <!-- Baris Tombol Aksi TTML: REFRESH BETTERLYRICS | IMPORT TTML -->
+        <div class="edit-lyrics-top-actions">
+          <button id="refreshTtmlBtn" type="button" class="btn outline-btn edit-top-action-btn" data-i18n-title="editTtmlRefreshTitle" title="Cari TTML di BetterLyrics">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path>
+            </svg>
+            <span>BETTERLYRICS</span>
+          </button>
+          <button id="importTtmlBtn" type="button" class="btn outline-btn edit-top-action-btn" data-i18n-title="editTtmlImportTitle" title="Import file lirik .TTML atau .XML">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>IMPORT TTML</span>
+          </button>
+          <input type="file" id="importTtmlFileInput" accept=".ttml,.xml,.txt" style="display: none;">
+        </div>
+      </div>
+      <div class="modal-footer edit-lyrics-modal-footer-row">
+        <button id="cancelEditTtmlBtn" class="btn outline-btn edit-footer-btn" data-i18n="btnCancel">BATAL</button>
+        <button id="saveEditTtmlBtn" class="btn primary-btn edit-footer-btn" data-i18n="btnSave">SIMPAN TTML</button>
+        <button id="downloadTtmlFileBtn" class="btn outline-btn edit-footer-btn download-lrc-icon-btn" title="Download file .TTML">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>.TTML</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Reset / Search Lyrics Modal -->
   <div id="resetLyricsModal" class="window-popup-overlay hidden">
     <div class="window-popup-card reset-lyrics-modal-card">
       <div class="modal-header">
         <div class="modal-header-icon-title">
-          <span class="modal-icon">🔄</span>
+          <span class="modal-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path><path d="M16 21h5v-5"></path></svg></span>
           <div>
             <h3 class="modal-title" data-i18n="resetLyricsTitle">Pilihan Reset Lirik</h3>
             <span id="resetLyricsTrackTitle" class="modal-subtitle" data-i18n="resetLyricsSubtitle">Pilih sumber pencarian lirik</span>
@@ -1422,16 +1481,24 @@
         </button>
       </div>
       <div class="modal-body reset-lyrics-modal-body">
-        <button id="resetLyricsDefaultBtn" type="button" class="reset-lyric-option-btn">
-          <div class="option-icon-box">🌐</div>
+        <button id="resetLyricsKugouBtn" type="button" class="reset-lyric-option-btn">
+          <div class="option-icon-box"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg></div>
           <div class="option-text-box">
-            <div class="option-title" data-i18n="resetLyricsOptDefaultTitle">Cari Otomatis (Default / LRCLIB)</div>
-            <div class="option-desc" data-i18n="resetLyricsOptDefaultDesc">Hapus lirik lokal & ambil ulang lirik asli sinkron dari database online</div>
+            <div class="option-title" data-i18n="resetLyricsOptKugouTitle">Cari di KuGou (Presisi Studio / Sinkron)</div>
+            <div class="option-desc" data-i18n="resetLyricsOptKugouDesc">Ambil lirik sinkron presisi tinggi dari database studio KuGou</div>
+          </div>
+        </button>
+
+        <button id="resetLyricsLrclibBtn" type="button" class="reset-lyric-option-btn">
+          <div class="option-icon-box"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></div>
+          <div class="option-text-box">
+            <div class="option-title" data-i18n="resetLyricsOptLrclibTitle">Cari di LRCLIB (Komunitas Global)</div>
+            <div class="option-desc" data-i18n="resetLyricsOptLrclibDesc">Ambil lirik sinkron dari database komunitas global LRCLIB</div>
           </div>
         </button>
 
         <button id="resetLyricsLyricsifyBtn" type="button" class="reset-lyric-option-btn">
-          <div class="option-icon-box">🔍</div>
+          <div class="option-icon-box"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div>
           <div class="option-text-box">
             <div class="option-title" data-i18n="resetLyricsOptLyricsifyTitle">Cari di Lyricsify.com</div>
             <div class="option-desc" data-i18n="resetLyricsOptLyricsifyDesc">Buka pencarian lagu ini di Lyricsify via browser untuk salin lirik .LRC</div>
@@ -1439,7 +1506,7 @@
         </button>
 
         <button id="resetLyricsImportBtn" type="button" class="reset-lyric-option-btn">
-          <div class="option-icon-box">📂</div>
+          <div class="option-icon-box"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></div>
           <div class="option-text-box">
             <div class="option-title" data-i18n="resetLyricsOptImportTitle">Import File .LRC Lokal</div>
             <div class="option-desc" data-i18n="resetLyricsOptImportDesc">Pilih file lirik .lrc atau .txt yang tersimpan di HP Anda</div>
@@ -1454,7 +1521,7 @@
     <div class="window-popup-card options-modal-card">
       <div class="modal-header">
         <div class="modal-header-icon-title">
-          <span class="modal-icon">⏱️</span>
+          <span class="modal-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></span>
           <h3 data-i18n="musicSleepTimerTitle">Sleep Timer</h3>
         </div>
         <button id="closeSleepTimerModalBtn" class="icon-btn" aria-label="Close">
@@ -1486,7 +1553,7 @@
     <div class="window-popup-card options-modal-card mixtools-modal-card">
       <div class="modal-header">
         <div class="modal-header-icon-title">
-          <span class="modal-icon">🎛️</span>
+          <span class="modal-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg></span>
           <h3 data-i18n="mixtoolsTitle">MixTools</h3>
         </div>
         <div class="modal-header-actions-right">
@@ -1569,7 +1636,6 @@
                   <div class="puck-core"></div>
                 </div>
               </div>
-            </div>
             <div class="reverb-pad-hint" data-i18n="mixtoolsReverbHint">Atas = Luas • Kanan = Gema</div>
           </div>
         </div>
@@ -1632,7 +1698,7 @@
     <div class="window-popup-card options-modal-card">
       <div class="modal-header">
         <div class="modal-header-icon-title">
-          <span class="modal-icon">🔀</span>
+          <span class="modal-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"></path><path d="M7 20V4"></path><path d="m21 8-4-4-4 4"></path><path d="M17 4v16"></path></svg></span>
           <h3 data-i18n="musicSortModalTitle">Urutkan Berdasarkan</h3>
         </div>
         <button id="closeSortModalBtn" class="icon-btn" aria-label="Close">
@@ -1707,7 +1773,7 @@
 
           <!-- Empty state when 0 playlists exist -->
           <div id="playlistEmptyState" class="playlist-empty-card hidden">
-            <div class="playlist-empty-icon">📂</div>
+            <div class="playlist-empty-icon"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></div>
             <h3 class="playlist-empty-title" data-i18n="playlistEmptyTitle">Belum Ada Playlist</h3>
             <p class="playlist-empty-desc" data-i18n="playlistEmptyDesc">Kumpulkan lagu favoritmu dari NIMIYO, Songs, Artists, dan Album ke dalam daftar putar khusus.</p>
             <button id="playlistEmptyCreateBtn" class="btn primary-btn" style="margin-top: 14px; font-weight: 800;" data-i18n="playlistBtnCreateNew">+ Buat Playlist Baru</button>
@@ -1783,7 +1849,7 @@
             </div>
 
             <div id="playlistTracksEmpty" class="playlist-empty-card hidden">
-              <div class="playlist-empty-icon">🎵</div>
+              <div class="playlist-empty-icon"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg></div>
               <h4 class="playlist-empty-title" data-i18n="playlistDetailEmptyTitle">Playlist Ini Masih Kosong</h4>
               <p class="playlist-empty-desc" data-i18n="playlistDetailEmptyDesc">Tambahkan lagu sekarang dari folder NIMIYO, Songs, Artis, atau Album.</p>
               <button id="playlistTracksEmptyAddBtn" class="btn primary-btn" style="margin-top: 12px; font-weight: 800;" data-i18n="playlistDetailPickSongsBtn">+ Pilih Lagu Sekarang</button>
@@ -1799,7 +1865,7 @@
     <div class="window-popup-card song-picker-card">
       <div class="modal-header">
         <div class="modal-header-icon-title">
-          <span class="modal-icon">🎵</span>
+          <span class="modal-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg></span>
           <div>
             <h3 data-i18n="pickerModalTitle">Pilih Lagu</h3>
             <span class="picker-subtitle" id="pickerSelectedCount">0 dipilih</span>
@@ -1815,7 +1881,7 @@
         <div class="picker-search-wrapper">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" id="pickerSearchInput" placeholder="Cari lagu dalam koleksi..." data-i18n-placeholder="pickerSearchPlaceholder" autocomplete="off" spellcheck="false">
-          <button id="pickerClearSearchBtn" class="clear-btn hidden" aria-label="Clear">✕</button>
+          <button id="pickerClearSearchBtn" class="clear-btn hidden" aria-label="Clear"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
         </div>
 
         <div class="picker-tab-bar">
@@ -1851,7 +1917,7 @@
     <div class="window-popup-card" style="max-width: 360px;">
       <div class="modal-header">
         <div class="modal-header-icon-title">
-          <span class="modal-icon">✨</span>
+          <span class="modal-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path></svg></span>
           <h3 id="createPlaylistDialogTitle" data-i18n="createPlaylistTitle">Playlist Baru</h3>
         </div>
         <button id="closeCreatePlaylistBtn" class="icon-btn" aria-label="Close">
@@ -1876,7 +1942,7 @@
     <div class="window-popup-card" style="max-width: 380px;">
       <div class="modal-header">
         <div class="modal-header-icon-title">
-          <span class="modal-icon">➕</span>
+          <span class="modal-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
           <div>
             <h3 data-i18n="addToPlaylistTitle">Tambah ke Playlist</h3>
             <span class="picker-subtitle" id="addToPlaylistTrackTitle" data-i18n="addToPlaylistSubtitle">Pilih playlist tujuan</span>
@@ -1941,7 +2007,7 @@
     <div class="window-popup-card" style="max-width: 360px;">
       <div class="modal-header">
         <div class="modal-header-icon-title">
-          <span class="modal-icon">📦</span>
+          <span class="modal-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg></span>
           <h3 id="moveTargetModalTitle" data-i18n="moveTargetModalTitle">Pindahkan Lagu Ke</h3>
         </div>
         <button id="closeMoveTargetBtn" class="icon-btn" aria-label="Close">
@@ -1951,14 +2017,14 @@
       <div class="modal-body" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;">
         <p style="font-size: 12px; color: var(--muted-text); margin-bottom: 4px;" data-i18n="moveTargetModalDesc">Pilih tujuan pemindahan untuk lagu yang dipilih:</p>
         <button id="moveOptionPlaylistBtn" class="btn outline-btn move-choice-btn">
-          <span class="choice-icon">📋</span>
+          <span class="choice-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg></span>
           <div class="choice-info">
             <span class="choice-title" data-i18n="moveOptionPlaylistTitle">Playlist</span>
             <span class="choice-desc" data-i18n="moveOptionPlaylistDesc">Kumpulkan ke daftar putar Playlist</span>
           </div>
         </button>
         <button id="moveOptionNimiyoBtn" class="btn outline-btn move-choice-btn">
-          <span class="choice-icon">📁</span>
+          <span class="choice-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></span>
           <div class="choice-info">
             <span class="choice-title" data-i18n="moveOptionNimiyoTitle">Nimiyo</span>
             <span class="choice-desc" data-i18n="moveOptionNimiyoDesc">Pindahkan berkas audio ke folder musik NIMIYO</span>
@@ -1973,7 +2039,7 @@
     <div class="window-popup-card" style="max-width: 360px;">
       <div class="modal-header">
         <div class="modal-header-icon-title">
-          <span class="modal-icon">⚠️</span>
+          <span class="modal-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
           <h3 data-i18n="deleteConfirmModalTitle">Hapus Permanen</h3>
         </div>
         <button id="closeDeleteModalBtn" class="icon-btn" aria-label="Close">
@@ -1988,6 +2054,46 @@
       <div class="picker-modal-footer" style="padding: 12px 20px 20px 20px; display: flex; gap: 10px;">
         <button id="cancelDeleteModalBtn" class="btn outline-btn" style="flex: 1;" data-i18n="btnCancel">Batal</button>
         <button id="confirmDeleteModalBtn" class="btn primary-btn danger-bg" style="flex: 1; font-weight: 800; background: var(--danger-color); color: #fff; border-color: var(--border-color);" data-i18n="btnYes">Ya</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TTML Mode Spotlight Guide Overlay -->
+  <div id="ttmlSpotlightOverlay" class="ttml-spotlight-overlay hidden" aria-hidden="true">
+    <!-- Dark Inward Fluid Stage masked by 100% Perfect Circle -->
+    <div class="spotlight-stage" id="spotlightStage">
+      <div class="spotlight-flow flow-top"></div>
+      <div class="spotlight-flow flow-bottom"></div>
+      <div class="spotlight-flow flow-left"></div>
+      <div class="spotlight-flow flow-right"></div>
+      <div class="spotlight-unified-backdrop" id="spotlightUnifiedBackdrop"></div>
+    </div>
+
+    <!-- Central Focal Aperture & Pulse Rings -->
+    <div class="spotlight-aperture-wrap" id="spotlightApertureWrap">
+      <div class="spotlight-aperture-hole" id="spotlightApertureHole"></div>
+      <div class="spotlight-pulse-ring ring-1"></div>
+      <div class="spotlight-pulse-ring ring-2"></div>
+    </div>
+
+    <!-- Explanation Box in Bottom Right Corner -->
+    <div class="spotlight-guide-card" id="ttmlSpotlightCard">
+      <div class="spotlight-card-content">
+        <div class="spotlight-badge">
+          <span class="spotlight-badge-dot"></span>
+          <span class="spotlight-badge-text" data-i18n="spotlightTtmlTitle">Mode TTML</span>
+        </div>
+        <p class="spotlight-desc" data-i18n="spotlightTtmlDesc">
+          Ketuk tombol ini untuk beralih ke lirik kata-per-kata yang bergerak dinamis.
+        </p>
+      </div>
+      <div class="spotlight-dismiss-row">
+        <div class="spotlight-dismiss-link" id="ttmlSpotlightDismissBtn" role="button" tabindex="0">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span data-i18n="spotlightTtmlGotIt">Mengerti</span>
+        </div>
       </div>
     </div>
   </div>

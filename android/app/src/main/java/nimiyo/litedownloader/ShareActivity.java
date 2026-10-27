@@ -469,6 +469,10 @@ public class ShareActivity extends AppCompatActivity {
                     headers.put("Accept", "*/*");
                     if (fileUrl.contains("spotidown") || fileUrl.contains("spotify")) {
                         headers.put("Referer", "https://spotidown.app/");
+                    } else if (fileUrl.contains("forhub.io") || fileUrl.contains("dl.forhub.io")) {
+                        headers.put("Referer", "https://www.forhub.io/download.php");
+                    } else if (fileUrl.contains("klickaud.org") || fileUrl.contains("dl.klickaud.org")) {
+                        headers.put("Referer", "https://www.klickaud.org/download.php");
                     }
 
                     conn = connectWithRedirects(fileUrl, "GET", headers, null);
