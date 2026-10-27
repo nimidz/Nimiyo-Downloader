@@ -1,20 +1,33 @@
 {
-  "versionCode": 6,
-  "versionName": "2.2.1",
+  "versionCode": 7,
+  "versionName": "2.3.0",
   "minRequiredVersion": "2.0.0",
-  "releaseDate": "2026-09-30",
-  "downloadUrl": "https://github.com/nimidz/Nimiyo-Downloader/releases/download/v2.2.1/Nimiyo.v2.2.1.apk",
+  "releaseDate": "2026-10-28",
+  "downloadUrl": "https://github.com/nimidz/Nimiyo-Downloader/releases/download/v2.3.0/Nimiyo.v2.3.0.apk",
   "changelog": [
-    "Memperbaiki unduhan foto TikTok dari QuickSave yang sempat macet",
-    "Menggabungkan notifikasi banyak unduhan foto menjadi satu notifikasi progres tunggal",
-    "Memperbaiki sinkronisasi Warna Aksen (Accent Color) pada QuickSave dengan aplikasi utama",
-    "Memperbaiki unduhan QuickSave agar tampil di Balon Unduhan Melayang aplikasi utama",
-    "Memperbaiki QuickSave agar tidak memunculkan aplikasi utama ke latar depan saat di Recent Apps",
-    "Memperbaiki kontras teks dan latar belakang pada ekspor file .LRC dan tombol outline di Mode Gelap",
-    "Memperbaiki berbagai kendala unduhan dan notifikasi saat pergantian server",
-    "Menambahkan opsi Tunda (Snooze) pada notifikasi Pembaruan OTA (1 Hari, 3 Hari, 1 Minggu)",
-    "Meningkatkan jendela Pembaruan Tersedia dengan fitur Ingatkan Nanti (Remind Me Later)",
-    "Menambahkan SSSTik sebagai server tambahan TikTok (video tanpa watermark, audio MP3, slide foto)",
-    "Meningkatkan performa dan stabilitas unduhan Twitter/X dengan memprioritaskan server direct FxTwitter"
+    "Menambahkan platform download SoundCloud.",
+    "Menambahkan Kugou sebagai penyedia lirik dengan Hirarki sebagai cadangan.",
+    "Menambahkan Word-by-Word Lyrics untuk lirik TTML.",
+    "Menambahkan pengaturan halaman awal: Home, Player, atau History.",
+    "Memperbaiki audio MixTools yang patah-patah saat CPU tinggi.",
+    "Memperbaiki Mini Player yang menghilang saat aplikasi dibuka atau dimulai ulang.",
+    "Meningkatkan performa MixTools dan mengurangi penggunaan CPU.",
+    "Mengurangi audio patah-patah saat menggunakan Reverb.",
+    "Menghapus efek blur pada Lyrics Preview.",
+    "Menyederhanakan tampilan Now Playing.",
+    "Mempercepat pemuatan lagu agar langsung ditampilkan."
+  ],
+  "changelog_en": [
+    "Added SoundCloud download support.",
+    "Added Kugou lyrics support with Hirarki as a fallback.",
+    "Added Word-by-Word Lyrics support for TTML lyrics.",
+    "Added a Startup Page setting: Home, Player, or History.",
+    "Fixed MixTools audio stuttering under high CPU load.",
+    "Fixed the Mini Player disappearing on startup or restart.",
+    "Improved MixTools performance and reduced CPU usage.",
+    "Reduced audio stuttering when using Reverb.",
+    "Removed the blur effect from Lyrics Preview.",
+    "Simplified the Now Playing interface.",
+    "Improved song loading for faster display."
   ]
 }

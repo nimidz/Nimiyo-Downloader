@@ -7513,7 +7513,10 @@ function showUpdateModal(data) {
 
   if (list) {
     list.innerHTML = "";
-    const changelogs = Array.isArray(data.changelog) ? data.changelog : [data.changelog || "Perbaikan performa & stabilitas."];
+    const isEn = (settings.language || 'id').toLowerCase().startsWith('en');
+    const changelogs = (isEn && Array.isArray(data.changelog_en))
+      ? data.changelog_en
+      : (Array.isArray(data.changelog) ? data.changelog : [data.changelog || "Perbaikan performa & stabilitas."]);
     changelogs.forEach(item => {
       const li = document.createElement("li");
       li.innerText = item;
