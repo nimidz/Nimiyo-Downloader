@@ -249,6 +249,7 @@ Nimiyo-Downloader/
 ## 🤝 Acknowledgements & Credits
 
 - Built with ❤️ by [nimidz](https://github.com/nimidz)
+- Powered by `scrapr` engine by [@coflyn](https://github.com/coflyn)
 - Built with [Capacitor](https://capacitorjs.com/)
 
 ---
