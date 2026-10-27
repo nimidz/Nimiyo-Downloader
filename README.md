@@ -54,11 +54,11 @@
 
 | 4. Settings & UI/UX | 5. Quick Save Floating Panel | 6. Player: TTML Word-by-Word Lyrics |
 | :---: | :---: | :---: |
-| <img src="assets/screenshots/screenshot_04_settings.jpg" width="220" alt="4. Settings Page" /> | <img src="assets/screenshots/screenshot_05_quicksave.jpg" width="220" alt="5. Quick Download Page" /> | <video src="assets/videos/newLyrics_.mp4" controls width="220" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.3);"></video> |
+| <img src="assets/screenshots/screenshot_04_settings.jpg" width="220" alt="4. Settings Page" /> | <img src="assets/screenshots/screenshot_05_quicksave.jpg" width="220" alt="5. Quick Download Page" /> | <a href="assets/videos/newLyrics_.mp4" title="Click to view full MP4 video"><img src="assets/videos/newLyrics_.webp" width="220" alt="6. Player TTML Word-by-Word Lyrics" style="border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.3);" /></a> |
 
 | 7. Player: Classic LRC Synced Lyrics | 8. Multi-Select Song Manager | 9. Custom Playlists |
 | :---: | :---: | :---: |
-| <video src="assets/videos/oldLyrics.mp4" controls width="220" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.3);"></video> | <img src="assets/screenshots/screenshot_08_multiselect.jpg" width="220" alt="8. Multi-Select Songs" /> | <img src="assets/screenshots/screenshot_09_playlist.jpg" width="220" alt="9. Playlist Page" /> |
+| <a href="assets/videos/oldLyrics.mp4" title="Click to view full MP4 video"><img src="assets/videos/oldLyrics.webp" width="220" alt="7. Player Classic LRC Synced Lyrics" style="border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.3);" /></a> | <img src="assets/screenshots/screenshot_08_multiselect.jpg" width="220" alt="8. Multi-Select Songs" /> | <img src="assets/screenshots/screenshot_09_playlist.jpg" width="220" alt="9. Playlist Page" /> |
 
 | 10. Built-in HD Video Player |
 | :---: |
@@ -76,8 +76,8 @@ Experience synchronized singing with our dual-engine lyrics player. Seamlessly t
 
 | 🎵 Classic Synced Lyrics (LRC Mode) | ✨ Word-by-Word Dynamic Lyrics (TTML Mode) |
 | :---: | :---: |
-| <video src="assets/videos/oldLyrics.mp4" controls width="270" style="max-width: 100%; border-radius: 14px; box-shadow: 0 6px 20px rgba(0,0,0,0.35);"></video> | <video src="assets/videos/newLyrics_.mp4" controls width="270" style="max-width: 100%; border-radius: 14px; box-shadow: 0 6px 20px rgba(0,0,0,0.35);"></video> |
-| *Precision line-by-line scrolling & center alignment* | *Real-time syllable highlighting & smooth back-vocal animations* |
+| <a href="assets/videos/oldLyrics.mp4" title="Click to view full MP4 video"><img src="assets/videos/oldLyrics.webp" width="270" alt="Classic LRC Synced Lyrics" style="border-radius: 14px; box-shadow: 0 6px 20px rgba(0,0,0,0.35);" /></a> | <a href="assets/videos/newLyrics_.mp4" title="Click to view full MP4 video"><img src="assets/videos/newLyrics_.webp" width="270" alt="Word-by-Word Dynamic Lyrics" style="border-radius: 14px; box-shadow: 0 6px 20px rgba(0,0,0,0.35);" /></a> |
+| *Precision line-by-line scrolling & center alignment*<br/><sub>▶️ <i>(Klik media untuk melihat video MP4 penuh)</i></sub> | *Real-time syllable highlighting & smooth back-vocal animations*<br/><sub>▶️ <i>(Klik media untuk melihat video MP4 penuh)</i></sub> |
 
 </div>
 
