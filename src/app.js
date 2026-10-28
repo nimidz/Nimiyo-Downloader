@@ -3328,7 +3328,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     checkClipboardOnResume();
   }, 450);
-  checkInstallPermissionStatus();
   checkRulesOnboarding();
 
   // Ensure notification permission is requested on startup
