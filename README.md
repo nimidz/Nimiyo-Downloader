@@ -6,7 +6,7 @@
 
   **A Premium, Ultra-Fast & Lightweight Universal Media Downloader for Android**
 
-  [![Release](https://img.shields.io/badge/Release-v2.3.0--Lite-00C48C.svg?style=for-the-badge&logo=android&logoColor=white)](https://github.com/nimidz/Nimiyo-Downloader/releases)
+  [![Release](https://img.shields.io/badge/Release-v2.3.1--Lite-00C48C.svg?style=for-the-badge&logo=android&logoColor=white)](https://github.com/nimidz/Nimiyo-Downloader/releases)
   [![Total Downloads](https://img.shields.io/github/downloads/nimidz/Nimiyo-Downloader/total?style=for-the-badge&logo=github&color=3b82f6&label=Downloads)](https://github.com/nimidz/Nimiyo-Downloader/releases)
   [![Stars](https://img.shields.io/github/stars/nimidz/Nimiyo-Downloader?style=for-the-badge&logo=apachespark&color=f59e0b&label=Stars)](https://github.com/nimidz/Nimiyo-Downloader/stargazers)
   [![License](https://img.shields.io/badge/License-GPL--3.0-black.svg?style=for-the-badge)](LICENSE)
@@ -34,8 +34,10 @@
 
 ---
 
-## 🌟 What's New in v2.3.0
+## 🌟 What's New in v2.3.1
 
+- 🛡️ **Play Protect False Alarm Fixed**: Completely resolved Google Play Protect flagging the app as potentially harmful.
+- 🔒 **Removed Unknown App Install Permission**: Removed `REQUEST_INSTALL_PACKAGES` permission and in-app auto-installer to keep system permissions minimal and 100% compliant with Android device security standards.
 - ☁️ **SoundCloud Support**: Added SoundCloud as a brand-new audio downloading platform with high-bitrate streaming extraction, embedded metadata tags, and full-resolution cover art.
 - 🎼 **Smart Hierarchical Lyrics Engine**: Integrated multi-provider lyrics resolution featuring **KuGou Studio**, **LRCLIB**, **BetterLyrics**, and **Boidu** for unmatched lyrics accuracy and coverage across Asian and Western songs.
 - 🎤 **Word-by-Word Karaoke Lyrics (TTML Mode)**: Full real-time syllable-by-syllable lyric highlighting with glowing word trails, smooth back-vocal transitions, and an interactive Spotlight guide.
@@ -128,7 +130,7 @@ NIMIYO incorporates an intelligent multi-provider lyrics engine designed to ensu
   - 🖼️ `Download/Nimiyo/ImageYo/`
 - 📁 **Direct Folder Opener**: One-tap direct folder navigation into Xiaomi File Explorer, Samsung My Files, Google Files, and ZArchiver.
 - 🔄 **Smart Concurrent Downloads & Auto-Retry**: Download up to 5 items simultaneously in parallel with smart automatic retries on connection hiccups.
-- 🚀 **In-App Auto Update**: Effortlessly check, download, and install new APK updates directly inside the app with native install permission integration.
+- 🔄 **Easy Update Checker**: Check for updates directly inside the app and open the official GitHub Releases page with one tap, without requiring intrusive system install permissions.
 - 🌍 **Multilingual Localization**: Complete native language parity for **English**, **Bahasa Indonesia**, **简体中文**, and **日本語**.
 - 🛡️ **Community Guidelines & Rules**: Built-in Terms of Use modal prohibiting harmful, violent, and NSFW content.
 - 🔒 **Privacy First**: Built-in Incognito Mode, zero tracking, and strictly local history management.
@@ -190,7 +192,7 @@ Nimiyo-Downloader/
 │   ├── app/src/main/java/nimiyo/litedownloader/
 │   │   ├── MainActivity.java         # Main App Container
 │   │   ├── ShareActivity.java        # Quick Save Native Bottom Sheet
-│   │   ├── MediaSaverPlugin.java     # MediaStore Storage & APK Installer Plugin
+│   │   ├── MediaSaverPlugin.java     # MediaStore Storage & Native Downloader Plugin
 │   │   ├── MusicPlaybackService.java # Android Native Media Notification & Session
 │   │   ├── VideoPlayerActivity.java  # Hardware Accelerated Video Player
 │   │   └── ImageViewerActivity.java  # High-Res Image Viewer
