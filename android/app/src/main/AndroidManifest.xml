@@ -79,7 +79,7 @@
         <service
             android:name=".MusicPlaybackService"
             android:foregroundServiceType="mediaPlayback"
-            android:stopWithTask="false"
+            android:stopWithTask="true"
             android:exported="false" />
     </application>
 
@@ -95,7 +95,6 @@
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" tools:ignore="ScopedStorage" />
 
     <queries>

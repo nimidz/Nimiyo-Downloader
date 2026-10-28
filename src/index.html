@@ -661,15 +661,6 @@
               <label for="settingKeepAwake" data-i18n="labelKeepAwake">Keep Screen Awake</label>
               <input type="checkbox" id="settingKeepAwake" class="ios-switch">
             </div>
-            <div class="setting-item auto-update-perm-item">
-              <div class="setting-label-group">
-                <label data-i18n="labelAutoUpdate">Auto-Update & Install APK</label>
-                <span class="setting-hint" data-i18n="hintAutoUpdate">Allow automatic APK update installation</span>
-              </div>
-              <button id="btnAutoUpdatePermission" class="btn outline-btn perm-btn">
-                <span id="txtAutoUpdatePermission" data-i18n="btnPermissionAllow">Izinkan</span>
-              </button>
-            </div>
             <div class="setting-item action-row">
               <button id="resetSettingsBtn" class="btn danger-btn full-btn" data-i18n="btnResetSettings">RESET ALL
                 SETTINGS TO DEFAULT</button>
@@ -1002,18 +993,10 @@
             <!-- Dynamically populated -->
           </ul>
         </div>
-        <div id="updateDownloadProgressBox" class="update-progress-box hidden">
-          <div class="update-progress-label">
-            <span id="updateProgressText" data-i18n="updateDownloading">Mengunduh pembaruan...</span>
-            <span id="updateProgressPercent">0%</span>
-          </div>
-          <div class="progress-bar-bg">
-            <div id="updateProgressBarFill" class="progress-bar-fill" style="width: 0%;"></div>
-          </div>
-        </div>
         <div class="action-row update-action-row" id="updateActionRow">
-          <button id="btnStartUpdate" class="btn primary-btn" data-i18n="btnUpdateAndInstall">Update dan Install</button>
-          <button id="btnManualDownloadUpdate" class="btn outline-btn" data-i18n="btnManualDownload">Download Manual Install</button>
+          <button id="btnStartUpdate" class="btn primary-btn" data-i18n="btnOpenGitHubReleases">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 6px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg><span id="txtStartUpdate">Buka Halaman Rilis GitHub</span>
+          </button>
           <div class="update-remind-group" id="updateRemindGroup">
             <button id="btnLaterUpdate" class="btn outline-btn btn-remind-later" data-i18n="btnRemindLater">Nanti ingatkan kembali</button>
             <button id="btnRemindSchedule" class="btn outline-btn btn-remind-clock" type="button" aria-label="Jadwalkan Pengingat" title="Jadwalkan Pengingat">

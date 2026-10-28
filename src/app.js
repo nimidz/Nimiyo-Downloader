@@ -405,9 +405,10 @@ const translations = {
     remind3Days: "3 Days",
     remind1Week: "1 Week",
     toastRemindScheduled: "Update reminder set for {time}.",
-    btnUpdateNow: "Update and Install",
-    btnUpdateAndInstall: "Update and Install",
-    btnManualDownload: "Download Manual Install",
+    btnUpdateNow: "Update on GitHub",
+    btnUpdateAndInstall: "Update on GitHub",
+    btnOpenGitHubReleases: "Download on GitHub",
+    btnManualDownload: "Download on GitHub",
     labelAccentColor: "UI Accent Color",
     optAccentYellow: "Yellow (Default app)",
     optAccentBlue: "Blue",
@@ -1176,9 +1177,10 @@ const translations = {
     remind3Days: "3 Hari",
     remind1Week: "1 Minggu",
     toastRemindScheduled: "Pengingat pembaruan diatur untuk {time}.",
-    btnUpdateNow: "Update dan Install",
-    btnUpdateAndInstall: "Update dan Install",
-    btnManualDownload: "Download Manual Install",
+    btnUpdateNow: "Unduh di GitHub",
+    btnUpdateAndInstall: "Unduh di GitHub",
+    btnOpenGitHubReleases: "Buka Halaman Rilis GitHub",
+    btnManualDownload: "Unduh di GitHub",
     labelAccentColor: "Warna Aksen UI",
     optAccentYellow: "Yellow (dafault app)",
     optAccentBlue: "Biru",
@@ -1945,9 +1947,10 @@ const translations = {
     remind3Days: "3 天",
     remind1Week: "1 周",
     toastRemindScheduled: "已设置更新提醒：{time}后。",
-    btnUpdateNow: "更新并安装",
-    btnUpdateAndInstall: "更新并安装",
-    btnManualDownload: "手动下载安装包",
+    btnUpdateNow: "在 GitHub 更新",
+    btnUpdateAndInstall: "在 GitHub 更新",
+    btnOpenGitHubReleases: "在 GitHub 下载更新",
+    btnManualDownload: "在 GitHub 下载更新",
     labelAccentColor: "UI 强调色",
     optAccentYellow: "黄色 (默认)",
     optAccentBlue: "蓝色",
@@ -2716,9 +2719,10 @@ const translations = {
     remind3Days: "3 日後",
     remind1Week: "1 週間後",
     toastRemindScheduled: "{time}後にアップデートを再通知します。",
-    btnUpdateNow: "更新してインストール",
-    btnUpdateAndInstall: "更新してインストール",
-    btnManualDownload: "手動ダウンロード・インストール",
+    btnUpdateNow: "GitHubで更新",
+    btnUpdateAndInstall: "GitHubで更新",
+    btnOpenGitHubReleases: "GitHubで更新をダウンロード",
+    btnManualDownload: "GitHubで更新をダウンロード",
     labelAccentColor: "UIアクセントカラー",
     optAccentYellow: "イエロー (既定)",
     optAccentBlue: "ブルー",
@@ -4625,14 +4629,6 @@ function setupEventListeners() {
     }
   });
 
-  // Auto-Update permission button in Settings -> Advanced
-  const btnAutoUpdatePerm = document.getElementById("btnAutoUpdatePermission");
-  if (btnAutoUpdatePerm) {
-    btnAutoUpdatePerm.addEventListener("click", () => {
-      requestAutoUpdatePermission();
-    });
-  }
-
   // Manual Check for Updates button in About App
   const btnCheckUpdateManual = document.getElementById("btnCheckUpdateManual");
   if (btnCheckUpdateManual) {
@@ -4696,21 +4692,12 @@ function setupEventListeners() {
     });
   });
 
-  // Update Now / Update & Install button
+  // Open GitHub Releases page for manual download
   const btnStartUpdate = document.getElementById("btnStartUpdate");
   if (btnStartUpdate) {
     btnStartUpdate.addEventListener("click", () => {
       triggerHaptic();
-      downloadAndInstallUpdate();
-    });
-  }
-
-  // Download Manual Install button
-  const btnManualDownloadUpdate = document.getElementById("btnManualDownloadUpdate");
-  if (btnManualDownloadUpdate) {
-    btnManualDownloadUpdate.addEventListener("click", () => {
-      triggerHaptic();
-      downloadManualUpdate();
+      openGitHubReleases();
     });
   }
 
@@ -4742,12 +4729,11 @@ function setupEventListeners() {
     });
   }
 
-  // Register resume & focus event listeners for Auto-Paste, History Sync & Permission recheck
+  // Register resume & focus event listeners for Auto-Paste & History Sync
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
       loadHistory();
       setTimeout(checkClipboardOnResume, 350);
-      checkAndResumePendingUpdateInstall();
       if (window.nimiyoMusicPlayer) window.nimiyoMusicPlayer.autoCheckPermissionOnResume().catch(() => {});
     }
   });
@@ -4755,7 +4741,6 @@ function setupEventListeners() {
   window.addEventListener("focus", () => {
     loadHistory();
     setTimeout(checkClipboardOnResume, 350);
-    checkAndResumePendingUpdateInstall();
     if (window.nimiyoMusicPlayer) window.nimiyoMusicPlayer.autoCheckPermissionOnResume().catch(() => {});
   });
 
@@ -4765,14 +4750,12 @@ function setupEventListeners() {
       if (isActive) {
         loadHistory();
         setTimeout(checkClipboardOnResume, 350);
-        checkAndResumePendingUpdateInstall();
         if (window.nimiyoMusicPlayer) window.nimiyoMusicPlayer.autoCheckPermissionOnResume().catch(() => {});
       }
     });
     AppPlugin.addListener("resume", () => {
       loadHistory();
       setTimeout(checkClipboardOnResume, 350);
-      checkAndResumePendingUpdateInstall();
       if (window.nimiyoMusicPlayer) window.nimiyoMusicPlayer.autoCheckPermissionOnResume().catch(() => {});
     });
   }
@@ -7388,56 +7371,18 @@ function getSVGPath(platform) {
 }
 
 // -------------------------------------------------------------
-// Auto-Update & Native Install Permission Engine
+// App Updates & GitHub Releases Navigation
 // -------------------------------------------------------------
 
-// Check & Update Permission Button Status (Izinkan vs Diaktifkan)
-async function checkInstallPermissionStatus() {
-  const permBtn = document.getElementById("btnAutoUpdatePermission");
-  const permTxt = document.getElementById("txtAutoUpdatePermission");
-  if (!permBtn || !permTxt) return false;
-
-  const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
-  if (MediaSaver && window.Capacitor?.isNativePlatform()) {
-    try {
-      const res = await MediaSaver.checkInstallPermission();
-      if (res && res.isGranted) {
-        permBtn.classList.add("granted");
-        permTxt.innerText = getTranslation("btnPermissionGranted");
-        return true;
-      } else {
-        permBtn.classList.remove("granted");
-        permTxt.innerText = getTranslation("btnPermissionAllow");
-        return false;
-      }
-    } catch (e) {
-      console.warn("checkInstallPermission error:", e);
-    }
-  }
-
-  permBtn.classList.remove("granted");
-  permTxt.innerText = getTranslation("btnPermissionAllow");
-  return false;
-}
-
-// Request Permission by opening Android Settings
-async function requestAutoUpdatePermission() {
-  triggerHaptic();
-  const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
-  if (MediaSaver && window.Capacitor?.isNativePlatform()) {
-    try {
-      await MediaSaver.requestInstallPermission();
-    } catch (e) {
-      console.warn("requestInstallPermission error:", e);
-    }
+// Open GitHub Releases page directly
+function openGitHubReleases() {
+  const releasesUrl = "https://github.com/nimidz/Nimiyo-Downloader/releases/";
+  if (window.Capacitor?.Plugins?.Browser) {
+    window.Capacitor.Plugins.Browser.open({ url: releasesUrl }).catch(() => {
+      window.open(releasesUrl, "_blank");
+    });
   } else {
-    showToast(getTranslation("btnPermissionGranted"), "success");
-    const permBtn = document.getElementById("btnAutoUpdatePermission");
-    const permTxt = document.getElementById("txtAutoUpdatePermission");
-    if (permBtn && permTxt) {
-      permBtn.classList.add("granted");
-      permTxt.innerText = getTranslation("btnPermissionGranted");
-    }
+    window.open(releasesUrl, "_blank");
   }
 }
 
@@ -7548,16 +7493,13 @@ function showUpdateModal(data) {
     }
   }
 
-  if (progressBox) progressBox.classList.add("hidden");
   if (actionRow) actionRow.classList.remove("hidden");
   if (startBtn) {
     startBtn.disabled = false;
-    startBtn.innerText = getTranslation("btnUpdateAndInstall");
-  }
-  const manualBtn = document.getElementById("btnManualDownloadUpdate");
-  if (manualBtn) {
-    manualBtn.disabled = false;
-    manualBtn.innerText = getTranslation("btnManualDownload");
+    const txtSpan = document.getElementById("txtStartUpdate");
+    if (txtSpan) {
+      txtSpan.innerText = getTranslation("btnOpenGitHubReleases", "Buka Halaman Rilis GitHub");
+    }
   }
   const laterBtn = document.getElementById("btnLaterUpdate");
   if (laterBtn) {
@@ -7568,232 +7510,11 @@ function showUpdateModal(data) {
   triggerHaptic();
 }
 
-// Download APK manually to Download directory without auto-install
-async function downloadManualUpdate(apkUrl) {
-  if (!apkUrl) {
-    apkUrl = latestUpdateInfo?.downloadUrl;
-  }
-  if (!apkUrl) return;
 
-  const version = latestUpdateInfo?.versionName || latestUpdateInfo?.versionCode || "latest";
-  const fileName = `Nimiyo_v${version}.apk`;
 
-  const progressBox = document.getElementById("updateDownloadProgressBox");
-  const actionRow = document.getElementById("updateActionRow");
-  const progressBarFill = document.getElementById("updateProgressBarFill");
-  const progressPercentText = document.getElementById("updateProgressPercent");
-  const progressText = document.getElementById("updateProgressText");
 
-  if (progressBox) progressBox.classList.remove("hidden");
-  if (actionRow) actionRow.classList.add("hidden");
-  if (progressText) progressText.innerText = getTranslation("toastDownloadingApkManual", "Mengunduh file APK ke folder Download...");
 
-  let downloadPercent = 0;
-  const simInterval = setInterval(() => {
-    if (downloadPercent < 90) {
-      downloadPercent += Math.floor(Math.random() * 8) + 3;
-      if (downloadPercent > 90) downloadPercent = 90;
-      if (progressBarFill) progressBarFill.style.width = `${downloadPercent}%`;
-      if (progressPercentText) progressPercentText.innerText = `${downloadPercent}%`;
-    }
-  }, 250);
 
-  try {
-    const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
-
-    if (MediaSaver && typeof MediaSaver.downloadFile === "function" && window.Capacitor?.isNativePlatform()) {
-      await MediaSaver.downloadFile({
-        url: apkUrl,
-        fileName: fileName,
-        fileType: "apk"
-      });
-      clearInterval(simInterval);
-      if (progressBarFill) progressBarFill.style.width = "100%";
-      if (progressPercentText) progressPercentText.innerText = "100%";
-      if (progressText) progressText.innerText = getTranslation("toastManualApkDownloaded", "File APK tersimpan di folder Download. Silakan pasang secara manual.");
-      
-      showToast(getTranslation("toastManualApkDownloaded", "File APK tersimpan di folder Download. Silakan pasang secara manual."), "success");
-      
-      setTimeout(() => {
-        document.getElementById("updateModal")?.classList.add("hidden");
-        if (progressBox) progressBox.classList.add("hidden");
-        if (actionRow) actionRow.classList.remove("hidden");
-      }, 1500);
-    } else if (Filesystem && window.Capacitor?.isNativePlatform()) {
-      const dlRes = await Filesystem.downloadFile({
-        url: apkUrl,
-        path: fileName,
-        directory: "CACHE"
-      });
-      if (MediaSaver && typeof MediaSaver.saveToPublicStorage === "function") {
-        await MediaSaver.saveToPublicStorage({
-          filePath: dlRes?.path || fileName,
-          fileName: fileName,
-          fileType: "apk"
-        });
-      }
-      clearInterval(simInterval);
-      if (progressBarFill) progressBarFill.style.width = "100%";
-      if (progressPercentText) progressPercentText.innerText = "100%";
-      showToast(getTranslation("toastManualApkDownloaded", "File APK tersimpan di folder Download. Silakan pasang secara manual."), "success");
-      setTimeout(() => {
-        document.getElementById("updateModal")?.classList.add("hidden");
-        if (progressBox) progressBox.classList.add("hidden");
-        if (actionRow) actionRow.classList.remove("hidden");
-      }, 1500);
-    } else {
-      clearInterval(simInterval);
-      window.open(apkUrl, "_blank");
-      showToast(getTranslation("toastDownloadSuccess"), "success");
-      document.getElementById("updateModal")?.classList.add("hidden");
-      if (progressBox) progressBox.classList.add("hidden");
-      if (actionRow) actionRow.classList.remove("hidden");
-    }
-  } catch (err) {
-    clearInterval(simInterval);
-    console.error("downloadManualUpdate error:", err);
-    if (progressBox) progressBox.classList.add("hidden");
-    if (actionRow) actionRow.classList.remove("hidden");
-    showToast(`${getTranslation("toastDownloadFailManualServer")}: ${err.message}`, "error");
-  }
-}
-
-let lastDownloadedUpdateApkPath = localStorage.getItem("nimiyo_pending_apk_path") || null;
-
-// Check if install permission was just granted and resume APK installation
-async function checkAndResumePendingUpdateInstall() {
-  const granted = await checkInstallPermissionStatus();
-  const pendingPath = lastDownloadedUpdateApkPath || localStorage.getItem("nimiyo_pending_apk_path");
-  if (granted && pendingPath) {
-    lastDownloadedUpdateApkPath = null;
-    localStorage.removeItem("nimiyo_pending_apk_path");
-    const progressText = document.getElementById("updateProgressText");
-    if (progressText) progressText.innerText = "Memulai pemasangan pembaruan...";
-    const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
-    if (MediaSaver && typeof MediaSaver.installApk === "function") {
-      try {
-        await MediaSaver.installApk({ filePath: pendingPath });
-      } catch (err) {
-        console.error("Install pending APK error:", err);
-      }
-    }
-  }
-}
-
-// Download and Install APK Update directly inside the app
-async function downloadAndInstallUpdate(apkUrl) {
-  if (!apkUrl) {
-    apkUrl = latestUpdateInfo?.downloadUrl;
-  }
-  if (!apkUrl) return;
-
-  const progressBox = document.getElementById("updateDownloadProgressBox");
-  const actionRow = document.getElementById("updateActionRow");
-  const progressBarFill = document.getElementById("updateProgressBarFill");
-  const progressPercentText = document.getElementById("updateProgressPercent");
-  const progressText = document.getElementById("updateProgressText");
-
-  if (progressBox) progressBox.classList.remove("hidden");
-  if (actionRow) actionRow.classList.add("hidden");
-  if (progressBarFill) progressBarFill.style.width = "0%";
-  if (progressPercentText) progressPercentText.innerText = "0%";
-  if (progressText) progressText.innerText = getTranslation("updateDownloading", "Mengunduh pembaruan...");
-
-  const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
-  let progressListener = null;
-  let simInterval = null;
-
-  try {
-    let apkFilePath = null;
-
-    if (MediaSaver && typeof MediaSaver.downloadUpdateApk === "function" && window.Capacitor?.isNativePlatform()) {
-      if (typeof MediaSaver.addListener === "function") {
-        progressListener = MediaSaver.addListener("onUpdateDownloadProgress", (data) => {
-          if (data && typeof data.progress === "number") {
-            const pct = Math.min(Math.max(data.progress, 0), 99);
-            if (progressBarFill) progressBarFill.style.width = `${pct}%`;
-            if (progressPercentText) progressPercentText.innerText = `${pct}%`;
-          }
-        });
-      }
-
-      const res = await MediaSaver.downloadUpdateApk({ url: apkUrl });
-      if (res && res.success && res.filePath) {
-        apkFilePath = res.filePath;
-      } else {
-        throw new Error(res?.error || "Gagal mengunduh berkas pembaruan");
-      }
-    } else if (MediaSaver && typeof MediaSaver.downloadFile === "function" && window.Capacitor?.isNativePlatform()) {
-      // In-app fallback using downloadFile if downloadUpdateApk is not present
-      const version = latestUpdateInfo?.versionName || latestUpdateInfo?.versionCode || "latest";
-      const fileName = `Nimiyo_v${version}.apk`;
-
-      let downloadPercent = 0;
-      simInterval = setInterval(() => {
-        if (downloadPercent < 90) {
-          downloadPercent += Math.floor(Math.random() * 8) + 3;
-          if (downloadPercent > 90) downloadPercent = 90;
-          if (progressBarFill) progressBarFill.style.width = `${downloadPercent}%`;
-          if (progressPercentText) progressPercentText.innerText = `${downloadPercent}%`;
-        }
-      }, 250);
-
-      const res = await MediaSaver.downloadFile({
-        url: apkUrl,
-        fileName: fileName,
-        fileType: "apk",
-        overwriteMode: "overwrite"
-      });
-
-      if (res && res.success && (res.filePath || res.fileName)) {
-        apkFilePath = res.filePath || res.fileName;
-      } else {
-        throw new Error("Gagal mengunduh berkas pembaruan");
-      }
-    } else {
-      // Only fallback to browser if not running on native platform
-      window.open(apkUrl, "_blank");
-      showToast(getTranslation("toastDownloadSuccess"), "success");
-      if (progressBox) progressBox.classList.add("hidden");
-      if (actionRow) actionRow.classList.remove("hidden");
-      return;
-    }
-
-    if (simInterval) clearInterval(simInterval);
-    if (progressListener) {
-      try { progressListener.remove(); } catch (_) {}
-    }
-
-    if (apkFilePath) {
-      lastDownloadedUpdateApkPath = apkFilePath;
-      localStorage.setItem("nimiyo_pending_apk_path", apkFilePath);
-
-      if (progressBarFill) progressBarFill.style.width = "100%";
-      if (progressPercentText) progressPercentText.innerText = "100%";
-      if (progressText) progressText.innerText = "Memulai pemasangan...";
-
-      // Trigger native package install prompt immediately
-      if (MediaSaver && typeof MediaSaver.installApk === "function") {
-        const installRes = await MediaSaver.installApk({ filePath: apkFilePath });
-        if (installRes && installRes.permissionRequired) {
-          if (progressText) progressText.innerText = "Aktifkan izin instalasi aplikasi tidak dikenal untuk melanjutkan...";
-          showToast("Aktifkan izin 'Install aplikasi tidak dikenal' lalu kembali ke aplikasi", "info");
-        } else if (installRes && installRes.success) {
-          if (progressText) progressText.innerText = "Silakan konfirmasi pembaruan di layar...";
-        }
-      }
-    }
-  } catch (err) {
-    if (simInterval) clearInterval(simInterval);
-    if (progressListener) {
-      try { progressListener.remove(); } catch (_) {}
-    }
-    console.error("downloadAndInstallUpdate error:", err);
-    if (progressBox) progressBox.classList.add("hidden");
-    if (actionRow) actionRow.classList.remove("hidden");
-    showToast(`Gagal mengunduh pembaruan: ${err.message}`, "error");
-  }
-}
 
 // -------------------------------------------------------------
 // First-Time Rules & Guidelines Onboarding Check

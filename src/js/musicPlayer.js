@@ -2441,25 +2441,27 @@ class NimiyoMusicPlayer {
 
     for (const q of queries) {
       try {
-        const searchUrl = `http://mobilecdn.kugou.com/api/v3/search/song?format=json&keyword=${encodeURIComponent(q.trim())}&page=1&pagesize=5`;
+        const searchUrl = `https://songsearch.kugou.com/song_search_v2?keyword=${encodeURIComponent(q.trim())}&page=1&pagesize=5&clientver=&platform=WebFilter`;
         const searchData = await this.requestLyricsHttp(searchUrl);
-        const songList = searchData?.data?.info || [];
+        const songList = searchData?.data?.lists || searchData?.data?.info || [];
         if (!songList || songList.length === 0) continue;
 
         let bestSong = songList[0];
         if (trackDuration > 15 && songList.length > 1) {
           songList.sort((a, b) => {
-            const diffA = Math.abs((a.duration || 0) - trackDuration);
-            const diffB = Math.abs((b.duration || 0) - trackDuration);
+            const durA = a.Duration || a.duration || 0;
+            const durB = b.Duration || b.duration || 0;
+            const diffA = Math.abs(durA - trackDuration);
+            const diffB = Math.abs(durB - trackDuration);
             return diffA - diffB;
           });
           bestSong = songList[0];
         }
 
-        const songHash = bestSong?.hash;
+        const songHash = bestSong?.FileHash || bestSong?.hash;
         if (!songHash) continue;
 
-        const candUrl = `http://krcs.kugou.com/search?ver=1&man=yes&client=mobi&hash=${encodeURIComponent(songHash)}`;
+        const candUrl = `https://krcs.kugou.com/search?ver=1&man=yes&client=mobi&hash=${encodeURIComponent(songHash)}`;
         const candData = await this.requestLyricsHttp(candUrl);
         const candidates = candData?.candidates || [];
         if (!candidates || candidates.length === 0) continue;
@@ -2467,7 +2469,7 @@ class NimiyoMusicPlayer {
         const cand = candidates[0];
         if (!cand?.id || !cand?.accesskey) continue;
 
-        const downloadUrl = `http://lyrics.kugou.com/download?ver=1&client=pc&id=${encodeURIComponent(cand.id)}&accesskey=${encodeURIComponent(cand.accesskey)}&fmt=lrc&charset=utf8`;
+        const downloadUrl = `https://lyrics.kugou.com/download?ver=1&client=pc&id=${encodeURIComponent(cand.id)}&accesskey=${encodeURIComponent(cand.accesskey)}&fmt=lrc&charset=utf8`;
         const downloadData = await this.requestLyricsHttp(downloadUrl);
         const b64 = downloadData?.content;
         if (b64) {
