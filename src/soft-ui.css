@@ -895,9 +895,22 @@ body.theme-softui.dark-mode .player-action-pill {
 }
 
 body.theme-softui .player-action-pill.primary-action-pill {
+  background: var(--soft-surface) !important;
+  color: var(--soft-text-main) !important;
+  border: 1px solid var(--soft-border) !important;
+}
+
+body.theme-softui.dark-mode .player-action-pill.primary-action-pill {
+  background: var(--soft-surface-solid) !important;
+  color: var(--soft-text-main) !important;
+  border-color: var(--soft-border) !important;
+}
+
+body.theme-softui .player-action-pill.active,
+body.theme-softui .player-action-pill.primary-action-pill.active {
   background: var(--soft-primary) !important;
   color: #1A1200 !important;
-  border: none !important;
+  border: 1px solid var(--soft-primary) !important;
   box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35) !important;
 }
 

@@ -275,14 +275,14 @@ class NimiyoMusicPlayer {
   // Initializer & Setup
   // -------------------------------------------------------------
   async init() {
-    this.cacheDomElements();
-    this.loadPersistedPreferences();
-    this.loadPlaylists();
-    this.setupAudioListeners();
-    this.setupMediaSession();
-    this.setupUiEventListeners();
-    this.setupNativeMediaBridge();
-    this.setupAudioInterruption();
+    try { this.cacheDomElements(); } catch (e) { console.error("Cache DOM elements error:", e); }
+    try { this.loadPersistedPreferences(); } catch (e) { console.error("Load prefs error:", e); }
+    try { this.loadPlaylists(); } catch (e) { console.error("Load playlists error:", e); }
+    try { this.setupAudioListeners(); } catch (e) { console.error("Audio listener init error:", e); }
+    try { this.setupMediaSession(); } catch (e) { console.error("Media session init error:", e); }
+    try { this.setupUiEventListeners(); } catch (e) { console.error("UI listeners init error:", e); }
+    try { this.setupNativeMediaBridge(); } catch (e) { console.error("Native bridge init error:", e); }
+    try { this.setupAudioInterruption(); } catch (e) { console.error("Audio interruption init error:", e); }
 
     // 1. INSTANT HYDRATION: Load cached library immediately on cold start (0ms delay)!
     this.loadCachedLibrary();
@@ -315,6 +315,7 @@ class NimiyoMusicPlayer {
       libraryStats: document.getElementById("playerLibraryStats"),
       reloadLibraryBtn: document.getElementById("playerReloadLibraryBtn"),
       shuffleAllBtn: document.getElementById("playerShuffleAllBtn"),
+      shuffleLabel: document.getElementById("playerShuffleLabel"),
       sortBtn: document.getElementById("playerSortBtn"),
       sortLabel: document.getElementById("playerSortLabel"),
 
@@ -723,14 +724,30 @@ class NimiyoMusicPlayer {
     }
   }
 
-  async refreshLibrary() {
-    const reloadIcon = this.elements.reloadLibraryBtn;
+  async refreshLibrary(isUserTriggered = false) {
+    const reloadIcon = this.elements.reloadLibraryBtn || document.getElementById("playerReloadLibraryBtn");
     if (reloadIcon) reloadIcon.classList.add("spinning");
 
     try {
-      let tracks = [];
       const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
+      if (MediaSaver && typeof MediaSaver.getAudioPermissionStatus === "function") {
+        try {
+          const permRes = await MediaSaver.getAudioPermissionStatus();
+          if (permRes && permRes.granted === false) {
+            this.permissionGranted = false;
+            this.showPermissionPrompt(permRes.status === "permanently_denied");
+            if (isUserTriggered) {
+              await this.requestAudioPermission();
+              return;
+            }
+          } else if (permRes && permRes.granted) {
+            this.permissionGranted = true;
+            this.hidePermissionPrompt();
+          }
+        } catch (_) {}
+      }
 
+      let tracks = [];
       if (MediaSaver && typeof MediaSaver.scanAudioLibrary === "function") {
         const res = await MediaSaver.scanAudioLibrary();
         if (res && Array.isArray(res.tracks)) {
@@ -746,6 +763,12 @@ class NimiyoMusicPlayer {
       this.processLibraryTracks(tracks);
       this.renderCurrentTab();
       this.updateLibraryStatsUi();
+
+      if (isUserTriggered && window.showToast) {
+        const total = this.allTracks.length;
+        const msg = this.t("musicRefreshedToast", "Perpustakaan musik diperbarui ({count} lagu)", { count: total });
+        window.showToast(msg, "success");
+      }
     } catch (err) {
       console.error("[MUSIC] Library scan error:", err);
       if (window.showToast) {
@@ -753,7 +776,7 @@ class NimiyoMusicPlayer {
       }
     } finally {
       if (reloadIcon) {
-        setTimeout(() => reloadIcon.classList.remove("spinning"), 400);
+        setTimeout(() => reloadIcon.classList.remove("spinning"), 600);
       }
     }
   }
@@ -781,6 +804,8 @@ class NimiyoMusicPlayer {
               isNimiyo: true,
               hasArtwork: false,
               hasLyrics: false,
+              dateAdded: item.timestamp || Date.now(),
+              dateModified: item.timestamp || Date.now(),
               mimeType: "audio/mpeg"
             });
           }
@@ -957,17 +982,31 @@ class NimiyoMusicPlayer {
       case "title_desc":
         list.sort((a, b) => (b.displayTitle || "").localeCompare(a.displayTitle || ""));
         break;
-      case "artist_asc":
-        list.sort((a, b) => (a.displayArtist || "").localeCompare(b.displayArtist || ""));
+      case "date_desc":
+        list.sort((a, b) => {
+          const tA = Number(a.dateAdded || a.dateModified || 0);
+          const tB = Number(b.dateAdded || b.dateModified || 0);
+          return tB - tA;
+        });
         break;
-      case "album_asc":
-        list.sort((a, b) => (a.displayAlbum || "").localeCompare(b.displayAlbum || ""));
+      case "date_asc":
+        list.sort((a, b) => {
+          const tA = Number(a.dateAdded || a.dateModified || 0);
+          const tB = Number(b.dateAdded || b.dateModified || 0);
+          return tA - tB;
+        });
         break;
       case "dur_desc":
         list.sort((a, b) => (b.duration || 0) - (a.duration || 0));
         break;
       case "dur_asc":
         list.sort((a, b) => (a.duration || 0) - (b.duration || 0));
+        break;
+      case "artist_asc":
+        list.sort((a, b) => (a.displayArtist || "").localeCompare(b.displayArtist || ""));
+        break;
+      case "album_asc":
+        list.sort((a, b) => (a.displayAlbum || "").localeCompare(b.displayAlbum || ""));
         break;
       default:
         list.sort((a, b) => (a.displayTitle || "").localeCompare(b.displayTitle || ""));
@@ -980,6 +1019,13 @@ class NimiyoMusicPlayer {
     this.sortMode = mode;
     this.savePreferences();
     this.updateSortLabelUi();
+    if (!this.isShuffle && this.queue && this.queue.length > 1 && this.currentTrack) {
+      this.queue = this.sortTracks(this.queue);
+      const newIdx = this.queue.findIndex(t => t.id === this.currentTrack.id);
+      if (newIdx !== -1) {
+        this.queueIndex = newIdx;
+      }
+    }
     this.renderCurrentTab();
     this.closeSortModal();
     if (window.showToast) {
@@ -989,22 +1035,26 @@ class NimiyoMusicPlayer {
 
   getSortModeLabel(mode) {
     switch (mode) {
-      case "title_asc": return this.t("musicSortTitleAsc", "Judul (A-Z)");
-      case "title_desc": return this.t("musicSortTitleDesc", "Judul (Z-A)");
-      case "artist_asc": return this.t("musicSortArtistAsc", "Artis (A-Z)");
-      case "album_asc": return this.t("musicSortAlbumAsc", "Album (A-Z)");
+      case "title_asc": return this.t("musicSortTitleAsc", "Nama (A ke Z)");
+      case "title_desc": return this.t("musicSortTitleDesc", "Nama (Z ke A)");
+      case "date_desc": return this.t("musicSortDateDesc", "Tanggal (Terbaru)");
+      case "date_asc": return this.t("musicSortDateAsc", "Tanggal (Terlama)");
       case "dur_desc": return this.t("musicSortDurDesc", "Durasi (Terpanjang)");
       case "dur_asc": return this.t("musicSortDurAsc", "Durasi (Terpendek)");
-      default: return this.t("musicSortTitle", "Urutkan");
+      case "artist_asc": return this.t("musicSortArtistAsc", "Artis (A-Z)");
+      case "album_asc": return this.t("musicSortAlbumAsc", "Album (A-Z)");
+      default: return this.t("musicSortTitle", "Urutan");
     }
   }
 
   updateSortLabelUi() {
-    if (this.elements.sortLabel) {
-      this.elements.sortLabel.innerText = this.getSortModeLabel(this.sortMode);
+    const label = this.elements.sortLabel || document.getElementById("playerSortLabel") || this.elements.sortBtn?.querySelector("span");
+    if (label) {
+      label.innerText = this.getSortModeLabel(this.sortMode);
     }
-    if (this.elements.sortModal) {
-      this.elements.sortModal.querySelectorAll(".sort-option-item").forEach(item => {
+    const modal = this.elements.sortModal || document.getElementById("musicSortModal");
+    if (modal) {
+      modal.querySelectorAll(".sort-option-item").forEach(item => {
         item.classList.toggle("active", item.getAttribute("data-sort") === this.sortMode);
       });
     }
@@ -1120,22 +1170,27 @@ class NimiyoMusicPlayer {
 
   setupMediaSession() {
     if ("mediaSession" in navigator) {
-      navigator.mediaSession.setActionHandler("play", () => this.play());
-      navigator.mediaSession.setActionHandler("pause", () => this.pause());
-      navigator.mediaSession.setActionHandler("previoustrack", () => this.previous());
-      navigator.mediaSession.setActionHandler("nexttrack", () => this.next());
-      navigator.mediaSession.setActionHandler("seekto", (details) => {
+      const safeSetHandler = (action, handler) => {
+        try {
+          navigator.mediaSession.setActionHandler(action, handler);
+        } catch (_) {}
+      };
+      safeSetHandler("play", () => this.play());
+      safeSetHandler("pause", () => this.pause());
+      safeSetHandler("previoustrack", () => this.previous());
+      safeSetHandler("nexttrack", () => this.next());
+      safeSetHandler("seekto", (details) => {
         if (details.seekTime !== undefined) this.seek(details.seekTime);
       });
-      navigator.mediaSession.setActionHandler("seekbackward", (details) => {
+      safeSetHandler("seekbackward", (details) => {
         const skipTime = details.seekOffset || 10;
         this.seek(Math.max((this.audio.currentTime || 0) - skipTime, 0));
       });
-      navigator.mediaSession.setActionHandler("seekforward", (details) => {
+      safeSetHandler("seekforward", (details) => {
         const skipTime = details.seekOffset || 10;
         this.seek(Math.min((this.audio.currentTime || 0) + skipTime, this.audio.duration || 0));
       });
-      navigator.mediaSession.setActionHandler("stop", () => this.pause());
+      safeSetHandler("stop", () => this.pause());
     }
   }
 
@@ -4815,7 +4870,7 @@ class NimiyoMusicPlayer {
     this.elements.playerNavContainer?.classList.remove("hidden");
     this.elements.playerSearchBar?.classList.remove("hidden");
     if (this.elements.backSubHeaderBtn) this.elements.backSubHeaderBtn.classList.add("hidden");
-    if (this.elements.subHeaderTitle) this.elements.subHeaderTitle.innerText = "PLAYER";
+    if (this.elements.subHeaderTitle) this.elements.subHeaderTitle.innerText = this.t("headerPlayer", "PLAYER");
 
     [
       this.elements.paneNimiyo,
@@ -5360,9 +5415,31 @@ class NimiyoMusicPlayer {
     }
   }
 
+  handleQuickShuffleClick() {
+    if (window.Capacitor?.Plugins?.Haptics?.impact) {
+      try { window.Capacitor.Plugins.Haptics.impact({ style: "LIGHT" }); } catch (_) {}
+    }
+    if (this.currentTrack && this.queue && this.queue.length > 0) {
+      this.toggleShuffle();
+    } else {
+      this.shuffleAll();
+    }
+  }
+
   updateControlStatesUi() {
     if (this.elements.fullPlayerShuffleBtn) {
       this.elements.fullPlayerShuffleBtn.classList.toggle("active", this.isShuffle);
+    }
+
+    const shufflePill = this.elements.shuffleAllBtn || document.getElementById("playerShuffleAllBtn");
+    if (shufflePill) {
+      shufflePill.classList.toggle("active", Boolean(this.isShuffle));
+      const lbl = this.elements.shuffleLabel || document.getElementById("playerShuffleLabel") || shufflePill.querySelector("span");
+      if (lbl) {
+        lbl.innerText = this.isShuffle
+          ? this.t("musicShuffleActive", "Acak (Aktif)")
+          : this.t("musicBtnShuffleAll", "Acak Semua");
+      }
     }
 
     if (this.elements.fullPlayerRepeatBtn) {
@@ -5618,14 +5695,18 @@ class NimiyoMusicPlayer {
   }
 
   openSortModal() {
-    if (this.elements.sortModal) {
-      this.elements.sortModal.classList.remove("hidden");
+    const modal = this.elements.sortModal || document.getElementById("musicSortModal");
+    if (modal) {
+      this._sortModalOpenedAt = Date.now();
+      this.updateSortLabelUi();
+      modal.classList.remove("hidden");
     }
   }
 
   closeSortModal() {
-    if (this.elements.sortModal) {
-      this.elements.sortModal.classList.add("hidden");
+    const modal = this.elements.sortModal || document.getElementById("musicSortModal");
+    if (modal) {
+      modal.classList.add("hidden");
     }
   }
 
@@ -5984,16 +6065,21 @@ class NimiyoMusicPlayer {
   }
 
   openPlaylistModal() {
-    if (this.elements.playlistModal) {
-      this.elements.playlistModal.classList.remove("hidden");
+    const modal = this.elements.playlistModal || document.getElementById("playlistModal");
+    if (modal) {
+      if (window.Capacitor?.Plugins?.Haptics?.impact) {
+        try { window.Capacitor.Plugins.Haptics.impact({ style: "LIGHT" }); } catch (_) {}
+      }
+      modal.classList.remove("hidden");
       this.closePlaylistDetail();
       this.renderPlaylistsList();
     }
   }
 
   closePlaylistModal() {
-    if (this.elements.playlistModal) {
-      this.elements.playlistModal.classList.add("hidden");
+    const modal = this.elements.playlistModal || document.getElementById("playlistModal");
+    if (modal) {
+      modal.classList.add("hidden");
     }
   }
 
@@ -7226,29 +7312,51 @@ class NimiyoMusicPlayer {
     }
 
     // Quick Action: Shuffle All
-    if (this.elements.shuffleAllBtn) {
-      this.elements.shuffleAllBtn.addEventListener("click", () => {
-        this.shuffleAll();
+    const shuffleBtn = this.elements.shuffleAllBtn || document.getElementById("playerShuffleAllBtn");
+    if (shuffleBtn) {
+      shuffleBtn.addEventListener("click", (e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        this.handleQuickShuffleClick();
       });
     }
 
     // Quick Action: Sort Order Modal
-    if (this.elements.sortBtn) {
-      this.elements.sortBtn.addEventListener("click", () => {
+    const sortBtn = this.elements.sortBtn || document.getElementById("playerSortBtn");
+    if (sortBtn) {
+      sortBtn.addEventListener("click", (e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
         this.openSortModal();
       });
     }
 
     // Sort options selection
-    if (this.elements.sortModal) {
-      this.elements.sortModal.querySelectorAll(".sort-option-item").forEach(item => {
-        item.addEventListener("click", () => {
+    const sortModal = this.elements.sortModal || document.getElementById("musicSortModal");
+    if (sortModal) {
+      sortModal.querySelectorAll(".sort-option-item").forEach(item => {
+        item.addEventListener("click", (e) => {
+          if (e) e.stopPropagation();
           const sortVal = item.getAttribute("data-sort");
           if (sortVal) this.setSortMode(sortVal);
         });
       });
-      if (this.elements.closeSortModalBtn) {
-        this.elements.closeSortModalBtn.addEventListener("click", () => this.closeSortModal());
+      const closeSortBtn = this.elements.closeSortModalBtn || document.getElementById("closeSortModalBtn");
+      if (closeSortBtn) {
+        closeSortBtn.addEventListener("click", (e) => {
+          if (e) e.stopPropagation();
+          this.closeSortModal();
+        });
+      }
+      const sortCard = sortModal.querySelector(".window-popup-card");
+      if (sortCard) {
+        sortCard.addEventListener("click", (e) => {
+          if (e) e.stopPropagation();
+        });
       }
     }
 
@@ -7274,8 +7382,15 @@ class NimiyoMusicPlayer {
     }
 
     // Reload library button
-    if (this.elements.reloadLibraryBtn) {
-      this.elements.reloadLibraryBtn.addEventListener("click", () => this.refreshLibrary());
+    const reloadBtn = this.elements.reloadLibraryBtn || document.getElementById("playerReloadLibraryBtn");
+    if (reloadBtn) {
+      reloadBtn.addEventListener("click", (e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        this.refreshLibrary(true);
+      });
     }
 
     // Permission Grant Button
@@ -7695,8 +7810,15 @@ class NimiyoMusicPlayer {
     // ============================================================
     // Playlist & Song Picker Event Listeners
     // ============================================================
-    if (this.elements.openPlaylistBtn) {
-      this.elements.openPlaylistBtn.addEventListener("click", () => this.openPlaylistModal());
+    const openPlBtn = this.elements.openPlaylistBtn || document.getElementById("playerOpenPlaylistBtn");
+    if (openPlBtn) {
+      openPlBtn.addEventListener("click", (e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        this.openPlaylistModal();
+      });
     }
 
     if (this.elements.playlistBackBtn) {
@@ -7836,7 +7958,12 @@ class NimiyoMusicPlayer {
     ].forEach(modal => {
       if (modal) {
         modal.addEventListener("click", (e) => {
-          if (e.target === modal) modal.classList.add("hidden");
+          if (e.target === modal) {
+            if (modal === this.elements.sortModal && this._sortModalOpenedAt && (Date.now() - this._sortModalOpenedAt < 300)) {
+              return;
+            }
+            modal.classList.add("hidden");
+          }
         });
       }
     });

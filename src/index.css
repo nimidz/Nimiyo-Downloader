@@ -5529,8 +5529,15 @@ body.mini-player-active .albums-grid-view {
 }
 
 .player-action-pill.primary-action-pill {
-  background: var(--accent-color);
-  color: #000000;
+  background: var(--card-bg);
+  color: var(--text-color);
+}
+
+.player-action-pill.active,
+.player-action-pill.primary-action-pill.active {
+  background: var(--accent-color) !important;
+  color: #000000 !important;
+  box-shadow: 2px 2px 0 var(--border-color) !important;
 }
 
 .player-stats-chip {

@@ -2023,7 +2023,9 @@ public class MediaSaverPlugin extends Plugin {
                     MediaStore.Audio.Media.TRACK,
                     MediaStore.Audio.Media.YEAR,
                     MediaStore.Audio.Media.MIME_TYPE,
-                    MediaStore.Audio.Media.SIZE
+                    MediaStore.Audio.Media.SIZE,
+                    MediaStore.Audio.Media.DATE_ADDED,
+                    MediaStore.Audio.Media.DATE_MODIFIED
                 };
 
                 String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0 OR " +
@@ -2055,6 +2057,8 @@ public class MediaSaverPlugin extends Plugin {
                         int yearIdx = cursor.getColumnIndex(MediaStore.Audio.Media.YEAR);
                         int mimeIdx = cursor.getColumnIndex(MediaStore.Audio.Media.MIME_TYPE);
                         int sizeIdx = cursor.getColumnIndex(MediaStore.Audio.Media.SIZE);
+                        int dateAddedIdx = cursor.getColumnIndex(MediaStore.Audio.Media.DATE_ADDED);
+                        int dateModifiedIdx = cursor.getColumnIndex(MediaStore.Audio.Media.DATE_MODIFIED);
 
                         while (cursor.moveToNext()) {
                             long id = idIdx >= 0 ? cursor.getLong(idIdx) : 0;
@@ -2074,6 +2078,10 @@ public class MediaSaverPlugin extends Plugin {
                             int year = yearIdx >= 0 ? cursor.getInt(yearIdx) : 0;
                             String mime = mimeIdx >= 0 ? cursor.getString(mimeIdx) : "audio/mpeg";
                             long size = sizeIdx >= 0 ? cursor.getLong(sizeIdx) : 0;
+                            long dateAdded = dateAddedIdx >= 0 ? cursor.getLong(dateAddedIdx) * 1000L : 0;
+                            long dateModified = dateModifiedIdx >= 0 ? cursor.getLong(dateModifiedIdx) * 1000L : 0;
+                            if (dateAdded == 0) dateAdded = dateModified;
+                            if (dateModified == 0) dateModified = dateAdded;
 
                             if (displayName == null || displayName.isEmpty()) {
                                 displayName = new File(data).getName();
@@ -2113,6 +2121,8 @@ public class MediaSaverPlugin extends Plugin {
                             trk.put("isNimiyo", isNimiyo);
                             trk.put("hasArtwork", true);
                             trk.put("hasLyrics", hasLyrics);
+                            trk.put("dateAdded", dateAdded);
+                            trk.put("dateModified", dateModified);
 
                             trackList.put(trk);
                         }
@@ -2228,6 +2238,8 @@ public class MediaSaverPlugin extends Plugin {
             trk.put("isNimiyo", isNimiyo);
             trk.put("hasArtwork", hasArtwork);
             trk.put("hasLyrics", hasLyrics);
+            trk.put("dateAdded", f.lastModified());
+            trk.put("dateModified", f.lastModified());
 
             return trk;
         } catch (Exception e) {
