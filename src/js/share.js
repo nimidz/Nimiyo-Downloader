@@ -74,16 +74,18 @@ const SERVERS = {
     { id: "savevid", name: "Server 2", sub: "SnapSave (Reels, Posts & Photos)" },
   ],
   youtube: [
-    { id: "gg", name: "Server 1", sub: "YTMP3.gg (1080p / MP3)" },
-    { id: "mobi", name: "Server 2", sub: "YTMP3.mobi (Fast MP4/MP3)" },
+    { id: "auto", name: "Server 1", sub: "Auto Fast (Anti-Lag / Hybrid)" },
+    { id: "gg", name: "Server 2", sub: "YTMP3.gg (1080p / MP3)" },
+    { id: "mobi", name: "Server 3", sub: "YTMP3.mobi (Fast MP4/MP3)" },
   ],
   twitter: [
     { id: "tweeload", name: "Server 1", sub: "TweeLoad (HD Video)" },
     { id: "tvd", name: "Server 2", sub: "TVD (HD Video)" },
   ],
   spotify: [
-    { id: "spotidown", name: "Server 1", sub: "SpotiDown (Album / Track)" },
-    { id: "soundloaders", name: "Server 2", sub: "SoundLoaders (Track)" },
+    { id: "soundloaders", name: "Server 1", sub: "SoundLoaders (Track / Album)" },
+    { id: "spotidown", name: "Server 2", sub: "SpotiDown (Album / Playlist)" },
+    { id: "spotisaver", name: "Server 3", sub: "Spotisaver (320kbps HD)" },
   ],
 };
 
@@ -467,33 +469,46 @@ async function triggerDownload(dlItem, title, idx) {
       const parts = finalUrl.replace("soundloaders_resolve:", "").split("|||");
       const dataVal = parts[0];
       const tokenVal = parts[1];
-      const BASE = "https://soundloaders.app";
+      const baseVal = parts[2] ? decodeURIComponent(parts[2]) : "https://open.spotify.com";
+      const cookiesVal = parts[3] ? decodeURIComponent(parts[3]) : "";
+
+      const BASE = "https://spotimate.app";
       const resRaw = window.NimidzShareBridge.httpRequest(
         JSON.stringify({
-          url: BASE + "/action/tracks",
+          url: BASE + "/action/track",
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             "User-Agent": getUserAgent(),
             "X-Requested-With": "XMLHttpRequest",
-            Referer: BASE + "/",
+            Referer: BASE + "/en1",
             Origin: BASE,
+            Cookie: cookiesVal
           },
           data:
             "data=" +
             encodeURIComponent(dataVal) +
-            "&track_token=" +
-            encodeURIComponent(tokenVal),
+            "&token=" +
+            encodeURIComponent(tokenVal) +
+            "&base=" +
+            encodeURIComponent(baseVal) +
+            "&g-recaptcha-response=dummy_token",
         }),
       );
       const res = JSON.parse(resRaw);
       let dd = typeof res.data === "string" ? JSON.parse(res.data) : res.data;
-      let dlHtml = dd?.html || "";
+      let dlHtml = dd?.data || dd?.html || (typeof dd === "string" ? dd : "");
       const match = dlHtml.match(
-        /href=["'](https:\/\/dl\.soundloaders\.app\/cdnv1\?token=[^"']+)["']/,
+        /href=["'](https?:\/\/(?:dl\.spotimate\.app|dl\.soundloaders\.app)[^"']+)["']/
       );
       if (match && match[1]) finalUrl = match[1];
-      else throw new Error("Could not resolve Soundloaders download link");
+      else {
+        // Fallback: any http link that is not premium or home or cover
+        const links = [...dlHtml.matchAll(/href=["'](https?:\/\/[^"']+)["']/g)];
+        const validLink = links.find(l => !l[1].includes("premium") && !l[1].includes("spotimate.app/en") && !l[1].includes("cover") && !l[1].includes("i.scdn.co") && !/\.(jpg|jpeg|png|webp)/i.test(l[1]) && l[1].includes("token="));
+        if (validLink) finalUrl = validLink[1];
+        else throw new Error("Could not resolve Spotify download link");
+      }
     }
   } catch (err) {
     if (window.onDownloadFailed) {

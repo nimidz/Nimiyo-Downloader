@@ -57,6 +57,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -69,6 +70,7 @@ public class MediaSaverPlugin extends Plugin {
     private static final String MUSIC_CHANNEL_ID = "nimiyo_media_channel";
     private static final int MUSIC_NOTIFICATION_ID = 8803;
     private android.os.PowerManager.WakeLock downloadWakeLock = null;
+    private android.net.wifi.WifiManager.WifiLock downloadWifiLock = null;
     private final java.util.concurrent.atomic.AtomicInteger activeDownloads = new java.util.concurrent.atomic.AtomicInteger(0);
     private BroadcastReceiver becomingNoisyReceiver = null;
     private static volatile boolean isAppForeground = true;
@@ -325,10 +327,8 @@ public class MediaSaverPlugin extends Plugin {
         Double dSpeed = call.getDouble("playbackSpeed", 1.0);
         float playbackSpeed = (dSpeed != null && dSpeed > 0.0) ? dSpeed.floatValue() : 1.0f;
 
-        // Store artwork in memory cache to bypass Android Binder 1MB IPC limit
-        if (artwork != null) {
-            MusicPlaybackService.setPendingArtwork(artwork);
-        }
+        // Store artwork in memory cache to bypass Android Binder 1MB IPC limit (clears old artwork if null)
+        MusicPlaybackService.setPendingArtwork(artwork);
 
         // 1. Direct in-memory update if service is already running (0ms latency, zero IPC, safe from background)
         MusicPlaybackService runningService = MusicPlaybackService.getInstance();
@@ -346,11 +346,11 @@ public class MediaSaverPlugin extends Plugin {
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         try {
-                            runningService.updateDirectly(fTitle, fArtist, fAlbum, fDuration, fPosition, fIsPlaying, fPlaybackSpeed, fSourceUrl, fTrackId);
+                            runningService.updateDirectly(fTitle, fArtist, fAlbum, fDuration, fPosition, fIsPlaying, fPlaybackSpeed, fSourceUrl, fTrackId, artwork);
                         } catch (Exception ignored) {}
                     });
                 } else {
-                    runningService.updateDirectly(fTitle, fArtist, fAlbum, fDuration, fPosition, fIsPlaying, fPlaybackSpeed, fSourceUrl, fTrackId);
+                    runningService.updateDirectly(fTitle, fArtist, fAlbum, fDuration, fPosition, fIsPlaying, fPlaybackSpeed, fSourceUrl, fTrackId, artwork);
                 }
                 call.resolve(new JSObject().put("success", true));
                 return;
@@ -457,6 +457,7 @@ public class MediaSaverPlugin extends Plugin {
 
         try {
             ensureMusicNotificationChannel();
+            MusicPlaybackService.setPendingArtwork(artwork);
             Intent intent = new Intent(getContext(), MusicPlaybackService.class);
             intent.setAction(MusicPlaybackService.ACTION_PLAY_NATIVE);
             intent.putExtra(MusicPlaybackService.EXTRA_SOURCE_URL, sourceUrl);
@@ -626,6 +627,7 @@ public class MediaSaverPlugin extends Plugin {
         }
     }
 
+
     @PluginMethod
     public void saveSharedHistoryItem(PluginCall call) {
         try {
@@ -675,29 +677,72 @@ public class MediaSaverPlugin extends Plugin {
 
     private final ExecutorService downloadExecutor = Executors.newFixedThreadPool(4);
 
-    private synchronized void acquireDownloadWakeLock() {
+    private synchronized void acquireDownloadWakeLock(String taskTitle) {
         try {
+            Context ctx = getContext();
             if (activeDownloads.incrementAndGet() == 1) {
                 if (downloadWakeLock == null) {
-                    android.os.PowerManager pm = (android.os.PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
+                    android.os.PowerManager pm = (android.os.PowerManager) ctx.getSystemService(Context.POWER_SERVICE);
                     if (pm != null) {
                         downloadWakeLock = pm.newWakeLock(android.os.PowerManager.PARTIAL_WAKE_LOCK, "Nimiyo:DownloadWakeLock");
                         downloadWakeLock.setReferenceCounted(false);
                     }
                 }
                 if (downloadWakeLock != null && !downloadWakeLock.isHeld()) {
-                    downloadWakeLock.acquire(30 * 60 * 1000L); // 30 minutes safety timeout
+                    downloadWakeLock.acquire(60 * 60 * 1000L); // 60 minutes safety timeout
+                }
+
+                if (downloadWifiLock == null) {
+                    android.net.wifi.WifiManager wm = (android.net.wifi.WifiManager) ctx.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                    if (wm != null) {
+                        int mode = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+                                ? android.net.wifi.WifiManager.WIFI_MODE_FULL_HIGH_PERF
+                                : android.net.wifi.WifiManager.WIFI_MODE_FULL;
+                        downloadWifiLock = wm.createWifiLock(mode, "Nimiyo:DownloadWifiLock");
+                        downloadWifiLock.setReferenceCounted(false);
+                    }
+                }
+                if (downloadWifiLock != null && !downloadWifiLock.isHeld()) {
+                    downloadWifiLock.acquire();
+                }
+
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        try {
+                            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                        } catch (Exception ignored) {}
+                    });
                 }
             }
+
+            // Keep entire application process alive as foreground service
+            DownloadService.startForegroundHold(ctx, taskTitle != null ? taskTitle : "Mengunduh berkas...");
         } catch (Exception ignored) {}
+    }
+
+    private synchronized void acquireDownloadWakeLock() {
+        acquireDownloadWakeLock("Mengunduh berkas...");
     }
 
     private synchronized void releaseDownloadWakeLock() {
         try {
+            Context ctx = getContext();
+            DownloadService.releaseForegroundHold(ctx);
+
             if (activeDownloads.decrementAndGet() <= 0) {
                 activeDownloads.set(0);
                 if (downloadWakeLock != null && downloadWakeLock.isHeld()) {
                     downloadWakeLock.release();
+                }
+                if (downloadWifiLock != null && downloadWifiLock.isHeld()) {
+                    downloadWifiLock.release();
+                }
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        try {
+                            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                        } catch (Exception ignored) {}
+                    });
                 }
             }
         } catch (Exception ignored) {}
@@ -751,12 +796,13 @@ public class MediaSaverPlugin extends Plugin {
             URL url = new URL(currentUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod(method);
-            conn.setConnectTimeout(30000);
-            conn.setReadTimeout(30000);
+            conn.setConnectTimeout(60000);
+            conn.setReadTimeout(60000);
             conn.setInstanceFollowRedirects(false);
 
             conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
             conn.setRequestProperty("Accept", "*/*");
+            conn.setRequestProperty("Accept-Language", "en-US,en;q=0.9,id;q=0.8");
 
             if (headers != null) {
                 for (Map.Entry<String, String> entry : headers.entrySet()) {
@@ -806,7 +852,7 @@ public class MediaSaverPlugin extends Plugin {
         String overwriteMode = call.getString("overwriteMode", "rename");
 
         downloadExecutor.execute(() -> {
-            acquireDownloadWakeLock();
+            acquireDownloadWakeLock("Mengunduh " + fileName);
             HttpURLConnection conn = null;
             OutputStream os = null;
             InputStream is = null;
@@ -865,23 +911,52 @@ public class MediaSaverPlugin extends Plugin {
                 }
 
                 if (!headers.containsKey("Referer")) {
-                    if (url.contains("tiktok") || url.contains("snaptik") || url.contains("tikwm")) {
+                    String lower = url.toLowerCase();
+                    if (lower.contains("snaptik.app") || lower.contains("snaptik")) {
+                        headers.put("Referer", "https://snaptik.app/");
+                        headers.put("Origin", "https://snaptik.app");
+                    } else if (lower.contains("ssstik.io") || lower.contains("tikcdn.io")) {
+                        headers.put("Referer", "https://ssstik.io/");
+                        headers.put("Origin", "https://ssstik.io");
+                    } else if (lower.contains("tiktokio.com")) {
+                        headers.put("Referer", "https://tiktokio.com/");
+                        headers.put("Origin", "https://tiktokio.com");
+                    } else if (lower.contains("tiktok.com") || lower.contains("byteoversea") || lower.contains("ibytedtos") || lower.contains("tikwm")) {
                         headers.put("Referer", "https://www.tiktok.com/");
-                    } else if (url.contains("instagram") || url.contains("cdninstagram")) {
+                    } else if (lower.contains("instagram.com") || lower.contains("cdninstagram") || lower.contains("fbcdn.net")) {
                         headers.put("Referer", "https://www.instagram.com/");
-                    } else if (url.contains("spotidown") || url.contains("spotify")) {
+                    } else if (lower.contains("spotidown") || lower.contains("spotify")) {
                         headers.put("Referer", "https://spotidown.app/");
-                    } else if (url.contains("forhub.io") || url.contains("dl.forhub.io")) {
+                    } else if (lower.contains("youtube.com") || lower.contains("googlevideo.com") || lower.contains("youtu.be")) {
+                        headers.put("Referer", "https://www.youtube.com/");
+                    } else if (lower.contains("forhub.io") || lower.contains("dl.forhub.io")) {
                         headers.put("Referer", "https://www.forhub.io/download.php");
-                    } else if (url.contains("klickaud.org") || url.contains("dl.klickaud.org")) {
+                    } else if (lower.contains("klickaud.org") || lower.contains("dl.klickaud.org")) {
                         headers.put("Referer", "https://www.klickaud.org/download.php");
+                    } else if (lower.contains("facebook.com") || lower.contains("fbcdn")) {
+                        headers.put("Referer", "https://www.facebook.com/");
+                    } else if (lower.contains("twitter.com") || lower.contains("x.com") || lower.contains("twimg")) {
+                        headers.put("Referer", "https://twitter.com/");
                     }
                 }
 
-                conn = connectWithRedirects(url, "GET", headers);
-                int responseCode = conn.getResponseCode();
-                if (responseCode >= 400) {
-                    throw new Exception("Server returned HTTP " + responseCode);
+                int maxConnRetries = 2;
+                int connAttempt = 0;
+                while (true) {
+                    try {
+                        conn = connectWithRedirects(url, "GET", headers);
+                        int responseCode = conn.getResponseCode();
+                        if (responseCode >= 400) {
+                            throw new Exception("Server returned HTTP " + responseCode);
+                        }
+                        break;
+                    } catch (Exception connEx) {
+                        connAttempt++;
+                        if (connAttempt > maxConnRetries) {
+                            throw connEx;
+                        }
+                        try { Thread.sleep(1200); } catch (Exception ignored) {}
+                    }
                 }
 
                 long contentLength = conn.getContentLengthLong();
@@ -970,7 +1045,7 @@ public class MediaSaverPlugin extends Plugin {
                     os = new FileOutputStream(targetFileLegacy);
                 }
 
-                byte[] buf = new byte[8192];
+                byte[] buf = new byte[32768];
                 int len;
                 long totalDownloaded = 0;
                 long lastProgressTime = 0;
@@ -2997,5 +3072,203 @@ public class MediaSaverPlugin extends Plugin {
             }
         });
     }
+
+    // =========================================================================
+    // Persistent Playlist Storage in Download/Nimiyo/database/playlist_*.json
+    // =========================================================================
+    private File getPlaylistDatabaseDir() {
+        File downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File dbDir = new File(downloads, "Nimiyo/database");
+        if (!dbDir.exists()) {
+            dbDir.mkdirs();
+        }
+        return dbDir;
+    }
+
+    private String sanitizePlaylistFilename(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            name = "playlist_" + System.currentTimeMillis();
+        }
+        String clean = name.trim().replaceAll("[\\\\/:*?\"<>|]", "_");
+        clean = clean.replaceAll("[\\s_]+", "_").replaceAll("^_+|__+$", "");
+        if (clean.isEmpty()) clean = "unnamed";
+        return "playlist_" + clean + ".json";
+    }
+
+    @PluginMethod
+    public void savePlaylistFile(PluginCall call) {
+        String name = call.getString("name");
+        String playlistJson = call.getString("playlistJson");
+        if (playlistJson == null) {
+            JSObject plObj = call.getObject("playlist");
+            if (plObj != null) {
+                playlistJson = plObj.toString();
+            }
+        }
+
+        if (name == null || name.trim().isEmpty() || playlistJson == null) {
+            call.reject("Nama playlist dan data playlist wajib diisi");
+            return;
+        }
+
+        final String finalName = name.trim();
+        final String finalJson = playlistJson;
+
+        downloadExecutor.execute(() -> {
+            try {
+                File dir = getPlaylistDatabaseDir();
+                File file = new File(dir, sanitizePlaylistFilename(finalName));
+                try (FileOutputStream fos = new FileOutputStream(file);
+                     OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
+                    osw.write(finalJson);
+                    osw.flush();
+                }
+
+                MediaScannerConnection.scanFile(
+                    getContext(),
+                    new String[]{ file.getAbsolutePath() },
+                    new String[]{ "application/json" },
+                    null
+                );
+
+                JSObject ret = new JSObject();
+                ret.put("success", true);
+                ret.put("filePath", file.getAbsolutePath());
+                ret.put("fileName", file.getName());
+                call.resolve(ret);
+            } catch (Exception e) {
+                call.reject("Gagal menyimpan playlist ke berkas: " + e.getMessage());
+            }
+        });
+    }
+
+    @PluginMethod
+    public void deletePlaylistFile(PluginCall call) {
+        String name = call.getString("name");
+        String fileName = call.getString("fileName");
+
+        if ((name == null || name.trim().isEmpty()) && (fileName == null || fileName.trim().isEmpty())) {
+            call.reject("Nama playlist atau nama berkas wajib diisi");
+            return;
+        }
+
+        final String targetFileName = (fileName != null && !fileName.trim().isEmpty())
+            ? fileName.trim()
+            : sanitizePlaylistFilename(name);
+
+        downloadExecutor.execute(() -> {
+            try {
+                File dir = getPlaylistDatabaseDir();
+                File file = new File(dir, targetFileName);
+                boolean deleted = false;
+                if (file.exists()) {
+                    deleted = file.delete();
+                }
+
+                JSObject ret = new JSObject();
+                ret.put("success", deleted || !file.exists());
+                call.resolve(ret);
+            } catch (Exception e) {
+                call.reject("Gagal menghapus berkas playlist: " + e.getMessage());
+            }
+        });
+    }
+
+    @PluginMethod
+    public void renamePlaylistFile(PluginCall call) {
+        String oldName = call.getString("oldName");
+        String newName = call.getString("newName");
+        String playlistJson = call.getString("playlistJson");
+        if (playlistJson == null) {
+            JSObject plObj = call.getObject("playlist");
+            if (plObj != null) {
+                playlistJson = plObj.toString();
+            }
+        }
+
+        if (oldName == null || newName == null) {
+            call.reject("Nama lama dan nama baru playlist wajib diisi");
+            return;
+        }
+
+        final String finalOldName = oldName.trim();
+        final String finalNewName = newName.trim();
+        final String finalJson = playlistJson;
+
+        downloadExecutor.execute(() -> {
+            try {
+                File dir = getPlaylistDatabaseDir();
+                File oldFile = new File(dir, sanitizePlaylistFilename(finalOldName));
+                File newFile = new File(dir, sanitizePlaylistFilename(finalNewName));
+
+                if (oldFile.exists() && !oldFile.getAbsolutePath().equals(newFile.getAbsolutePath())) {
+                    oldFile.delete();
+                }
+
+                if (finalJson != null && !finalJson.isEmpty()) {
+                    try (FileOutputStream fos = new FileOutputStream(newFile);
+                         OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
+                        osw.write(finalJson);
+                        osw.flush();
+                    }
+                } else if (oldFile.exists() && !newFile.exists()) {
+                    oldFile.renameTo(newFile);
+                }
+
+                MediaScannerConnection.scanFile(
+                    getContext(),
+                    new String[]{ newFile.getAbsolutePath() },
+                    new String[]{ "application/json" },
+                    null
+                );
+
+                JSObject ret = new JSObject();
+                ret.put("success", true);
+                ret.put("filePath", newFile.getAbsolutePath());
+                call.resolve(ret);
+            } catch (Exception e) {
+                call.reject("Gagal mengubah nama berkas playlist: " + e.getMessage());
+            }
+        });
+    }
+
+    @PluginMethod
+    public void loadAllPlaylists(PluginCall call) {
+        downloadExecutor.execute(() -> {
+            try {
+                File dir = getPlaylistDatabaseDir();
+                JSArray list = new JSArray();
+
+                File[] files = dir.listFiles((d, fName) -> fName != null && fName.startsWith("playlist_") && fName.endsWith(".json"));
+                if (files != null) {
+                    for (File f : files) {
+                        try (FileInputStream fis = new FileInputStream(f);
+                             InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
+                             BufferedReader reader = new BufferedReader(isr)) {
+                            StringBuilder sb = new StringBuilder();
+                            String line;
+                            while ((line = reader.readLine()) != null) {
+                                sb.append(line);
+                            }
+                            String content = sb.toString().trim();
+                            if (!content.isEmpty()) {
+                                org.json.JSONObject obj = new org.json.JSONObject(content);
+                                list.put(JSObject.fromJSONObject(obj));
+                            }
+                        } catch (Exception err) {
+                            Log.w("MediaSaverPlugin", "Error reading playlist file: " + f.getName(), err);
+                        }
+                    }
+                }
+
+                JSObject ret = new JSObject();
+                ret.put("playlists", list);
+                call.resolve(ret);
+            } catch (Exception e) {
+                call.reject("Gagal membaca berkas playlist: " + e.getMessage());
+            }
+        });
+    }
 }
+
 

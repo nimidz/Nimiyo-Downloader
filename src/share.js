@@ -175,6 +175,7 @@ let activeResult = null;
 let isAnalyzing = false;
 let analysisAborted = false;
 let currentServerIndex = 0;
+let activeShareDownloadsCount = 0;
 
 // Platform details & Regex mapping matching app.js
 const platformMapping = {
@@ -197,13 +198,13 @@ const platformMapping = {
 };
 
 const fallbackChains = {
-  tiktok: ['tiktokio', 'snaptik', 'ssstik', 'direct'],
+  tiktok: ['tiktokio', 'snaptik', 'ssstik', 'tikdownloader', 'direct'],
   instagram: ['snapsave', 'indown', 'direct'],
   facebook: ['snapsave', 'direct'],
-  spotify: ['spotidown', 'soundloaders', 'direct'],
+  spotify: ['soundloaders', 'spotidown', 'spotisaver', 'direct'],
   soundcloud: ['forhub', 'klickaud', 'direct'],
   twitter: ['direct', 'tweeload', 'tvd'],
-  youtube: ['ytmp3', 'direct'],
+  youtube: ['auto', 'gg', 'mobi', 'direct'],
   applemusic: ['aplmate', 'direct'],
   pinterest: ['pindown', 'direct'],
   threads: ['threadster', 'direct'],
@@ -426,6 +427,19 @@ function detectMediaCategory(dlItem, mediaResult) {
   const rawUrl = String(dlItem?.url || "").toLowerCase();
 
   // 1. Audio Platforms & Types
+  // Explicit Cover / Image check first to avoid being overridden by audio platform/type
+  if (
+    itemType.includes("[COVER]") ||
+    itemType.includes("COVER") ||
+    rawUrl.includes("i.scdn.co") ||
+    rawUrl.endsWith(".jpg") ||
+    rawUrl.endsWith(".jpeg") ||
+    rawUrl.endsWith(".png") ||
+    rawUrl.endsWith(".webp")
+  ) {
+    return "image";
+  }
+
   if (
     platform === "spotify" ||
     platform === "applemusic" ||
@@ -451,6 +465,7 @@ function detectMediaCategory(dlItem, mediaResult) {
     rawUrl.endsWith(".flac") ||
     rawUrl.includes("spotidown_resolve:") ||
     rawUrl.includes("soundloaders_resolve:") ||
+    rawUrl.includes("spotisaver_resolve:") ||
     rawUrl.includes("ytmp3gg_resolve:") ||
     rawUrl.includes("applemusic_resolve:")
   ) {
@@ -517,19 +532,30 @@ function formatDownloadOptionLabel(dl, mediaResult) {
   const rawType = String(dl.type || "").trim();
   const rawQuality = String(dl.quality || "").trim();
   const rawUrl = String(dl.url || "").split("?")[0].toLowerCase();
+  const fullUrl = String(dl.url || "").toLowerCase();
   const combined = `${rawType} ${rawQuality} ${rawUrl}`.toUpperCase();
 
-  // Determine file extension
+  // If this is an IMAGE, always display clean format: "IMAGE (PNG)", "IMAGE (JPG)", or "IMAGE (WEBP)"
+  // NEVER prepend video description/caption!
+  if (category === "image") {
+    let imgExt = "JPG";
+    if (combined.includes("PNG") || rawUrl.endsWith(".png") || fullUrl.includes(".png") || fullUrl.includes("format=png")) {
+      imgExt = "PNG";
+    } else if (combined.includes("WEBP") || rawUrl.endsWith(".webp") || fullUrl.includes(".webp") || fullUrl.includes("format=webp")) {
+      imgExt = "WEBP";
+    } else {
+      imgExt = "JPG";
+    }
+    return `IMAGE (${imgExt})`;
+  }
+
+  // Determine file extension for video/audio
   let extension = "MP4";
   if (category === "audio") {
     if (combined.includes("M4A") || rawUrl.endsWith(".m4a")) extension = "M4A";
     else if (combined.includes("WAV") || rawUrl.endsWith(".wav")) extension = "WAV";
     else if (combined.includes("FLAC") || rawUrl.endsWith(".flac")) extension = "FLAC";
     else extension = "MP3";
-  } else if (category === "image") {
-    if (combined.includes("PNG") || rawUrl.endsWith(".png")) extension = "PNG";
-    else if (combined.includes("WEBP") || rawUrl.endsWith(".webp")) extension = "WEBP";
-    else extension = "JPG";
   } else {
     if (combined.includes("WEBM") || rawUrl.endsWith(".webm")) extension = "WEBM";
     else if (combined.includes("MOV") || rawUrl.endsWith(".mov")) extension = "MOV";
@@ -556,9 +582,6 @@ function formatDownloadOptionLabel(dl, mediaResult) {
 
     const qualityTag = (isSD && !isHD) ? "SD" : "HD";
     badge = `(AUDIO) ${extension} ${qualityTag}`;
-  } else if (category === "image") {
-    // Image: (IMAGE) PNG, (IMAGE) JPG, (IMAGE) WEBP
-    badge = `(IMAGE) ${extension}`;
   } else {
     // Video: (VIDEO) MP4 1040P, (VIDEO) MP4 1080P, (VIDEO) MP4 720P, etc.
     let qualityTag = "";
@@ -598,13 +621,14 @@ function isGenericMediaTitle(str) {
     "AUDIOYO", "VIDEOYO", "IMAGEYO"
   ];
   if (genericList.includes(s)) return true;
+  if (s.includes("ZIP CAN INCLUDE") || s.includes("YOUR FREE ZIP") || s.includes("FREE ZIP")) return true;
   if (/^\(VIDEO\)/i.test(s) || /^\(AUDIO\)/i.test(s) || /^\(IMAGE\)/i.test(s)) return true;
   if (/^VIDEO\s*[\(\[]/i.test(s) || /^AUDIO\s*[\(\[]/i.test(s) || /^PHOTO\s*[\(\[]/i.test(s)) return true;
   if (/^VIDEO_\d+/i.test(s) || /^AUDIO_\d+/i.test(s) || /^IMAGE_\d+/i.test(s)) return true;
   return false;
 }
 
-function buildTargetFilename(dlItem, mediaResult, mediaCategory, platform, extension) {
+function buildTargetFilename(dlItem, mediaResult, mediaCategory, platform, extension, itemIndexOverride = null) {
   const isInstagram = (platform && platform.toLowerCase() === "instagram") || (currentPlatform && currentPlatform.toLowerCase() === "instagram") || (mediaResult?.sourceUrl && mediaResult.sourceUrl.includes("instagram.com"));
   let title = (mediaResult?.title || mediaResult?.description || "").trim();
   let itemTitle = (dlItem?.title || dlItem?.name || "").trim();
@@ -645,7 +669,7 @@ function buildTargetFilename(dlItem, mediaResult, mediaCategory, platform, exten
     }
   }
 
-  const itemIdx = dlItem?.itemIndex || dlItem?.index;
+  const itemIdx = itemIndexOverride || dlItem?.itemIndex || dlItem?.index;
   if (itemIdx && !base.endsWith(`_${itemIdx}`) && !base.includes(`(${itemIdx})`) && !base.startsWith(`${itemIdx}.`) && !base.startsWith(`0${itemIdx}.`)) {
     base += `_${itemIdx}`;
   }
@@ -659,7 +683,7 @@ function buildTargetFilename(dlItem, mediaResult, mediaCategory, platform, exten
     if (isInstagram) {
       cleaned = "Instagram_Content" + (itemIdx ? `_${itemIdx}` : "");
     } else {
-      cleaned = (platform ? platform.charAt(0).toUpperCase() + platform.slice(1) : "Nimiyo") + "_" + Date.now();
+      cleaned = (platform ? platform.charAt(0).toUpperCase() + platform.slice(1) : "Nimiyo") + "_" + (itemIdx ? itemIdx : Date.now());
     }
   }
 
@@ -857,8 +881,8 @@ async function startAnalyze(forced = false) {
     if (analysisAborted) break;
 
     try {
-      const scraperModule = window.scrapr?.[platform];
-      const scrapeFunc = scraperModule?.[method] || scraperModule?.default || window.scrapr?.[`scrape${platform.charAt(0).toUpperCase() + platform.slice(1)}`];
+      const scraperModule = window.nimiyoEngine?.[platform];
+      const scrapeFunc = scraperModule?.[method] || scraperModule?.default || window.nimiyoEngine?.[`scrape${platform.charAt(0).toUpperCase() + platform.slice(1)}`];
       if (!scrapeFunc) continue;
 
       const res = await scrapeFunc(activeUrl);
@@ -981,6 +1005,8 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
     return false;
   }
 
+  activeShareDownloadsCount++;
+
   const optBtn = document.getElementById("downloadOptBtn_" + index);
   if (optBtn) {
     optBtn.innerText = t("downloading");
@@ -991,9 +1017,10 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
   const minimizeBtn = document.getElementById("minimizeBtn");
   if (minimizeBtn) minimizeBtn.classList.remove("hidden");
 
+  const explicitIndex = (isBatch && batchIndex != null) ? (batchIndex + 1) : (dlItem?.itemIndex || dlItem?.index || null);
   const mediaCategory = detectMediaCategory(dlItem, result);
   const targetExtension = determineExtension(mediaCategory, dlItem.url);
-  const sanitizedFilename = buildTargetFilename(dlItem, result, mediaCategory, currentPlatform, targetExtension);
+  const sanitizedFilename = buildTargetFilename(dlItem, result, mediaCategory, currentPlatform, targetExtension, explicitIndex);
   const isAudio = mediaCategory === "audio";
   const mimeType = isAudio ? "audio/mpeg" : (mediaCategory === "image" ? "image/jpeg" : "video/mp4");
   const displayTitle = dlItem.title || result.title || sanitizedFilename;
@@ -1020,8 +1047,8 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
 
       if (!cookie) {
         try {
-          const homeRes = window.scrapr?.scraperFetch
-            ? await window.scrapr.scraperFetch({ url: "https://spotidown.app/", rawResponse: true }, "SpotiDown Cookie")
+          const homeRes = window.nimiyoEngine?.scraperFetch
+            ? await window.nimiyoEngine.scraperFetch({ url: "https://spotidown.app/", rawResponse: true }, "SpotiDown Cookie")
             : await fetch("https://spotidown.app/");
           const hHeaders = homeRes?.headers || {};
           const sc = hHeaders["set-cookie"] || hHeaders["Set-Cookie"] || "";
@@ -1051,8 +1078,8 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
           );
         });
         resData = typeof rawRes === "object" ? rawRes : JSON.parse(rawRes);
-      } else if (window.scrapr?.scraperFetch) {
-        resData = await window.scrapr.scraperFetch({
+      } else if (window.nimiyoEngine?.scraperFetch) {
+        resData = await window.nimiyoEngine.scraperFetch({
           url: "https://spotidown.app/action/track",
           method: "POST",
           data: payload,
@@ -1105,8 +1132,16 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
     if (downloadUrl.startsWith("soundloaders_resolve:")) {
       const parts = downloadUrl.replace("soundloaders_resolve:", "").split("|||");
       const dataVal = parts[0];
-      const trackToken = parts[1];
-      const formBody = new URLSearchParams({ data: dataVal, track_token: trackToken }).toString();
+      const tokenVal = parts[1];
+      const baseVal = parts[2] ? decodeURIComponent(parts[2]) : "https://open.spotify.com";
+      const cookiesVal = parts[3] ? decodeURIComponent(parts[3]) : "";
+
+      const formBody = new URLSearchParams({
+        data: dataVal,
+        token: tokenVal,
+        base: baseVal,
+        "g-recaptcha-response": "dummy_token"
+      }).toString();
 
       let resData = null;
       if (window.NimiyoShareBridge?.httpRequestAsync) {
@@ -1116,28 +1151,31 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
           window.__nimiyoShareCallbacks[reqId] = resolve;
           window.NimiyoShareBridge.httpRequestAsync(
             JSON.stringify({
-              url: "https://spotimate.io/action/tracks",
+              url: "https://spotimate.app/action/track",
               method: "POST",
               data: formBody,
               headers: {
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-                "Referer": "https://spotimate.io/",
-                "Origin": "https://spotimate.io"
+                "Referer": "https://spotimate.app/en1",
+                "Origin": "https://spotimate.app",
+                "Cookie": cookiesVal
               }
             }),
             reqId
           );
         });
         resData = typeof rawRes === "object" ? rawRes : JSON.parse(rawRes);
-      } else if (window.scrapr?.scraperFetch) {
-        resData = await window.scrapr.scraperFetch({
-          url: "https://spotimate.io/action/tracks",
+      } else if (window.nimiyoEngine?.scraperFetch || window.nimiyoEngine?.scraperFetch) {
+        const fetchHelper = window.nimiyoEngine?.scraperFetch || window.nimiyoEngine?.scraperFetch;
+        resData = await fetchHelper({
+          url: "https://spotimate.app/action/track",
           method: "POST",
           data: formBody,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "Referer": "https://spotimate.io/",
-            "Origin": "https://spotimate.io"
+            "Referer": "https://spotimate.app/en1",
+            "Origin": "https://spotimate.app",
+            "Cookie": cookiesVal
           }
         });
       }
@@ -1146,18 +1184,68 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
       if (typeof parsedData === "string") {
         try { parsedData = JSON.parse(parsedData); } catch (_) { }
       }
-      const htmlContent = parsedData?.html || (typeof parsedData === "string" ? parsedData : "");
+      const htmlContent = parsedData?.data || parsedData?.html || (typeof parsedData === "string" ? parsedData : "");
       const parser = new DOMParser();
       const doc = parser.parseFromString(htmlContent, "text/html");
       let resolvedUrl = "";
-      doc.querySelectorAll("a").forEach(a => {
-        const link = a.getAttribute("href");
-        if (link && link.startsWith("http") && !link.includes("spotimate.io") && !link.includes("soundloaders.app")) {
+      const allAnchors = Array.from(doc.querySelectorAll("a"));
+      for (const a of allAnchors) {
+        const link = a.getAttribute("href") || "";
+        const text = (a.textContent || "").toLowerCase();
+        if (!link.startsWith("http") || link.includes("premium.html") || link.includes("/en1") || link.includes("/en7") || link.includes("spotimate.app/en") || link.includes("soundloaders.app/en")) {
+          continue;
+        }
+        const isCoverLink = text.includes("cover") || link.includes("cover") || link.includes("i.scdn.co") || /\.(jpg|jpeg|png|webp)($|\?)/i.test(link);
+        if (isCoverLink) {
+          continue;
+        }
+        if (link.includes("dl.spotimate.app") || link.includes("dl.soundloaders.app") || link.includes("token=") || text.includes("mp3") || text.includes("song") || text.includes("download")) {
+          resolvedUrl = link;
+          break;
+        }
+        if (!resolvedUrl) {
           resolvedUrl = link;
         }
-      });
-      if (!resolvedUrl) throw new Error("Could not resolve Spotimate download link.");
+      }
+      if (!resolvedUrl) throw new Error("Could not resolve Spotify download link.");
       downloadUrl = resolvedUrl;
+    }
+
+    // 1B3. Spotify Spotisaver Lazy Resolving
+    if (downloadUrl.startsWith("spotisaver_resolve:")) {
+      const parts = downloadUrl.replace("spotisaver_resolve:", "").split("|||");
+      const trackId = parts[0];
+      const trackName = decodeURIComponent(parts[1] || "");
+      const duration = parts[2] || "0";
+      const cookiesVal = parts[3] ? decodeURIComponent(parts[3]) : "";
+
+      try {
+        const BASE = "https://spotisaver.net";
+        const fetchHelper = window.nimiyoEngine?.scraperFetch || window.nimiyoEngine?.scraperFetch;
+        const ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
+        const dlCtx = { lang: "en", id: trackId, name: trackName, duration_ms: String(duration) };
+        const b64 = btoa(JSON.stringify(dlCtx)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+        const sigParams = new URLSearchParams({
+          _t: "455b447694e16f8ceacaa717f18ba309675dafb36687859a5d69d39798046221",
+          _a: "download_track",
+          _c: b64,
+        });
+
+        const rSig = fetchHelper
+          ? await fetchHelper({
+              url: `${BASE}/api/get_signature.php?${sigParams.toString()}`,
+              headers: { "User-Agent": ua, Accept: "application/json", Referer: BASE + "/en1", Cookie: cookiesVal },
+            }, "Spotisaver Sig Resolve")
+          : null;
+
+        if (rSig?.token) {
+          downloadUrl = `${BASE}/api/download_track.php?id=${trackId}`;
+        } else {
+          throw new Error("Could not obtain Spotisaver download token");
+        }
+      } catch (e) {
+        throw new Error(`Spotify Spotisaver resolve failed: ${e.message}`);
+      }
     }
 
     // 1C. Apple Music Aplmate Resolving
@@ -1208,17 +1296,142 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
       downloadUrl = resolvedUrl;
     }
 
+    // 1D. YouTube Playlist Resolving (ytmp3gg_resolve:videoId|||format|||quality)
+    if (downloadUrl.startsWith("ytmp3gg_resolve:")) {
+      const parts = downloadUrl.replace("ytmp3gg_resolve:", "").split("|||");
+      const videoId = parts[0];
+      const format = parts[1] || "mp3";
+      const quality = parts[2] || "128";
+      let resolvedDlUrl = null;
+
+      try {
+        const fetchHelper = window.nimiyoEngine?.scraperFetch || window.nimiyoEngine?.scraperFetch;
+        const headers = {
+          Origin: "https://media.ytmp3.gg",
+          Referer: "https://media.ytmp3.gg/",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json"
+        };
+        let convRes = null;
+        if (fetchHelper) {
+          convRes = await fetchHelper({
+            url: "https://hub.convert1s.com/api/download",
+            method: "POST",
+            headers,
+            data: JSON.stringify({
+              url: `https://www.youtube.com/watch?v=${videoId}`,
+              os: "macos",
+              output: { type: format === "mp4" ? "video" : "audio", format, quality },
+              audio: { bitrate: "128k" },
+            }),
+            rawResponse: true,
+          }, "YTMP3 Playlist Resolve");
+        }
+        let conv = convRes?.data;
+        if (typeof conv === "string") {
+          try { conv = JSON.parse(conv); } catch (_) {}
+        }
+        if (conv && !conv.error && conv.statusUrl) {
+          let attempts = 0;
+          while (!resolvedDlUrl && attempts < 12) {
+            await new Promise(r => setTimeout(r, 1200));
+            const pollData = await fetchHelper({ url: conv.statusUrl, headers }, "YTMP3 Status");
+            attempts++;
+            if (pollData && pollData.status === "completed" && pollData.downloadUrl) {
+              resolvedDlUrl = pollData.downloadUrl;
+              break;
+            }
+            if (pollData && (pollData.status === "error" || pollData.status === "failed")) break;
+          }
+        }
+      } catch (_) {}
+
+      // Fallback to ymcdn
+      if (!resolvedDlUrl) {
+        try {
+          const fetchHelper = window.nimiyoEngine?.scraperFetch || window.nimiyoEngine?.scraperFetch;
+          const ymHeaders = {
+            Origin: "https://ytmp3.mobi",
+            Referer: "https://ytmp3.mobi/en8/",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            Accept: "*/*"
+          };
+          const initData = fetchHelper
+            ? await fetchHelper({ url: `https://a.ymcdn.org/api/v1/init?p=y&23=1llum1n471&_=${Math.random()}`, headers: ymHeaders }, "YTMobi Init")
+            : null;
+
+          if (initData?.convertURL) {
+            let convData = await fetchHelper({ url: `${initData.convertURL}&v=${videoId}&f=${format}&_=${Math.random()}`, headers: ymHeaders }, "YTMobi Convert");
+            let redirCount = 0;
+            while (convData && convData.redirect > 0 && convData.redirectURL && redirCount < 5) {
+              redirCount++;
+              convData = await fetchHelper({ url: `${convData.redirectURL}&v=${videoId}&f=${format}&_=${Math.random()}`, headers: ymHeaders }, "YTMobi Redirect");
+            }
+            if (convData && !convData.error) {
+              let progress = convData.progress || 0;
+              let ymAttempts = 0;
+              while (progress < 3 && ymAttempts < 12 && convData.progressURL) {
+                await new Promise((r) => setTimeout(r, 1200));
+                const progData = await fetchHelper({ url: `${convData.progressURL}&_=${Math.random()}`, headers: ymHeaders }, "YTMobi Progress");
+                if (!progData || progData.error) break;
+                progress = progData.progress ?? 0;
+                if (progData.downloadURL) resolvedDlUrl = progData.downloadURL;
+                if (progress === 4) break;
+                ymAttempts++;
+              }
+              if (convData.downloadURL && !resolvedDlUrl) resolvedDlUrl = convData.downloadURL;
+            }
+          }
+        } catch (_) {}
+      }
+
+      if (!resolvedDlUrl) throw new Error("Could not resolve YouTube download link.");
+      if (resolvedDlUrl.startsWith("//")) resolvedDlUrl = "https:" + resolvedDlUrl;
+      downloadUrl = resolvedDlUrl;
+    }
+
     // 2. High-Speed Native Stream Downloader
     if (window.NimiyoShareBridge && window.NimiyoShareBridge.downloadFileAsync) {
+      let historyTitle = "";
+      if (dlItem?.title && !isGenericMediaTitle(dlItem.title)) {
+        historyTitle = dlItem.title;
+      } else if (dlItem?.name && !isGenericMediaTitle(dlItem.name)) {
+        historyTitle = dlItem.name;
+      } else if (sanitizedFilename && !isGenericMediaTitle(sanitizedFilename)) {
+        historyTitle = sanitizedFilename.replace(/\.(mp4|mp3|png|jpg|jpeg|webp|m4a|wav|webm|mov)$/i, "").replace(/_+/g, " ").trim();
+      } else if (result?.title && !isGenericMediaTitle(result.title)) {
+        historyTitle = result.title;
+      } else {
+        historyTitle = sanitizedFilename.replace(/\.(mp4|mp3|png|jpg|jpeg|webp|m4a|wav|webm|mov)$/i, "").replace(/_+/g, " ").trim();
+      }
+      const curIndex = dlItem?.itemIndex || (isBatch && batchIndex != null ? batchIndex + 1 : null);
+      const totalCount = dlItem?.batchTotal || (isBatch ? batchTotal : null);
+      if (curIndex && totalCount && totalCount > 1 && !historyTitle.includes(`(${curIndex}/${totalCount})`)) {
+        historyTitle += ` (${curIndex}/${totalCount})`;
+      } else if (curIndex && !totalCount && !historyTitle.includes(`(${curIndex})`)) {
+        historyTitle += ` (${curIndex})`;
+      }
+      const preHistoryItem = {
+        id: "dl_" + Date.now() + "_" + Math.random().toString(36).substr(2, 6),
+        filename: sanitizedFilename,
+        title: historyTitle,
+        thumbnail: dlItem?.thumbnail || dlItem?.cover || dlItem?.url || result?.thumbnail || "nimiyo_icon.webp",
+        platform: currentPlatform || (activeUrl ? detectPlatform(activeUrl) : "other"),
+        mediaType: isAudio ? "audio" : mediaCategory,
+        timestamp: Date.now()
+      };
+      const historyItemJson = JSON.stringify(preHistoryItem);
+
       const reqId = "dl_" + Date.now() + "_" + Math.random().toString(36).substr(2, 6);
       const res = await new Promise((resolve) => {
         if (!window.__nimiyoShareCallbacks) window.__nimiyoShareCallbacks = {};
         window.__nimiyoShareCallbacks[reqId] = resolve;
-        window.NimiyoShareBridge.downloadFileAsync(downloadUrl, sanitizedFilename, mimeType, isAudio, reqId);
+        window.NimiyoShareBridge.downloadFileAsync(downloadUrl, sanitizedFilename, mimeType, isAudio, reqId, historyItemJson, isBatch);
       });
 
       if (res && res.success) {
-        saveToHistory(sanitizedFilename, result, dlItem, isAudio ? "audio" : mediaCategory);
+        saveToHistory(sanitizedFilename, result, dlItem, isAudio ? "audio" : mediaCategory, isBatch ? batchIndex : null, isBatch ? batchTotal : null);
         if (optBtn) {
           optBtn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Selesai';
           optBtn.disabled = true;
@@ -1259,7 +1472,7 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
         optBtn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Selesai';
         optBtn.disabled = true;
       }
-      saveToHistory(sanitizedFilename, result, dlItem, isAudio ? "audio" : mediaCategory);
+      saveToHistory(sanitizedFilename, result, dlItem, isAudio ? "audio" : mediaCategory, isBatch ? batchIndex : null, isBatch ? batchTotal : null);
 
       if (!isBatch) {
         updateDownloadProgressCard(true, displayTitle, 100);
@@ -1289,6 +1502,16 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
 
     if (!isBatch) {
       updateDownloadProgressCard(false);
+
+      // If user minimized or document is hidden, do NOT auto-switch server in background loop
+      if (document.hidden || window.__isMinimized) {
+        const failMsg = "Unduhan gagal: " + (err?.message || "Koneksi terputus");
+        showToast(failMsg);
+        showNativeToast(failMsg);
+        notifyNative("Nimiyo Downloader", failMsg, 0, 0, true);
+        return false;
+      }
+
       const platform = currentPlatform || (activeUrl ? detectPlatform(activeUrl) : null);
       const servers = platform ? (fallbackChains[platform] || ['direct']) : ['direct'];
 
@@ -1315,11 +1538,15 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
       console.warn(`[Batch Download] Item ${batchIndex + 1}/${batchTotal} failed:`, err?.message || err);
     }
     return false;
+  } finally {
+    activeShareDownloadsCount = Math.max(0, activeShareDownloadsCount - 1);
   }
 }
 
 async function executeBatchDownload(items, result) {
   if (!items || items.length === 0) return;
+
+  window.__isBatchDownloading = true;
 
   const minimizeBtn = document.getElementById("minimizeBtn");
   if (minimizeBtn) minimizeBtn.classList.remove("hidden");
@@ -1336,9 +1563,13 @@ async function executeBatchDownload(items, result) {
 
   updateDownloadProgressCard(true, `Mengunduh berkas 1 dari ${total}...`, 0);
 
+  if (window.NimiyoShareBridge && window.NimiyoShareBridge.setBatchActive) {
+    window.NimiyoShareBridge.setBatchActive(true, total);
+  }
+
   if (window.NimiyoShareBridge && window.NimiyoShareBridge.showBatchNotification) {
     window.NimiyoShareBridge.showBatchNotification(
-      "NIMIYO Quick Save",
+      "Nimiyo Downloader",
       `Mengunduh 1/${total} berkas...`,
       1,
       total,
@@ -1349,64 +1580,92 @@ async function executeBatchDownload(items, result) {
 
   let successCount = 0;
 
-  for (let i = 0; i < total; i++) {
-    const item = items[i];
-    const baseProgress = (i / total) * 100;
-    const itemWeight = 100 / total;
-
-    if (allBtn) {
-      allBtn.innerText = `MENGUNDUH (${i + 1}/${total})...`;
-    }
-
-    const cardTitle = `Mengunduh berkas ${i + 1} dari ${total}...`;
-    updateDownloadProgressCard(true, cardTitle, baseProgress);
-
-    activeDownloadProgressCallback = (reqId, pct) => {
-      const overall = Math.min(99, Math.round(baseProgress + ((pct / 100) * itemWeight)));
-      updateDownloadProgressCard(true, cardTitle, overall);
-      if (window.NimiyoShareBridge && window.NimiyoShareBridge.showBatchNotification) {
-        window.NimiyoShareBridge.showBatchNotification(
-          "NIMIYO Quick Save",
-          `Mengunduh ${i + 1}/${total} berkas (${Math.round(pct)}%)...`,
-          i + 1,
-          total,
-          overall,
-          false
-        );
+  try {
+    for (let i = 0; i < total; i++) {
+      const item = items[i];
+      if (!item.itemIndex && !item.index) {
+        item.itemIndex = i + 1;
       }
-    };
+      item.batchTotal = total;
 
-    const ok = await executeSingleDownload(item, result, i, true, i, total);
-    if (ok) successCount++;
+      const baseProgress = (i / total) * 100;
+      const itemWeight = 100 / total;
+
+      if (allBtn) {
+        allBtn.innerText = `MENGUNDUH (${i + 1}/${total})...`;
+      }
+
+      const cardTitle = `Mengunduh berkas ${i + 1} dari ${total}...`;
+      updateDownloadProgressCard(true, cardTitle, baseProgress);
+
+      activeDownloadProgressCallback = (reqId, pct) => {
+        const overall = Math.min(99, Math.round(baseProgress + ((pct / 100) * itemWeight)));
+        updateDownloadProgressCard(true, cardTitle, overall);
+        if (window.NimiyoShareBridge && window.NimiyoShareBridge.showBatchNotification) {
+          window.NimiyoShareBridge.showBatchNotification(
+            "Nimiyo Downloader",
+            `Mengunduh ${i + 1}/${total} berkas (${Math.round(pct)}%)...`,
+            i + 1,
+            total,
+            overall,
+            false
+          );
+        }
+      };
+
+      const ok = await executeSingleDownload(item, result, i, true, i, total);
+      if (ok) successCount++;
+    }
+  } finally {
+    activeDownloadProgressCallback = null;
+    window.__isBatchDownloading = false;
   }
-
-  activeDownloadProgressCallback = null;
 
   // Finished batch
   if (successCount === 0) {
     updateDownloadProgressCard(false);
-    if (window.NimiyoShareBridge && window.NimiyoShareBridge.showBatchNotification) {
-      window.NimiyoShareBridge.showBatchNotification(
-        "NIMIYO Quick Save",
-        "Unduhan gagal: berkas tidak dapat diunduh",
-        total,
-        total,
-        0,
-        true
-      );
+    const failMsg = `Unduhan gagal: ${total} berkas tidak dapat diunduh`;
+    if (window.NimiyoShareBridge && window.NimiyoShareBridge.notifyBatchComplete) {
+      window.NimiyoShareBridge.notifyBatchComplete(0, failMsg);
+    } else {
+      if (window.NimiyoShareBridge && window.NimiyoShareBridge.showBatchNotification) {
+        window.NimiyoShareBridge.showBatchNotification(
+          "Nimiyo Downloader",
+          failMsg,
+          total,
+          total,
+          0,
+          true
+        );
+      }
+      if (window.NimiyoShareBridge && window.NimiyoShareBridge.setBatchActive) {
+        window.NimiyoShareBridge.setBatchActive(false, total);
+      }
+      showToast(failMsg);
+      showNativeToast(failMsg);
     }
   } else {
     updateDownloadProgressCard(true, `${successCount}/${total} berkas selesai diunduh!`, 100);
+    const completeMsg = `Semua ${successCount} berkas selesai diunduh!`;
 
-    if (window.NimiyoShareBridge && window.NimiyoShareBridge.showBatchNotification) {
-      window.NimiyoShareBridge.showBatchNotification(
-        "NIMIYO Quick Save",
-        `Semua ${successCount} berkas selesai diunduh!`,
-        total,
-        total,
-        100,
-        true
-      );
+    if (window.NimiyoShareBridge && window.NimiyoShareBridge.notifyBatchComplete) {
+      window.NimiyoShareBridge.notifyBatchComplete(successCount, completeMsg);
+    } else {
+      if (window.NimiyoShareBridge && window.NimiyoShareBridge.showBatchNotification) {
+        window.NimiyoShareBridge.showBatchNotification(
+          "Nimiyo Downloader",
+          completeMsg,
+          total,
+          total,
+          100,
+          true
+        );
+      }
+      if (window.NimiyoShareBridge && window.NimiyoShareBridge.setBatchActive) {
+        window.NimiyoShareBridge.setBatchActive(false, total);
+      }
+      showToast(completeMsg);
+      showNativeToast(completeMsg);
     }
   }
 
@@ -1415,47 +1674,71 @@ async function executeBatchDownload(items, result) {
     allBtn.disabled = true;
   }
 
-  showToast(t("saved"));
-  showNativeToast(t("saved"));
-
-  // Dismiss panel after 1500ms
+  // Dismiss panel after 1500ms only if user is still on screen and no downloads are active
   setTimeout(() => {
-    window.dismissPanel();
+    if (activeShareDownloadsCount === 0 && !window.__isMinimized) {
+      window.dismissPanel();
+    }
   }, 1500);
 }
 
-function saveToHistory(filename, result, dlItem, mediaType = "media") {
+function saveToHistory(filename, result, dlItem, mediaType = "media", batchIndex = null, batchTotal = null) {
   try {
     const historyJson = localStorage.getItem("nimiyo_history");
     let history = historyJson ? JSON.parse(historyJson) : [];
 
     let historyTitle = filename.replace(/\.(mp4|mp3|png|jpg|jpeg|webp|m4a|wav|webm|mov)$/i, "").replace(/_+/g, " ").trim();
-    if (result?.title && !isGenericMediaTitle(result.title)) {
-      historyTitle = result.title;
-    }
     if (dlItem?.title && !isGenericMediaTitle(dlItem.title)) {
       historyTitle = dlItem.title;
+    } else if (dlItem?.name && !isGenericMediaTitle(dlItem.name)) {
+      historyTitle = dlItem.name;
+    } else if (result?.title && !isGenericMediaTitle(result.title)) {
+      historyTitle = result.title;
     }
     if (!historyTitle || isGenericMediaTitle(historyTitle)) {
       historyTitle = filename.replace(/\.(mp4|mp3|png|jpg|jpeg|webp|m4a|wav|webm|mov)$/i, "").replace(/_+/g, " ").trim();
     }
 
+    const curIndex = dlItem?.itemIndex || (batchIndex != null ? batchIndex + 1 : null);
+    const totalCount = dlItem?.batchTotal || batchTotal;
+    if (curIndex && totalCount && totalCount > 1 && !historyTitle.includes(`(${curIndex}/${totalCount})`)) {
+      historyTitle += ` (${curIndex}/${totalCount})`;
+    } else if (curIndex && !totalCount && !historyTitle.includes(`(${curIndex})`)) {
+      historyTitle += ` (${curIndex})`;
+    }
+
     const historyItem = {
-      id: "dl_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
+      id: "dl_" + Date.now() + "_" + Math.random().toString(36).substr(2, 6),
       filename: filename,
       title: historyTitle,
-      thumbnail: dlItem?.thumbnail || result?.thumbnail || "nimiyo_icon.webp",
+      thumbnail: dlItem?.thumbnail || dlItem?.cover || dlItem?.url || result?.thumbnail || "nimiyo_icon.webp",
       platform: currentPlatform || (activeUrl ? detectPlatform(activeUrl) : "other"),
       mediaType: mediaType,
       timestamp: Date.now()
     };
 
-    history.unshift(historyItem);
-    if (history.length > 50) history.pop();
+    const itemKey = (filename || "").toLowerCase().trim();
+    const existingIdx = history.findIndex(h => {
+      if (h.id && historyItem.id && h.id === historyItem.id) return true;
+      const hKey = (h.filename || "").toLowerCase().trim();
+      return hKey && itemKey && hKey === itemKey;
+    });
+
+    if (existingIdx !== -1) {
+      history[existingIdx] = {
+        ...history[existingIdx],
+        ...historyItem,
+        timestamp: historyItem.timestamp || Date.now()
+      };
+    } else {
+      history.unshift(historyItem);
+    }
+
+    if (history.length > 200) history = history.slice(0, 200);
     localStorage.setItem("nimiyo_history", JSON.stringify(history));
 
     // Persist to native Android SharedPreferences so MainActivity syncs it
-    const bridge = window.NimiyoShareBridge || window.NimidzShareBridge || window.NimiyoShareBridge;
+    const bridge = window.NimiyoShareBridge || window.NimidzShareBridge;
     if (bridge && typeof bridge.saveHistoryItem === "function") {
       bridge.saveHistoryItem(JSON.stringify(historyItem));
     }
@@ -1477,13 +1760,21 @@ function showNativeToast(message) {
 }
 
 // Window Exposed Functions
+window.__isMinimized = false;
+
 window.dismissPanel = function () {
+  if (activeShareDownloadsCount > 0 || window.__isBatchDownloading) {
+    window.__isMinimized = true;
+    window.minimizeWindow();
+    return;
+  }
   if (window.NimiyoShareBridge && window.NimiyoShareBridge.dismiss) {
     window.NimiyoShareBridge.dismiss();
   }
 };
 
 window.minimizeWindow = function () {
+  window.__isMinimized = true;
   showToast(t("backgroundDl"));
   showNativeToast(t("backgroundDl"));
   if (window.NimiyoShareBridge && window.NimiyoShareBridge.minimize) {

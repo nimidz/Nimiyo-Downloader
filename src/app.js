@@ -326,9 +326,10 @@ const translations = {
     btnResetSettings: "RESET ALL SETTINGS TO DEFAULT",
     groupAbout: "About & Help",
     menuAboutDesc: "Version, Info & Developer",
-    aboutVersion: "Version 2.3.1 (Lite)",
-    aboutDesc: "A premium, modern, and lightweight media downloader engine built on scrapr.",
-    aboutThanks: "Thanks to:",
+    aboutVersion: "Version 2.3.2 (Lite)",
+    aboutDesc: "A premium, modern, and lightweight media downloader engine.",
+    aboutThanks: "Thanks to :",
+    aboutThanksDesc: "for scrapers media engine",
     toastClipboardEmpty: "Clipboard is empty or does not contain a text link.",
     toastInvalidUrl: "Please enter a valid link from a supported platform.",
     toastDetecting: "Detecting platform...",
@@ -1102,9 +1103,10 @@ const translations = {
     btnResetSettings: "KEMBALIKAN SEMUA SETELAN KE DEFAULT",
     groupAbout: "Tentang & Bantuan",
     menuAboutDesc: "Versi, Info & Pengembang",
-    aboutVersion: "Versi 2.3.1 (Lite)",
-    aboutDesc: "Mesin pengunduh media premium, modern, dan ringan yang dibangun di atas scrapr.",
-    aboutThanks: "Terima kasih kepada:",
+    aboutVersion: "Versi 2.3.2 (Lite)",
+    aboutDesc: "Mesin pengunduh media premium, modern, dan ringan.",
+    aboutThanks: "Terima kasih kepada :",
+    aboutThanksDesc: "for scrapers media engine",
     toastClipboardEmpty: "Papan klip kosong atau tidak berisi tautan teks.",
     toastInvalidUrl: "Masukkan tautan yang valid dari platform yang didukung.",
     toastDetecting: "Mendeteksi platform...",
@@ -1877,9 +1879,10 @@ const translations = {
     btnResetSettings: "恢复所有设置到默认值",
     groupAbout: "关于与帮助",
     menuAboutDesc: "版本信息、开源与开发团队",
-    aboutVersion: "版本 2.3.1 (Lite)",
-    aboutDesc: "基于 scrapr 构建的高级、现代且轻量级的媒体下载引擎。",
-    aboutThanks: "致谢:",
+    aboutVersion: "版本 2.3.2 (Lite)",
+    aboutDesc: "高级、现代且轻量级的媒体下载引擎。",
+    aboutThanks: "致谢 :",
+    aboutThanksDesc: "for scrapers media engine",
     toastClipboardEmpty: "剪贴板为空或不包含文本链接。",
     toastInvalidUrl: "请输入受支持平台的有效链接。",
     toastDetecting: "正在检测平台...",
@@ -2654,9 +2657,10 @@ const translations = {
     btnResetSettings: "すべての設定を初期値に戻す",
     groupAbout: "アプリについてとヘルプ",
     menuAboutDesc: "バージョン、情報と開発チーム",
-    aboutVersion: "バージョン 2.3.1 (Lite)",
-    aboutDesc: "scrapr をベースに構築されたプレミアムでモダン、軽量なメディアダウンローダー。",
-    aboutThanks: "スペシャルサンクス:",
+    aboutVersion: "バージョン 2.3.2 (Lite)",
+    aboutDesc: "プレミアムでモダン、軽量なメディアダウンローダー。",
+    aboutThanks: "スペシャルサンクス :",
+    aboutThanksDesc: "for scrapers media engine",
     toastClipboardEmpty: "クリップボードが空か、有効なテキストリンクが含まれていません。",
     toastInvalidUrl: "対応プラットフォームの有効なリンクを入力してください。",
     toastDetecting: "プラットフォームを検出中...",
@@ -3221,7 +3225,7 @@ let settings = {
   appFont: 'misans',
   filenameTemplate: 'title', // 'title' | 'title-platform' | 'title-date'
   overwriteMode: 'rename',   // 'rename' | 'overwrite' | 'skip'
-  concurrentDl: 1,           // 1 | 2 | 3 | 5
+  concurrentDl: 2,           // 1 | 2 | 3 | 5
   batchPhotoMode: 'all',     // 'all' | 'first'
   autoDownload: false,
   preferredServer: 'auto',
@@ -3271,15 +3275,15 @@ const platformMapping = {
   shopee: { name: "Shopee", domains: /(shopee\.[a-z.]+|shp\.ee)/i, color: "#EE4D2D" }
 };
 
-// Predefined scraper fallback order per platform (100% matching share.js & scrapr)
+// Predefined scraper fallback order per platform
 const fallbackChains = {
-  tiktok: ['tiktokio', 'snaptik', 'ssstik', 'direct'],
+  tiktok: ['tiktokio', 'snaptik', 'ssstik', 'tikdownloader', 'direct'],
   instagram: ['snapsave', 'indown', 'direct'],
   facebook: ['snapsave', 'direct'],
-  spotify: ['spotidown', 'soundloaders', 'direct'],
+  spotify: ['soundloaders', 'spotidown', 'spotisaver', 'direct'],
   soundcloud: ['forhub', 'klickaud', 'direct'],
   twitter: ['direct', 'tweeload', 'tvd'],
-  youtube: ['ytmp3', 'direct'],
+  youtube: ['auto', 'gg', 'mobi', 'direct'],
   applemusic: ['aplmate', 'direct'],
   pinterest: ['pindown', 'direct'],
   threads: ['threadster', 'direct'],
@@ -3292,10 +3296,12 @@ const fallbackChains = {
 };
 
 // App Version Constants & GitHub Auto-Update Engine
-const APP_VERSION_NAME = "2.3.1";
-const APP_VERSION_CODE = 8;
+const APP_VERSION_NAME = "2.3.2";
+const APP_VERSION_CODE = 9;
 const UPDATE_MANIFEST_URL = "https://raw.githubusercontent.com/nimidz/Nimiyo-Downloader/main/version.json";
 let latestUpdateInfo = null;
+let updateTabIndicator = null;
+let switchTab = null;
 
 // Initialize Application
 document.addEventListener("DOMContentLoaded", () => {
@@ -3309,7 +3315,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (startup !== 'home') {
     switchTab('tab-' + startup);
   } else {
-    updateTabIndicator();
+    if (typeof updateTabIndicator === 'function') {
+      updateTabIndicator();
+    }
   }
 
   // Smooth Coldstart Render Veil Dismissal
@@ -3460,7 +3468,22 @@ async function loadHistory() {
   const savedHistory = localStorage.getItem("nimiyo_history");
   if (savedHistory) {
     try {
-      localHistory = JSON.parse(savedHistory);
+      const parsed = JSON.parse(savedHistory);
+      if (Array.isArray(parsed)) {
+        // Automatically cleanup any past duplicate items that exist in localStorage
+        const seen = new Set();
+        localHistory = [];
+        for (const item of parsed) {
+          if (!item) continue;
+          const key = (item.filename || "").toLowerCase().trim() || item.id || ((item.originalUrl || "") + "|||" + (item.title || ""));
+          if (key && !seen.has(key)) {
+            seen.add(key);
+            localHistory.push(item);
+          }
+        }
+      } else {
+        localHistory = [];
+      }
     } catch (e) {
       console.error("Failed to parse history", e);
       localHistory = [];
@@ -3478,24 +3501,40 @@ async function loadHistory() {
           if (typeof item === "string") {
             try { item = JSON.parse(item); } catch (_) { }
           }
-          if (item && item.filename && !localHistory.some(h => h.filename === item.filename)) {
-            localHistory.unshift(item);
-            hasNew = true;
+          if (item && (item.filename || item.id || item.title)) {
+            const itemKey = (item.filename || "").toLowerCase().trim();
+            const isDuplicate = localHistory.some(h => {
+              if (h.id && item.id && h.id === item.id) return true;
+              const hKey = (h.filename || "").toLowerCase().trim();
+              if (hKey && itemKey && hKey === itemKey) return true;
+              if (h.originalUrl && item.originalUrl && h.originalUrl === item.originalUrl && h.title === item.title) return true;
+              return false;
+            });
+            if (!isDuplicate) {
+              localHistory.unshift(item);
+              hasNew = true;
+            }
           }
         }
         if (hasNew) {
-          if (localHistory.length > 200) localHistory = localHistory.slice(0, 200);
+          const maxLimit = settings.historyLimit === 'unlimited' ? 1000 : parseInt(settings.historyLimit, 10) || 200;
+          if (localHistory.length > maxLimit) localHistory = localHistory.slice(0, maxLimit);
           saveHistory();
           renderHistory();
-  // Re-render Music Player dynamic views & UI if active/instantiated
-  if (window.nimiyoMusicPlayer && typeof window.nimiyoMusicPlayer.updateLanguage === 'function') {
-    window.nimiyoMusicPlayer.updateLanguage();
-  }
+          // Re-render Music Player dynamic views & UI if active/instantiated
+          if (window.nimiyoMusicPlayer && typeof window.nimiyoMusicPlayer.updateLanguage === 'function') {
+            window.nimiyoMusicPlayer.updateLanguage();
+          }
         }
       }
     }
   } catch (e) {
     console.warn("Failed to sync shared history:", e);
+  }
+
+  const historyTab = document.getElementById("tab-history");
+  if (historyTab && !historyTab.classList.contains("hidden")) {
+    renderHistory();
   }
 }
 
@@ -3868,7 +3907,7 @@ function wipeAllData() {
       appFont: 'misans',
       filenameTemplate: 'title',
       overwriteMode: 'rename',
-      concurrentDl: 1,
+      concurrentDl: 2,
       batchPhotoMode: 'all',
       autoDownload: false,
       autoRetry: true,
@@ -3909,7 +3948,7 @@ function resetSettingsToDefault() {
       appFont: 'misans',
       filenameTemplate: 'title',
       overwriteMode: 'rename',
-      concurrentDl: 1,
+      concurrentDl: 2,
       batchPhotoMode: 'all',
       autoDownload: false,
       autoRetry: true,
@@ -3975,7 +4014,7 @@ function initUI() {
   setVal("settingAppFont", settings.appFont || 'misans');
   setVal("settingFilenameTemplate", settings.filenameTemplate || 'title');
   setVal("settingOverwriteMode", settings.overwriteMode || 'rename');
-  setVal("settingConcurrentDl", settings.concurrentDl || 1);
+  setVal("settingConcurrentDl", settings.concurrentDl || 2);
   setVal("settingBatchPhotoMode", settings.batchPhotoMode || 'all');
   setChecked("settingAutoDownload", settings.autoDownload);
   setChecked("settingAutoRetry", settings.autoRetry);
@@ -4003,9 +4042,9 @@ function initUI() {
   const grid = document.getElementById("platformsGrid");
   grid.innerHTML = "";
 
-  if (window.scrapr) {
+  if (window.nimiyoEngine) {
     Object.keys(platformMapping).forEach(key => {
-      if (window.scrapr[key]) {
+      if (window.nimiyoEngine[key]) {
         const plat = platformMapping[key];
         const card = document.createElement("div");
         card.className = "platform-card";
@@ -4146,7 +4185,8 @@ function setupEventListeners() {
   });
 
   // ===================== BOTTOM TAB BAR SWITCHING =====================
-  function updateTabIndicator(activeBtn, retryCount = 0) {
+  updateTabIndicator = function(activeBtn, retryCount = 0) {
+    window.updateTabIndicator = updateTabIndicator;
     const indicator = document.getElementById("tabIndicator");
     const tabBar = document.getElementById("tabBar");
     const targetBtn = activeBtn || document.querySelector(".tab-btn.active") || document.getElementById("btn-home");
@@ -4165,9 +4205,9 @@ function setupEventListeners() {
     const indicatorWidth = indicator.offsetWidth || 28;
     const targetX = (btnRect.left - barRect.left) + (btnRect.width / 2) - (indicatorWidth / 2);
     indicator.style.transform = `translateX(${Math.round(targetX)}px)`;
-  }
+  };
 
-  function switchTab(tabId) {
+  switchTab = function(tabId) {
     // Hide all tab panes
     document.querySelectorAll(".tab-pane").forEach(pane => {
       pane.classList.add("hidden");
@@ -4198,6 +4238,8 @@ function setupEventListeners() {
       if (player) {
         player.autoCheckPermissionOnResume().catch(() => {});
         player.renderCurrentTab();
+        player.updateSortLabelUi();
+        player.updateControlStatesUi();
         player.updateSubTabIndicator();
         requestAnimationFrame(() => {
           player.updateSubTabIndicator();
@@ -4330,7 +4372,12 @@ function setupEventListeners() {
     btn.addEventListener("click", () => {
       triggerHaptic();
       document.querySelectorAll(".settings-sub-page").forEach(sp => sp.classList.add("hidden"));
-      document.getElementById("settingsMenuMain").classList.remove("hidden");
+      const mainMenu = document.getElementById("settingsMenuMain");
+      if (mainMenu) {
+        mainMenu.classList.remove("hidden");
+        mainMenu.classList.add("menu-returning");
+        setTimeout(() => mainMenu.classList.remove("menu-returning"), 240);
+      }
     });
   });
 
@@ -4450,7 +4497,8 @@ function setupEventListeners() {
   // Dismiss other popup modals when clicking on their overlay backdrop
   [
     "updateModal",
-    "rulesModal"
+    "rulesModal",
+    "bugReportModal"
   ].forEach(modalId => {
     const el = document.getElementById(modalId);
     if (el) {
@@ -4468,6 +4516,13 @@ function setupEventListeners() {
   window.handleAppBackButton = function() {
     // 1. If Media Player Modal is open -> close it
     if (window.closeMediaPlayerModal && window.closeMediaPlayerModal()) {
+      return true;
+    }
+
+    // 2. If Bug Report Modal is open -> close it
+    const bugReportModal = document.getElementById("bugReportModal");
+    if (bugReportModal && !bugReportModal.classList.contains("hidden")) {
+      bugReportModal.classList.add("hidden");
       return true;
     }
 
@@ -4743,6 +4798,107 @@ function setupEventListeners() {
       const modal = document.getElementById("rulesModal");
       if (modal) modal.classList.add("hidden");
       showToast(getTranslation("toastSettingsSaved"), "success");
+    });
+  }
+
+  // Bug Report Modal Listeners
+  const btnOpenBugReport = document.getElementById("btnOpenBugReport");
+  const bugReportModalEl = document.getElementById("bugReportModal");
+  const closeBugReportModalBtn = document.getElementById("closeBugReportModalBtn");
+  const btnCancelBugReport = document.getElementById("btnCancelBugReport");
+  const btnSubmitBugReport = document.getElementById("btnSubmitBugReport");
+  const bugPlatformSelect = document.getElementById("bugPlatformSelect");
+  const bugIssueDesc = document.getElementById("bugIssueDesc");
+  const bugCooldownMsg = document.getElementById("bugCooldownMsg");
+
+  function getBugReportCooldownRemaining() {
+    const lastReport = parseInt(localStorage.getItem("nimiyo_last_bug_report") || "0", 10);
+    const now = Date.now();
+    const elapsed = now - lastReport;
+    const cooldownMs = 60000; // 60 detik jeda anti-spam
+    if (elapsed < cooldownMs) {
+      return Math.ceil((cooldownMs - elapsed) / 1000);
+    }
+    return 0;
+  }
+
+  function updateBugCooldownDisplay() {
+    const remainingSec = getBugReportCooldownRemaining();
+    if (remainingSec > 0) {
+      if (bugCooldownMsg) {
+        bugCooldownMsg.textContent = `Mohon tunggu ${remainingSec} detik sebelum mengirim lagi.`;
+        bugCooldownMsg.classList.remove("hidden");
+      }
+      return remainingSec;
+    } else {
+      if (bugCooldownMsg) {
+        bugCooldownMsg.classList.add("hidden");
+        bugCooldownMsg.textContent = "";
+      }
+      return 0;
+    }
+  }
+
+  if (btnOpenBugReport) {
+    btnOpenBugReport.addEventListener("click", () => {
+      triggerHaptic();
+      updateBugCooldownDisplay();
+      if (bugReportModalEl) bugReportModalEl.classList.remove("hidden");
+    });
+  }
+
+  function closeBugReportModal() {
+    triggerHaptic();
+    if (bugReportModalEl) bugReportModalEl.classList.add("hidden");
+  }
+
+  if (closeBugReportModalBtn) closeBugReportModalBtn.addEventListener("click", closeBugReportModal);
+  if (btnCancelBugReport) btnCancelBugReport.addEventListener("click", closeBugReportModal);
+
+  if (btnSubmitBugReport) {
+    btnSubmitBugReport.addEventListener("click", async () => {
+      triggerHaptic();
+      const remainingSec = updateBugCooldownDisplay();
+      if (remainingSec > 0) {
+        showToast(`Mohon tunggu ${remainingSec} detik sebelum mengirim laporan lagi agar tidak spam.`, "warning");
+        return;
+      }
+
+      const platform = bugPlatformSelect ? bugPlatformSelect.value : "Lainnya";
+      const desc = bugIssueDesc ? bugIssueDesc.value.trim() : "";
+      if (!desc || desc.length < 5) {
+        showToast("Harap jelaskan masalah yang dialami terlebih dahulu.", "warning");
+        if (bugIssueDesc) bugIssueDesc.focus();
+        return;
+      }
+
+      btnSubmitBugReport.disabled = true;
+      btnSubmitBugReport.textContent = "Mengirim...";
+
+      const issueTitle = `[Bug Report] [${platform}] Issue Report`;
+      const issueBody = `### Platform\n${platform}\n\n### Deskripsi Masalah\n${desc}\n\n### Detail Perangkat & Aplikasi\n- Versi: v2.3.2 (Lite)\n- User-Agent: ${navigator.userAgent}\n- Waktu: ${new Date().toLocaleString()}`;
+
+      try {
+        const ghUrl = `https://github.com/nimidz/Nimiyo-Downloader/issues/new?title=${encodeURIComponent(issueTitle)}&body=${encodeURIComponent(issueBody)}`;
+
+        // Buka langsung halaman issue prefilled
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser) {
+          await window.Capacitor.Plugins.Browser.open({ url: ghUrl });
+        } else {
+          window.open(ghUrl, "_blank");
+        }
+
+        localStorage.setItem("nimiyo_last_bug_report", Date.now().toString());
+        showToast("Laporan bug telah disiapkan! Terima kasih.", "success");
+        if (bugIssueDesc) bugIssueDesc.value = "";
+        closeBugReportModal();
+      } catch (err) {
+        console.error("Bug report error:", err);
+        showToast("Gagal memproses laporan: " + (err.message || err), "error");
+      } finally {
+        btnSubmitBugReport.disabled = false;
+        btnSubmitBugReport.textContent = "Kirim Laporan";
+      }
     });
   }
 
@@ -5047,8 +5203,8 @@ async function analyzeLink(url, specificScraper = null) {
     let timeoutId;
 
     const scraperPromise = (async () => {
-      const scraperModule = window.scrapr?.[platform];
-      const scrapeFunc = scraperModule?.[scraperMethod] || scraperModule?.default || window.scrapr?.[`scrape${platform.charAt(0).toUpperCase() + platform.slice(1)}`];
+      const scraperModule = window.nimiyoEngine?.[platform];
+      const scrapeFunc = scraperModule?.[scraperMethod] || scraperModule?.default || window.nimiyoEngine?.[`scrape${platform.charAt(0).toUpperCase() + platform.slice(1)}`];
       if (!scrapeFunc) {
         return { status: false, message: `Scraper ${scraperMethod} not found` };
       }
@@ -5369,7 +5525,27 @@ function renderResult(result, platform, activeMethod) {
     chain.forEach(method => {
       const option = document.createElement("option");
       option.value = method;
-      option.innerText = method;
+      let label = method;
+      if (platform === "youtube") {
+        if (method === "auto") label = "Server 1 (Auto Fast)";
+        else if (method === "gg") label = "Server 2 (YTMP3.gg)";
+        else if (method === "mobi") label = "Server 3 (YTMP3.mobi)";
+        else if (method === "direct") label = "Server 4 (Direct)";
+      } else if (platform === "spotify") {
+        if (method === "soundloaders") label = "Server 1 (SoundLoaders)";
+        else if (method === "spotidown") label = "Server 2 (SpotiDown)";
+        else if (method === "spotisaver") label = "Server 3 (Spotisaver)";
+      } else if (platform === "tiktok") {
+        if (method === "tiktokio") label = "Server 1 (TikTokIO)";
+        else if (method === "snaptik") label = "Server 2 (SnapTik)";
+        else if (method === "ssstik") label = "Server 3 (SSSTik)";
+        else if (method === "tikdownloader") label = "Server 4 (TikDownloader)";
+        else if (method === "direct") label = "Server 5 (Direct)";
+        else label = method.charAt(0).toUpperCase() + method.slice(1);
+      } else {
+        label = method.charAt(0).toUpperCase() + method.slice(1);
+      }
+      option.innerText = label;
       option.selected = (method === activeMethod);
       serverSelect.appendChild(option);
     });
@@ -5394,7 +5570,11 @@ function renderResult(result, platform, activeMethod) {
       downloadAllBtn.className = "btn primary-btn";
       downloadAllBtn.style.width = "100%";
       downloadAllBtn.innerText = getTranslation("btnDownloadAll", { count: result.downloads.length });
+      let lastBatchClick = 0;
       downloadAllBtn.onclick = () => {
+        const now = Date.now();
+        if (now - lastBatchClick < 800) return;
+        lastBatchClick = now;
         triggerHaptic();
         enqueueDownloads(result.downloads, result);
       };
@@ -5429,7 +5609,11 @@ function renderResult(result, platform, activeMethod) {
       btn.className = "btn primary-btn option-btn";
       btn.innerText = getTranslation("btnDownload");
 
+      let lastBtnClick = 0;
       btn.addEventListener("click", () => {
+        const now = Date.now();
+        if (now - lastBtnClick < 800) return;
+        lastBtnClick = now;
         triggerHaptic();
         enqueueDownloads([dl], result);
       });
@@ -5458,6 +5642,19 @@ function detectMediaCategory(dlItem, mediaResult, contentType = "") {
   const quality = String(dlItem?.quality || "").toUpperCase();
   const rawUrl = String(dlItem?.url || "").split("?")[0].toLowerCase();
 
+  // Explicit Cover / Image check first to avoid being overridden by resType === "AUDIO"
+  if (
+    itemType.includes("[COVER]") ||
+    itemType.includes("COVER") ||
+    rawUrl.includes("i.scdn.co") ||
+    rawUrl.endsWith(".jpg") ||
+    rawUrl.endsWith(".jpeg") ||
+    rawUrl.endsWith(".png") ||
+    rawUrl.endsWith(".webp")
+  ) {
+    return "image";
+  }
+
   // 1. Audio detection
   if (
     itemType.includes("[MP3]") ||
@@ -5478,6 +5675,7 @@ function detectMediaCategory(dlItem, mediaResult, contentType = "") {
     rawUrl.endsWith(".flac") ||
     rawUrl.includes("spotidown_resolve:") ||
     rawUrl.includes("soundloaders_resolve:") ||
+    rawUrl.includes("spotisaver_resolve:") ||
     rawUrl.includes("ytmp3gg_resolve:") ||
     rawUrl.includes("applemusic_resolve:")
   ) {
@@ -5547,19 +5745,30 @@ function formatDownloadOptionLabel(dl, mediaResult) {
   const rawType = String(dl.type || "").trim();
   const rawQuality = String(dl.quality || "").trim();
   const rawUrl = String(dl.url || "").split("?")[0].toLowerCase();
+  const fullUrl = String(dl.url || "").toLowerCase();
   const combined = `${rawType} ${rawQuality} ${rawUrl}`.toUpperCase();
 
-  // Determine file extension
+  // If this is an IMAGE, always display clean format: "IMAGE (PNG)", "IMAGE (JPG)", or "IMAGE (WEBP)"
+  // NEVER prepend video description/caption!
+  if (category === "image") {
+    let imgExt = "JPG";
+    if (combined.includes("PNG") || rawUrl.endsWith(".png") || fullUrl.includes(".png") || fullUrl.includes("format=png")) {
+      imgExt = "PNG";
+    } else if (combined.includes("WEBP") || rawUrl.endsWith(".webp") || fullUrl.includes(".webp") || fullUrl.includes("format=webp")) {
+      imgExt = "WEBP";
+    } else {
+      imgExt = "JPG";
+    }
+    return `IMAGE (${imgExt})`;
+  }
+
+  // Determine file extension for video/audio
   let extension = "MP4";
   if (category === "audio") {
     if (combined.includes("M4A") || rawUrl.endsWith(".m4a")) extension = "M4A";
     else if (combined.includes("WAV") || rawUrl.endsWith(".wav")) extension = "WAV";
     else if (combined.includes("FLAC") || rawUrl.endsWith(".flac")) extension = "FLAC";
     else extension = "MP3";
-  } else if (category === "image") {
-    if (combined.includes("PNG") || rawUrl.endsWith(".png")) extension = "PNG";
-    else if (combined.includes("WEBP") || rawUrl.endsWith(".webp")) extension = "WEBP";
-    else extension = "JPG";
   } else {
     if (combined.includes("WEBM") || rawUrl.endsWith(".webm")) extension = "WEBM";
     else if (combined.includes("MOV") || rawUrl.endsWith(".mov")) extension = "MOV";
@@ -5586,9 +5795,6 @@ function formatDownloadOptionLabel(dl, mediaResult) {
 
     const qualityTag = (isSD && !isHD) ? "SD" : "HD";
     badge = `(AUDIO) ${extension} ${qualityTag}`;
-  } else if (category === "image") {
-    // Image: (IMAGE) PNG, (IMAGE) JPG, (IMAGE) WEBP
-    badge = `(IMAGE) ${extension}`;
   } else {
     // Video: (VIDEO) MP4 1040P, (VIDEO) MP4 1080P, (VIDEO) MP4 720P, etc.
     let qualityTag = "";
@@ -5628,6 +5834,7 @@ function isGenericMediaTitle(str) {
     "AUDIOYO", "VIDEOYO", "IMAGEYO"
   ];
   if (genericList.includes(s)) return true;
+  if (s.includes("ZIP CAN INCLUDE") || s.includes("YOUR FREE ZIP") || s.includes("FREE ZIP")) return true;
   if (/^\(VIDEO\)/i.test(s) || /^\(AUDIO\)/i.test(s) || /^\(IMAGE\)/i.test(s)) return true;
   if (/^VIDEO\s*[\(\[]/i.test(s) || /^AUDIO\s*[\(\[]/i.test(s) || /^PHOTO\s*[\(\[]/i.test(s)) return true;
   if (/^VIDEO_\d+/i.test(s) || /^AUDIO_\d+/i.test(s) || /^IMAGE_\d+/i.test(s)) return true;
@@ -5749,8 +5956,8 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
     try {
       if (!cookie) {
         try {
-          const homeRes = window.scrapr?.scraperFetch
-            ? await window.scrapr.scraperFetch({ url: "https://spotidown.app/", rawResponse: true }, "SpotiDown Cookie")
+          const homeRes = window.nimiyoEngine?.scraperFetch
+            ? await window.nimiyoEngine.scraperFetch({ url: "https://spotidown.app/", rawResponse: true }, "SpotiDown Cookie")
             : await fetch("https://spotidown.app/");
           const hHeaders = homeRes?.headers || {};
           const sc = hHeaders["set-cookie"] || hHeaders["Set-Cookie"] || "";
@@ -5759,8 +5966,8 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
       }
 
       let data = null;
-      if (window.scrapr?.scraperFetch) {
-        data = await window.scrapr.scraperFetch({
+      if (window.nimiyoEngine?.scraperFetch) {
+        data = await window.nimiyoEngine.scraperFetch({
           url: "https://spotidown.app/action/track",
           method: "POST",
           data: payload,
@@ -5857,36 +6064,41 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
     console.log("[SPOTIFY RESOLVE] Resolving SoundLoaders token for track:", itemTitle);
     const parts = downloadUrl.replace("soundloaders_resolve:", "").split("|||");
     const dataVal = parts[0];
-    const trackToken = parts[1];
+    const tokenVal = parts[1];
+    const baseVal = parts[2] ? decodeURIComponent(parts[2]) : "https://open.spotify.com";
+    const cookiesVal = parts[3] ? decodeURIComponent(parts[3]) : "";
 
     try {
       let resData = null;
-      const formBody = new URLSearchParams({ data: dataVal, track_token: trackToken }).toString();
+      const formBody = new URLSearchParams({
+        data: dataVal,
+        token: tokenVal,
+        base: baseVal,
+        "g-recaptcha-response": "dummy_token"
+      }).toString();
 
-      if (window.scrapr?.scraperFetch) {
-        resData = await window.scrapr.scraperFetch({
-          url: "https://spotimate.io/action/tracks",
+      const fetchHelper = window.nimiyoEngine?.scraperFetch || window.nimiyoEngine?.scraperFetch;
+      const headers = {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "X-Requested-With": "XMLHttpRequest",
+        Referer: "https://spotimate.app/en1",
+        Origin: "https://spotimate.app",
+        Cookie: cookiesVal
+      };
+
+      if (fetchHelper) {
+        resData = await fetchHelper({
+          url: "https://spotimate.app/action/track",
           method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-            "X-Requested-With": "XMLHttpRequest",
-            Referer: "https://spotimate.io/",
-            Origin: "https://spotimate.io"
-          },
+          headers,
           data: formBody,
           rawResponse: true
         }, "Spotimate Track Resolve");
       } else {
-        const res = await fetch("https://spotimate.io/action/tracks", {
+        const res = await fetch("https://spotimate.app/action/track", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-            "X-Requested-With": "XMLHttpRequest",
-            Referer: "https://spotimate.io/",
-            Origin: "https://spotimate.io"
-          },
+          headers,
           body: formBody
         });
         resData = await res.json();
@@ -5902,7 +6114,7 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
         }
       }
 
-      const htmlContent = parsedData?.html || (typeof parsedData === "string" ? parsedData : "");
+      const htmlContent = parsedData?.data || parsedData?.html || (typeof parsedData === "string" ? parsedData : "");
       const parser = new DOMParser();
       const doc = parser.parseFromString(htmlContent, "text/html");
 
@@ -5913,12 +6125,25 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
       }
 
       let resolvedUrl = "";
-      doc.querySelectorAll("a").forEach(a => {
-        const link = a.getAttribute("href");
-        if (link && link.startsWith("http") && !link.includes("spotimate.io") && !link.includes("soundloaders.app")) {
+      const allAnchors = Array.from(doc.querySelectorAll("a"));
+      for (const a of allAnchors) {
+        const link = a.getAttribute("href") || "";
+        const text = (a.textContent || "").toLowerCase();
+        if (!link.startsWith("http") || link.includes("premium.html") || link.includes("/en1") || link.includes("/en7") || link.includes("spotimate.app/en") || link.includes("soundloaders.app/en")) {
+          continue;
+        }
+        const isCoverLink = text.includes("cover") || link.includes("cover") || link.includes("i.scdn.co") || /\.(jpg|jpeg|png|webp)($|\?)/i.test(link);
+        if (isCoverLink) {
+          continue;
+        }
+        if (link.includes("dl.spotimate.app") || link.includes("dl.soundloaders.app") || link.includes("token=") || text.includes("mp3") || text.includes("song") || text.includes("download")) {
+          resolvedUrl = link;
+          break;
+        }
+        if (!resolvedUrl) {
           resolvedUrl = link;
         }
-      });
+      }
 
       if (!resolvedUrl) {
         throw new Error("[NETWORK DOWNLOAD FAILED] Could not find download link in Spotimate response.");
@@ -5927,6 +6152,45 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
     } catch (e) {
       console.error("[SPOTIFY RESOLVE] Error resolving SoundLoaders token:", e);
       throw new Error(`[NETWORK DOWNLOAD FAILED] SoundLoaders resolve failed: ${e.message}`);
+    }
+  }
+
+  // 1B3. Spotify Spotisaver Lazy Resolving
+  if (downloadUrl.startsWith("spotisaver_resolve:")) {
+    console.log("[SPOTIFY RESOLVE] Resolving Spotisaver token for track:", itemTitle);
+    const parts = downloadUrl.replace("spotisaver_resolve:", "").split("|||");
+    const trackId = parts[0];
+    const trackName = decodeURIComponent(parts[1] || "");
+    const duration = parts[2] || "0";
+    const cookiesVal = parts[3] ? decodeURIComponent(parts[3]) : "";
+
+    try {
+      const BASE = "https://spotisaver.net";
+      const fetchHelper = window.nimiyoEngine?.scraperFetch || window.nimiyoEngine?.scraperFetch;
+      const ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
+      const dlCtx = { lang: "en", id: trackId, name: trackName, duration_ms: String(duration) };
+      const b64 = btoa(JSON.stringify(dlCtx)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+      const sigParams = new URLSearchParams({
+        _t: "455b447694e16f8ceacaa717f18ba309675dafb36687859a5d69d39798046221",
+        _a: "download_track",
+        _c: b64,
+      });
+
+      const rSig = fetchHelper
+        ? await fetchHelper({
+            url: `${BASE}/api/get_signature.php?${sigParams.toString()}`,
+            headers: { "User-Agent": ua, Accept: "application/json", Referer: BASE + "/en1", Cookie: cookiesVal },
+          }, "Spotisaver Sig Resolve")
+        : await (await fetch(`${BASE}/api/get_signature.php?${sigParams.toString()}`, { headers: { "User-Agent": ua, Accept: "application/json" } })).json();
+
+      if (rSig?.token) {
+        downloadUrl = `${BASE}/api/download_track.php?id=${trackId}`;
+      } else {
+        throw new Error("Could not obtain Spotisaver download token");
+      }
+    } catch (e) {
+      console.error("[SPOTIFY RESOLVE] Error resolving Spotisaver token:", e);
+      throw new Error(`[NETWORK DOWNLOAD FAILED] Spotisaver resolve failed: ${e.message}`);
     }
   }
 
@@ -5949,8 +6213,8 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
       };
 
       let convRes = null;
-      if (window.scrapr?.scraperFetch) {
-        convRes = await window.scrapr.scraperFetch({
+      if (window.nimiyoEngine?.scraperFetch) {
+        convRes = await window.nimiyoEngine.scraperFetch({
           url: "https://hub.convert1s.com/api/download",
           method: "POST",
           headers,
@@ -5998,8 +6262,8 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
       while (!resolvedDlUrl && attempts < 30) {
         await new Promise((r) => setTimeout(r, 1500));
         let pollData = null;
-        if (window.scrapr?.scraperFetch) {
-          pollData = await window.scrapr.scraperFetch({
+        if (window.nimiyoEngine?.scraperFetch) {
+          pollData = await window.nimiyoEngine.scraperFetch({
             url: conv.statusUrl,
             headers,
           }, "ytmp3.gg Status");
@@ -6018,8 +6282,58 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
       }
 
       if (!resolvedDlUrl) {
-        throw new Error("[NETWORK DOWNLOAD FAILED] Conversion timed out or failed on ytmp3.gg.");
+        console.warn("[YOUTUBE RESOLVE] Primary convert failed, trying ymcdn fallback...");
+        try {
+          const fetchHelper = window.nimiyoEngine?.scraperFetch || window.nimiyoEngine?.scraperFetch;
+          const ymHeaders = {
+            Origin: "https://ytmp3.mobi",
+            Referer: "https://ytmp3.mobi/en8/",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            Accept: "*/*"
+          };
+          const initData = fetchHelper
+            ? await fetchHelper({ url: `https://a.ymcdn.org/api/v1/init?p=y&23=1llum1n471&_=${Math.random()}`, headers: ymHeaders }, "YTMobi Init")
+            : await (await fetch(`https://a.ymcdn.org/api/v1/init?p=y&23=1llum1n471&_=${Math.random()}`, { headers: ymHeaders })).json();
+
+          if (initData?.convertURL) {
+            let convData = fetchHelper
+              ? await fetchHelper({ url: `${initData.convertURL}&v=${videoId}&f=${format}&_=${Math.random()}`, headers: ymHeaders }, "YTMobi Convert")
+              : await (await fetch(`${initData.convertURL}&v=${videoId}&f=${format}&_=${Math.random()}`, { headers: ymHeaders })).json();
+
+            let redirCount = 0;
+            while (convData && convData.redirect > 0 && convData.redirectURL && redirCount < 5) {
+              redirCount++;
+              convData = fetchHelper
+                ? await fetchHelper({ url: `${convData.redirectURL}&v=${videoId}&f=${format}&_=${Math.random()}`, headers: ymHeaders }, "YTMobi Redirect")
+                : await (await fetch(`${convData.redirectURL}&v=${videoId}&f=${format}&_=${Math.random()}`, { headers: ymHeaders })).json();
+            }
+
+            if (convData && !convData.error) {
+              let progress = convData.progress || 0;
+              let ymAttempts = 0;
+              while (progress < 3 && ymAttempts < 12 && convData.progressURL) {
+                await new Promise((r) => setTimeout(r, 1200));
+                const progData = fetchHelper
+                  ? await fetchHelper({ url: `${convData.progressURL}&_=${Math.random()}`, headers: ymHeaders }, "YTMobi Progress")
+                  : await (await fetch(`${convData.progressURL}&_=${Math.random()}`, { headers: ymHeaders })).json();
+                if (!progData || progData.error) break;
+                progress = progData.progress ?? 0;
+                if (progData.downloadURL) resolvedDlUrl = progData.downloadURL;
+                if (progress === 4) break;
+                ymAttempts++;
+              }
+              if (convData.downloadURL && !resolvedDlUrl) resolvedDlUrl = convData.downloadURL;
+            }
+          }
+        } catch (ymErr) {
+          console.warn("[YOUTUBE RESOLVE] ymcdn fallback failed:", ymErr);
+        }
       }
+
+      if (!resolvedDlUrl) {
+        throw new Error("[NETWORK DOWNLOAD FAILED] Conversion timed out or failed on YouTube servers.");
+      }
+      if (resolvedDlUrl.startsWith("//")) resolvedDlUrl = "https:" + resolvedDlUrl;
       downloadUrl = resolvedDlUrl;
     } catch (e) {
       console.error("[YOUTUBE RESOLVE] Error resolving ytmp3gg token:", e);
@@ -6043,8 +6357,8 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
         Referer: "https://aplmate.com/"
       };
 
-      if (window.scrapr?.scraperFetch) {
-        r4Data = await window.scrapr.scraperFetch({
+      if (window.nimiyoEngine?.scraperFetch) {
+        r4Data = await window.nimiyoEngine.scraperFetch({
           url: "https://aplmate.com/action/track",
           method: "POST",
           data: payloadStr,
@@ -6126,6 +6440,60 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
       }
     }, 250);
 
+    const recordDownloadedItemToHistory = (finalFileName, finalFileUri) => {
+      let historyTitle = "";
+      if (dlItem?.title && !isGenericMediaTitle(dlItem.title)) {
+        historyTitle = dlItem.title;
+      } else if (dlItem?.name && !isGenericMediaTitle(dlItem.name)) {
+        historyTitle = dlItem.name;
+      } else if (finalFileName && !isGenericMediaTitle(finalFileName)) {
+        historyTitle = finalFileName.replace(/\.(mp4|mp3|png|jpg|jpeg|webp|m4a|wav|webm|mov)$/i, "").replace(/_+/g, " ").trim();
+      } else if (mediaResult?.title && !isGenericMediaTitle(mediaResult.title)) {
+        historyTitle = mediaResult.title;
+      } else {
+        historyTitle = finalFileName.replace(/\.(mp4|mp3|png|jpg|jpeg|webp|m4a|wav|webm|mov)$/i, "").replace(/_+/g, " ").trim();
+      }
+
+      const curIdx = dlItem?.itemIndex || dlItem?.index;
+      const totCount = dlItem?.totalItems;
+      if (curIdx && totCount && totCount > 1 && !historyTitle.includes(`(${curIdx}/${totCount})`)) {
+        historyTitle += ` (${curIdx}/${totCount})`;
+      } else if (curIdx && !totCount && !historyTitle.includes(`(${curIdx})`)) {
+        historyTitle += ` (${curIdx})`;
+      }
+
+      const isImageMedia = mediaCategory === "image" || dlItem.type?.toUpperCase().includes("PHOTO") || dlItem.type?.toUpperCase().includes("IMAGE") || finalFileName.match(/\.(png|jpg|jpeg|webp)$/i);
+      let historyThumb = dlItem.thumbnail || dlItem.cover;
+
+      // For downloaded images, prioritize the exact downloaded local file URI!
+      if (isImageMedia && finalFileUri && window.Capacitor?.convertFileSrc) {
+        historyThumb = window.Capacitor.convertFileSrc(finalFileUri);
+      } else if (!historyThumb && isImageMedia && dlItem.url && dlItem.url.startsWith("http")) {
+        historyThumb = dlItem.url;
+      }
+      if (!historyThumb) {
+        historyThumb = mediaResult?.thumbnail || "nimiyo_icon.webp";
+      }
+
+      // Add immediately to History on single file finish
+      addToHistory({
+        title: historyTitle,
+        thumbnail: historyThumb,
+        originalUrl: document.getElementById("urlInput")?.value || "",
+        platform: currentPlatform,
+        mediaType: mediaCategory,
+        filename: finalFileName,
+        timestamp: Date.now()
+      });
+
+      // Auto-refresh Music Library if audio was downloaded
+      if (mediaCategory === "audio" || finalFileName.match(/\.(mp3|m4a|wav|flac|ogg|opus|aac|wma)$/i)) {
+        if (window.nimiyoMusicPlayer && typeof window.nimiyoMusicPlayer.refreshLibrary === "function") {
+          window.nimiyoMusicPlayer.refreshLibrary();
+        }
+      }
+    };
+
     try {
       updateProgressPercent(15);
       const res = await MediaSaver.downloadFile({
@@ -6140,9 +6508,10 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
       if (res?.skipped) {
         savedFileUri = res.uri;
         if (res.fileName) sanitizedFilename = res.fileName;
+        recordDownloadedItemToHistory(sanitizedFilename, savedFileUri);
         updateProgressPercent(100);
         showToast(getTranslation("toastSkippedDuplicate") || `Berkas sudah ada (dilewati): ${sanitizedFilename}`, "info");
-        return;
+        return { success: true, filename: sanitizedFilename, skipped: true };
       }
       if (!res || !res.success || !res.uri) {
         throw new Error(res?.error || "MediaSaver direct download failed");
@@ -6219,9 +6588,10 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
           if (mediaSaverRes?.skipped) {
             savedFileUri = mediaSaverRes.uri;
             if (mediaSaverRes.fileName) sanitizedFilename = mediaSaverRes.fileName;
+            recordDownloadedItemToHistory(sanitizedFilename, savedFileUri);
             updateProgressPercent(100);
             showToast(getTranslation("toastSkippedDuplicate") || `Berkas sudah ada (dilewati): ${sanitizedFilename}`, "info");
-            return;
+            return { success: true, filename: sanitizedFilename, skipped: true };
           }
           if (!mediaSaverRes || !mediaSaverRes.success || !mediaSaverRes.uri) {
             throw new Error("[PUBLIC STORAGE FAILED] MediaSaver failed to copy file to Downloads/Nimiyo/ storage.");
@@ -6275,49 +6645,7 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
     updateProgressPercent(100);
   }
 
-  // Extract accurate track-specific title & thumbnail for history: MUST USE ACTUAL FILE NAME OR TITLE
-  let historyTitle = sanitizedFilename.replace(/\.(mp4|mp3|png|jpg|jpeg|webp|m4a|wav|webm|mov)$/i, "").replace(/_+/g, " ").trim();
-  if (mediaResult?.title && !isGenericMediaTitle(mediaResult.title)) {
-    historyTitle = mediaResult.title;
-  }
-  if (dlItem?.title && !isGenericMediaTitle(dlItem.title)) {
-    historyTitle = dlItem.title;
-  }
-  if (!historyTitle || isGenericMediaTitle(historyTitle)) {
-    historyTitle = sanitizedFilename.replace(/\.(mp4|mp3|png|jpg|jpeg|webp|m4a|wav|webm|mov)$/i, "").replace(/_+/g, " ").trim();
-  }
-
-  const isImageMedia = mediaCategory === "image" || dlItem.type?.toUpperCase().includes("PHOTO") || dlItem.type?.toUpperCase().includes("IMAGE") || sanitizedFilename.match(/\.(png|jpg|jpeg|webp)$/i);
-  let historyThumb = dlItem.thumbnail || dlItem.cover;
-
-  // For downloaded images, prioritize the exact downloaded local file URI!
-  if (isImageMedia && savedFileUri && window.Capacitor?.convertFileSrc) {
-    historyThumb = window.Capacitor.convertFileSrc(savedFileUri);
-  } else if (!historyThumb && isImageMedia && dlItem.url && dlItem.url.startsWith("http")) {
-    historyThumb = dlItem.url;
-  }
-  if (!historyThumb) {
-    historyThumb = mediaResult?.thumbnail || "nimiyo_icon.webp";
-  }
-
-  // Add immediately to History on single file finish
-  addToHistory({
-    title: historyTitle,
-    thumbnail: historyThumb,
-    originalUrl: document.getElementById("urlInput")?.value || "",
-    platform: currentPlatform,
-    mediaType: mediaCategory,
-    filename: sanitizedFilename,
-    timestamp: Date.now()
-  });
-
-  // Auto-refresh Music Library if audio was downloaded
-  if (mediaCategory === "audio" || sanitizedFilename.match(/\.(mp3|m4a|wav|flac|ogg|opus|aac|wma)$/i)) {
-    if (window.nimiyoMusicPlayer && typeof window.nimiyoMusicPlayer.refreshLibrary === "function") {
-      window.nimiyoMusicPlayer.refreshLibrary();
-    }
-  }
-
+  recordDownloadedItemToHistory(sanitizedFilename, savedFileUri);
   return { success: true, filename: sanitizedFilename };
 }
 
@@ -6433,14 +6761,16 @@ function enqueueDownloads(items, mediaResult) {
     const targetExtension = determineExtension(mediaCategory, dlItem.url);
     const sanitizedFilename = buildTargetFilename(dlItem, mediaResult, mediaCategory, currentPlatform, targetExtension);
 
-    let historyTitle = sanitizedFilename.replace(/\.(mp4|mp3|png|jpg|jpeg|webp|m4a|wav|webm|mov)$/i, "").replace(/_+/g, " ").trim();
-    if (mediaResult?.title && !isGenericMediaTitle(mediaResult.title)) {
-      historyTitle = mediaResult.title;
-    }
+    let historyTitle = "";
     if (dlItem?.title && !isGenericMediaTitle(dlItem.title)) {
       historyTitle = dlItem.title;
-    }
-    if (!historyTitle || isGenericMediaTitle(historyTitle)) {
+    } else if (dlItem?.name && !isGenericMediaTitle(dlItem.name)) {
+      historyTitle = dlItem.name;
+    } else if (sanitizedFilename && !isGenericMediaTitle(sanitizedFilename)) {
+      historyTitle = sanitizedFilename.replace(/\.(mp4|mp3|png|jpg|jpeg|webp|m4a|wav|webm|mov)$/i, "").replace(/_+/g, " ").trim();
+    } else if (mediaResult?.title && !isGenericMediaTitle(mediaResult.title)) {
+      historyTitle = mediaResult.title;
+    } else {
       historyTitle = sanitizedFilename.replace(/\.(mp4|mp3|png|jpg|jpeg|webp|m4a|wav|webm|mov)$/i, "").replace(/_+/g, " ").trim();
     }
 
@@ -6451,6 +6781,16 @@ function enqueueDownloads(items, mediaResult) {
     }
     if (!historyThumb) {
       historyThumb = mediaResult?.thumbnail || "nimiyo_icon.webp";
+    }
+
+    // Prevent duplicate entries in activeDownloadQueue if clicked multiple times
+    const isAlreadyQueued = activeDownloadQueue.some(t =>
+      (t.status === 'pending' || t.status === 'downloading') &&
+      (t.filename === sanitizedFilename || (t.dlItem && dlItem.url && t.dlItem.url === dlItem.url))
+    );
+    if (isAlreadyQueued) {
+      console.log(`[QUEUE] File already in queue or currently downloading: ${sanitizedFilename}`);
+      return;
     }
 
     const taskId = "dl_" + Date.now() + "_" + Math.random().toString(36).substr(2, 6);
@@ -6834,8 +7174,32 @@ function addToHistory(item) {
   if (settings.incognito) {
     return; // Incognito mode enabled: do not record to history
   }
+  if (!item) return;
 
-  localHistory.unshift(item); // insert at beginning
+  const itemFilename = (item.filename || "").toLowerCase().trim();
+
+  // Deduplication check: if item already exists in localHistory, update it instead of adding a duplicate
+  const existingIdx = localHistory.findIndex(h => {
+    if (h.id && item.id && h.id === item.id) return true;
+    const hFilename = (h.filename || "").toLowerCase().trim();
+    if (hFilename && itemFilename && hFilename === itemFilename) return true;
+    if (h.originalUrl && item.originalUrl && h.originalUrl === item.originalUrl && h.title === item.title) {
+      return true;
+    }
+    return false;
+  });
+
+  if (existingIdx !== -1) {
+    const existing = localHistory[existingIdx];
+    localHistory.splice(existingIdx, 1);
+    localHistory.unshift({
+      ...existing,
+      ...item,
+      timestamp: item.timestamp || Date.now()
+    });
+  } else {
+    localHistory.unshift(item); // insert at beginning
+  }
 
   // History retention limit check
   const maxLimit = settings.historyLimit === 'unlimited' ? 1000 : parseInt(settings.historyLimit, 10);
@@ -6864,9 +7228,10 @@ function addToHistory(item) {
     }).catch(() => {});
   }
 
-  // Jika modal riwayat terbuka, langsung render item baru tanpa menunggu sisa download selesai
+  // Jika modal riwayat atau tab riwayat terbuka, langsung render item baru tanpa menunggu sisa download selesai
   const historyModal = document.getElementById("historyModal");
-  if (historyModal && !historyModal.classList.contains("hidden")) {
+  const historyTab = document.getElementById("tab-history");
+  if ((historyModal && !historyModal.classList.contains("hidden")) || (historyTab && !historyTab.classList.contains("hidden"))) {
     renderHistory();
   }
 }

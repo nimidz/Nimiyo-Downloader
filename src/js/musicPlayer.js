@@ -182,6 +182,9 @@ class NimiyoReverbFX {
 
 class NimiyoMusicPlayer {
   constructor() {
+    window.nimiyoMusicPlayer = this;
+    window.musicPlayer = this;
+
     // Playback Engine
     this.audio = new Audio();
     this.audio.preload = "auto";
@@ -295,6 +298,8 @@ class NimiyoMusicPlayer {
 
     // 4. Update sub-tab indicator so the active sub-tab (NIMIYO) has its background pill
     this.updateSubTabIndicator();
+    this.updateSortLabelUi();
+    this.updateControlStatesUi();
     requestAnimationFrame(() => this.updateSubTabIndicator());
     setTimeout(() => this.updateSubTabIndicator(), 60);
     setTimeout(() => this.updateSubTabIndicator(), 200);
@@ -975,47 +980,47 @@ class NimiyoMusicPlayer {
     if (!Array.isArray(tracks)) return [];
     const list = [...tracks];
 
+    const getTitle = (t) => (t.displayTitle || t.title || t.name || "").toString();
+    const getArtist = (t) => (t.displayArtist || t.artist || "").toString();
+    const getAlbum = (t) => (t.displayAlbum || t.album || "").toString();
+    const getDur = (t) => Number(t.duration) || 0;
+    const getDate = (t) => Number(t.dateAdded || t.dateModified || t.lastModified || t.timestamp || 0);
+
     switch (this.sortMode) {
       case "title_asc":
-        list.sort((a, b) => (a.displayTitle || "").localeCompare(b.displayTitle || ""));
+        list.sort((a, b) => getTitle(a).localeCompare(getTitle(b), undefined, { numeric: true, sensitivity: "base" }));
         break;
       case "title_desc":
-        list.sort((a, b) => (b.displayTitle || "").localeCompare(a.displayTitle || ""));
+        list.sort((a, b) => getTitle(b).localeCompare(getTitle(a), undefined, { numeric: true, sensitivity: "base" }));
         break;
       case "date_desc":
-        list.sort((a, b) => {
-          const tA = Number(a.dateAdded || a.dateModified || 0);
-          const tB = Number(b.dateAdded || b.dateModified || 0);
-          return tB - tA;
-        });
+        list.sort((a, b) => getDate(b) - getDate(a));
         break;
       case "date_asc":
-        list.sort((a, b) => {
-          const tA = Number(a.dateAdded || a.dateModified || 0);
-          const tB = Number(b.dateAdded || b.dateModified || 0);
-          return tA - tB;
-        });
+        list.sort((a, b) => getDate(a) - getDate(b));
         break;
       case "dur_desc":
-        list.sort((a, b) => (b.duration || 0) - (a.duration || 0));
+        list.sort((a, b) => getDur(b) - getDur(a));
         break;
       case "dur_asc":
-        list.sort((a, b) => (a.duration || 0) - (b.duration || 0));
+        list.sort((a, b) => getDur(a) - getDur(b));
         break;
       case "artist_asc":
-        list.sort((a, b) => (a.displayArtist || "").localeCompare(b.displayArtist || ""));
+        list.sort((a, b) => getArtist(a).localeCompare(getArtist(b), undefined, { numeric: true, sensitivity: "base" }));
         break;
       case "album_asc":
-        list.sort((a, b) => (a.displayAlbum || "").localeCompare(b.displayAlbum || ""));
+        list.sort((a, b) => getAlbum(a).localeCompare(getAlbum(b), undefined, { numeric: true, sensitivity: "base" }));
         break;
       default:
-        list.sort((a, b) => (a.displayTitle || "").localeCompare(b.displayTitle || ""));
+        list.sort((a, b) => getTitle(a).localeCompare(getTitle(b), undefined, { numeric: true, sensitivity: "base" }));
         break;
     }
     return list;
   }
 
   setSortMode(mode) {
+    if (this._sortModeDebounce && Date.now() - this._sortModeDebounce < 350) return;
+    this._sortModeDebounce = Date.now();
     this.sortMode = mode;
     this.savePreferences();
     this.updateSortLabelUi();
@@ -1029,7 +1034,7 @@ class NimiyoMusicPlayer {
     this.renderCurrentTab();
     this.closeSortModal();
     if (window.showToast) {
-      window.showToast(this.getSortModeLabel(mode), "info");
+      window.showToast("Diurutkan: " + this.getSortModeLabel(mode), "info");
     }
   }
 
@@ -1522,6 +1527,11 @@ class NimiyoMusicPlayer {
         const matchPitch = this.bpmRate !== 100;
         const reverbPreset = this.getNativeReverbPreset();
 
+        let trackArt = this.artworkCache?.get(track.id) || track.artwork || track.thumbnail || track.cover || "";
+        if (trackArt && (trackArt.includes("image/svg") || trackArt.startsWith("<svg"))) {
+          trackArt = "";
+        }
+
         if (autoPlay) {
           try {
             await MediaSaver.nativePlayTrack({
@@ -1530,6 +1540,7 @@ class NimiyoMusicPlayer {
               title: nativeTrack.title,
               artist: nativeTrack.artist,
               album: nativeTrack.album,
+              artwork: trackArt || null,
               duration: nativeTrack.duration,
               position: 0,
               playbackSpeed: speed,
@@ -1599,7 +1610,9 @@ class NimiyoMusicPlayer {
   async playTrackFromList(track, trackList = []) {
     if (!track) return;
 
-    if (this.currentTrack && this.currentTrack.id === track.id) {
+    const isMiniPlayerHidden = !this.elements.miniPlayer || this.elements.miniPlayer.classList.contains("hidden");
+
+    if (this.currentTrack && this.currentTrack.id === track.id && !isMiniPlayerHidden) {
       this.togglePlay();
       return;
     }
@@ -1658,6 +1671,7 @@ class NimiyoMusicPlayer {
   }
 
   async play() {
+    this.showMiniPlayer();
     if (!this.currentTrack && this.queue.length > 0) {
       await this.setTrack(this.queue[0], true);
       return;
@@ -2049,13 +2063,7 @@ class NimiyoMusicPlayer {
   }
 
   toggleShuffle() {
-    this.isShuffle = !this.isShuffle;
-    this.rebuildShuffleIndices();
-    this.savePreferences();
-    this.updateControlStatesUi();
-    if (window.showToast) {
-      window.showToast(this.isShuffle ? this.t("musicShuffleOn", "Shuffle Aktif") : this.t("musicShuffleOff", "Shuffle Nonaktif"), "info");
-    }
+    this.handleQuickShuffleClick();
   }
 
   cycleRepeat() {
@@ -2292,6 +2300,7 @@ class NimiyoMusicPlayer {
     this.artworkCache.set(track.id, null);
     this.applyArtworkToUi(defaultPlaceholder);
     this.resetDynamicColor();
+    this.updateNativeNotification(this.isPlaying);
   }
 
   applyArtworkToUi(artworkSrc) {
@@ -3894,12 +3903,18 @@ class NimiyoMusicPlayer {
   }
 
   toggleLyricsMode(forceState) {
-    this.isLyricsModeActive = typeof forceState === "boolean" ? forceState : !this.isLyricsModeActive;
-    if (this.isLyricsModeActive) {
-      this.elements.fullPlayerArtStage?.classList.add("hidden");
-      this.elements.fullPlayerInfoSection?.classList.add("hidden");
-      this.elements.fullPlayerLyricsStage?.classList.remove("hidden");
+    const targetState = typeof forceState === "boolean" ? forceState : !this.isLyricsModeActive;
+    if (this.isLyricsModeActive === targetState && this._lyricsTransitioning) return;
+    this.isLyricsModeActive = targetState;
+    this._lyricsTransitioning = true;
 
+    const artStage = this.elements.fullPlayerArtStage;
+    const infoSection = this.elements.fullPlayerInfoSection;
+    const lyricsStage = this.elements.fullPlayerLyricsStage;
+
+    clearTimeout(this._lyricsTransitionTimer);
+
+    if (this.isLyricsModeActive) {
       if (this.currentTrack) {
         if (this.elements.lyricsMiniTitle) this.elements.lyricsMiniTitle.innerText = this.currentTrack.displayTitle;
         if (this.elements.lyricsMiniArtist) this.elements.lyricsMiniArtist.innerText = this.currentTrack.displayArtist;
@@ -3907,11 +3922,34 @@ class NimiyoMusicPlayer {
 
       this.activeIntegratedLyricIndex = -999;
       this.renderIntegratedLyrics();
+
+      // Trigger exit transition on Album and Info
+      artStage?.classList.remove("album-entering", "album-active-view");
+      artStage?.classList.add("album-exiting");
+      infoSection?.classList.remove("info-entering", "info-active-view");
+      infoSection?.classList.add("info-exiting");
+
+      // Reveal lyrics stage in initial entering position
+      lyricsStage?.classList.remove("hidden", "lyrics-exiting", "lyrics-active-view");
+      lyricsStage?.classList.add("lyrics-entering");
+
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
+          lyricsStage?.classList.remove("lyrics-entering");
+          lyricsStage?.classList.add("lyrics-active-view");
           this.syncIntegratedLyrics(this.getCurrentPosition(), true);
         });
       });
+
+      this._lyricsTransitionTimer = setTimeout(() => {
+        artStage?.classList.add("hidden");
+        artStage?.classList.remove("album-exiting");
+        infoSection?.classList.add("hidden");
+        infoSection?.classList.remove("info-exiting");
+        lyricsStage?.classList.remove("lyrics-active-view");
+        this._lyricsTransitioning = false;
+      }, 260);
+
       if (this.isPlaying) {
         this.startLyricsAnimationLoop();
       }
@@ -3919,9 +3957,33 @@ class NimiyoMusicPlayer {
     } else {
       this.stopLyricsAnimationLoop();
       this.dismissTtmlSpotlight();
-      this.elements.fullPlayerLyricsStage?.classList.add("hidden");
-      this.elements.fullPlayerArtStage?.classList.remove("hidden");
-      this.elements.fullPlayerInfoSection?.classList.remove("hidden");
+
+      // Trigger exit transition on lyrics stage
+      lyricsStage?.classList.remove("lyrics-entering", "lyrics-active-view");
+      lyricsStage?.classList.add("lyrics-exiting");
+
+      // Reveal album art and info section in entering state
+      artStage?.classList.remove("hidden", "album-exiting", "album-active-view");
+      artStage?.classList.add("album-entering");
+      infoSection?.classList.remove("hidden", "info-exiting", "info-active-view");
+      infoSection?.classList.add("info-entering");
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          artStage?.classList.remove("album-entering");
+          artStage?.classList.add("album-active-view");
+          infoSection?.classList.remove("info-entering");
+          infoSection?.classList.add("info-active-view");
+        });
+      });
+
+      this._lyricsTransitionTimer = setTimeout(() => {
+        lyricsStage?.classList.add("hidden");
+        lyricsStage?.classList.remove("lyrics-exiting");
+        artStage?.classList.remove("album-active-view");
+        infoSection?.classList.remove("info-active-view");
+        this._lyricsTransitioning = false;
+      }, 260);
     }
     this.updateLyricsBackdropState();
   }
@@ -5415,28 +5477,56 @@ class NimiyoMusicPlayer {
     }
   }
 
-  handleQuickShuffleClick() {
+  async handleQuickShuffleClick() {
+    if (this._shuffleDebounce && Date.now() - this._shuffleDebounce < 350) return;
+    this._shuffleDebounce = Date.now();
+
     if (window.Capacitor?.Plugins?.Haptics?.impact) {
       try { window.Capacitor.Plugins.Haptics.impact({ style: "LIGHT" }); } catch (_) {}
+    } else if (window.triggerHaptic) {
+      window.triggerHaptic();
     }
-    if (this.currentTrack && this.queue && this.queue.length > 0) {
-      this.toggleShuffle();
-    } else {
-      this.shuffleAll();
+
+    this.isShuffle = !this.isShuffle;
+    this.rebuildShuffleIndices();
+    this.savePreferences();
+    this.updateControlStatesUi();
+
+    if (this.queue && this.queue.length > 1) {
+      if (!this.isShuffle) {
+        this.queue = this.sortTracks(this.queue);
+        if (this.currentTrack) {
+          const idx = this.queue.findIndex(t => t.id === this.currentTrack.id);
+          if (idx !== -1) this.queueIndex = idx;
+        }
+      }
+    }
+
+    if (window.showToast) {
+      const msg = this.isShuffle
+        ? this.t("musicShuffleOn", "Mode Acak Aktif")
+        : this.t("musicShuffleOff", "Mode Acak Nonaktif");
+      window.showToast(msg, "info");
     }
   }
 
   updateControlStatesUi() {
     if (this.elements.fullPlayerShuffleBtn) {
-      this.elements.fullPlayerShuffleBtn.classList.toggle("active", this.isShuffle);
+      this.elements.fullPlayerShuffleBtn.classList.toggle("active", Boolean(this.isShuffle));
     }
 
     const shufflePill = this.elements.shuffleAllBtn || document.getElementById("playerShuffleAllBtn");
     if (shufflePill) {
-      shufflePill.classList.toggle("active", Boolean(this.isShuffle));
+      const active = Boolean(this.isShuffle);
+      shufflePill.classList.toggle("active", active);
+      if (active) {
+        shufflePill.setAttribute("data-active", "true");
+      } else {
+        shufflePill.removeAttribute("data-active");
+      }
       const lbl = this.elements.shuffleLabel || document.getElementById("playerShuffleLabel") || shufflePill.querySelector("span");
       if (lbl) {
-        lbl.innerText = this.isShuffle
+        lbl.innerText = active
           ? this.t("musicShuffleActive", "Acak (Aktif)")
           : this.t("musicBtnShuffleAll", "Acak Semua");
       }
@@ -5578,7 +5668,11 @@ class NimiyoMusicPlayer {
 
   closeFullPlayer() {
     if (this.elements.fullPlayerModal) {
-      this.elements.fullPlayerModal.classList.add("hidden");
+      this.elements.fullPlayerModal.classList.add("modal-closing");
+      setTimeout(() => {
+        this.elements.fullPlayerModal.classList.add("hidden");
+        this.elements.fullPlayerModal.classList.remove("modal-closing");
+      }, 200);
     }
   }
 
@@ -5695,19 +5789,30 @@ class NimiyoMusicPlayer {
   }
 
   openSortModal() {
-    const modal = this.elements.sortModal || document.getElementById("musicSortModal");
-    if (modal) {
-      this._sortModalOpenedAt = Date.now();
-      this.updateSortLabelUi();
-      modal.classList.remove("hidden");
+    try {
+      const modal = this.elements.sortModal || document.getElementById("musicSortModal");
+      if (modal) {
+        this._sortModalOpenedAt = Date.now();
+        this.updateSortLabelUi();
+        modal.classList.remove("hidden");
+        modal.style.removeProperty("display");
+        modal.style.display = "flex";
+        if (window.triggerHaptic) window.triggerHaptic();
+      }
+    } catch (err) {
+      console.error("[MUSIC] openSortModal error:", err);
     }
   }
 
   closeSortModal() {
-    const modal = this.elements.sortModal || document.getElementById("musicSortModal");
-    if (modal) {
-      modal.classList.add("hidden");
-    }
+    try {
+      const modal = this.elements.sortModal || document.getElementById("musicSortModal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.style.removeProperty("display");
+        modal.style.display = "none";
+      }
+    } catch (_) {}
   }
 
   openSongInfoModal(track) {
@@ -6050,37 +6155,144 @@ class NimiyoMusicPlayer {
       const raw = localStorage.getItem("nimiyo_playlists");
       if (raw) {
         this.playlists = JSON.parse(raw);
+        if (!Array.isArray(this.playlists)) this.playlists = [];
       } else {
         this.playlists = [];
       }
     } catch (_) {
       this.playlists = [];
     }
+
+    // Proactively sync with persistent storage on device: Download/Nimiyo/database/playlist_*.json
+    this.loadPlaylistsFromDisk();
+  }
+
+  loadPlaylistsFromDisk() {
+    try {
+      const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
+      if (!MediaSaver || typeof MediaSaver.loadAllPlaylists !== "function") return;
+      MediaSaver.loadAllPlaylists().then(res => {
+        if (res && Array.isArray(res.playlists)) {
+          if (res.playlists.length > 0) {
+            const diskMap = new Map();
+            res.playlists.forEach(pl => {
+              if (pl && (pl.id || pl.name)) {
+                const key = pl.id || ("pl_" + pl.name);
+                diskMap.set(key, pl);
+              }
+            });
+            // If localStorage had items not yet on disk, preserve and write them to disk
+            if (Array.isArray(this.playlists)) {
+              this.playlists.forEach(pl => {
+                const key = pl.id || ("pl_" + pl.name);
+                if (pl && !diskMap.has(key)) {
+                  diskMap.set(key, pl);
+                  this.savePlaylistToDisk(pl);
+                }
+              });
+            }
+            this.playlists = Array.from(diskMap.values()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            try { localStorage.setItem("nimiyo_playlists", JSON.stringify(this.playlists)); } catch (_) {}
+            this.renderPlaylistsList();
+            if (this.activePlaylistId) {
+              this.renderPlaylistDetailTracks();
+            }
+          } else if (Array.isArray(this.playlists) && this.playlists.length > 0) {
+            // Initial migration: write existing local playlists to disk
+            this.playlists.forEach(pl => {
+              this.savePlaylistToDisk(pl);
+            });
+          }
+        }
+      }).catch(err => {
+        console.warn("[MUSIC] Load playlists from disk error:", err);
+      });
+    } catch (e) {
+      console.warn("[MUSIC] loadPlaylistsFromDisk exception:", e);
+    }
   }
 
   savePlaylists() {
     try {
+      if (!Array.isArray(this.playlists)) this.playlists = [];
       localStorage.setItem("nimiyo_playlists", JSON.stringify(this.playlists));
+
+      // Persist all playlists into Download/Nimiyo/database/playlist_<name>.json
+      this.playlists.forEach(pl => {
+        this.savePlaylistToDisk(pl);
+      });
+    } catch (_) {}
+  }
+
+  savePlaylistToDisk(playlist) {
+    try {
+      if (!playlist || !playlist.name) return;
+      const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
+      if (MediaSaver && typeof MediaSaver.savePlaylistFile === "function") {
+        MediaSaver.savePlaylistFile({
+          name: playlist.name,
+          playlistJson: JSON.stringify(playlist)
+        }).catch(e => console.warn("[MUSIC] savePlaylistFile error:", e));
+      }
+    } catch (_) {}
+  }
+
+  deletePlaylistFromDisk(playlistName) {
+    try {
+      if (!playlistName) return;
+      const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
+      if (MediaSaver && typeof MediaSaver.deletePlaylistFile === "function") {
+        MediaSaver.deletePlaylistFile({
+          name: playlistName
+        }).catch(e => console.warn("[MUSIC] deletePlaylistFile error:", e));
+      }
+    } catch (_) {}
+  }
+
+  renamePlaylistOnDisk(oldName, newName, playlist) {
+    try {
+      if (!oldName || !newName) return;
+      const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
+      if (MediaSaver && typeof MediaSaver.renamePlaylistFile === "function") {
+        MediaSaver.renamePlaylistFile({
+          oldName: oldName,
+          newName: newName,
+          playlistJson: playlist ? JSON.stringify(playlist) : null
+        }).catch(e => console.warn("[MUSIC] renamePlaylistFile error:", e));
+      }
     } catch (_) {}
   }
 
   openPlaylistModal() {
-    const modal = this.elements.playlistModal || document.getElementById("playlistModal");
-    if (modal) {
-      if (window.Capacitor?.Plugins?.Haptics?.impact) {
-        try { window.Capacitor.Plugins.Haptics.impact({ style: "LIGHT" }); } catch (_) {}
+    try {
+      if (!Array.isArray(this.playlists)) this.playlists = [];
+      const modal = this.elements.playlistModal || document.getElementById("playlistModal");
+      if (modal) {
+        if (window.Capacitor?.Plugins?.Haptics?.impact) {
+          try { window.Capacitor.Plugins.Haptics.impact({ style: "LIGHT" }); } catch (_) {}
+        } else if (window.triggerHaptic) {
+          window.triggerHaptic();
+        }
+        modal.classList.remove("hidden");
+        modal.style.removeProperty("display");
+        modal.style.display = "flex";
+        this.closePlaylistDetail();
+        this.renderPlaylistsList();
       }
-      modal.classList.remove("hidden");
-      this.closePlaylistDetail();
-      this.renderPlaylistsList();
+    } catch (err) {
+      console.error("[MUSIC] openPlaylistModal error:", err);
     }
   }
 
   closePlaylistModal() {
-    const modal = this.elements.playlistModal || document.getElementById("playlistModal");
-    if (modal) {
-      modal.classList.add("hidden");
-    }
+    try {
+      const modal = this.elements.playlistModal || document.getElementById("playlistModal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.style.removeProperty("display");
+        modal.style.display = "none";
+      }
+    } catch (_) {}
   }
 
   handlePlaylistBack() {
@@ -6091,10 +6303,16 @@ class NimiyoMusicPlayer {
     }
   }
 
-  openCreatePlaylistDialog(editingPlaylistId = null) {
+  openCreatePlaylistDialog(editingPlaylistId = null, preselectedTracks = null) {
     this.editingPlaylistId = editingPlaylistId;
-    const titleEl = this.elements.createPlaylistDialogTitle;
-    const inputEl = this.elements.newPlaylistNameInput;
+    this.pendingTracksForNewPlaylist = (preselectedTracks && Array.isArray(preselectedTracks) && preselectedTracks.length > 0)
+      ? [...preselectedTracks]
+      : null;
+
+    const modal = this.elements.createPlaylistModal || document.getElementById("createPlaylistModal");
+    const titleEl = this.elements.createPlaylistDialogTitle || document.getElementById("createPlaylistDialogTitle");
+    const inputEl = this.elements.newPlaylistNameInput || document.getElementById("newPlaylistNameInput");
+
     if (editingPlaylistId) {
       const pl = this.playlists.find(p => p.id === editingPlaylistId);
       if (titleEl) titleEl.innerText = this.t("renamePlaylistTitle", "Ubah Nama Playlist");
@@ -6103,21 +6321,25 @@ class NimiyoMusicPlayer {
       if (titleEl) titleEl.innerText = this.t("createPlaylistTitle", "Playlist Baru");
       if (inputEl) inputEl.value = "";
     }
-    if (this.elements.createPlaylistModal) {
-      this.elements.createPlaylistModal.classList.remove("hidden");
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.style.removeProperty("display");
       setTimeout(() => inputEl?.focus(), 150);
     }
   }
 
   closeCreatePlaylistDialog() {
-    if (this.elements.createPlaylistModal) {
-      this.elements.createPlaylistModal.classList.add("hidden");
+    const modal = this.elements.createPlaylistModal || document.getElementById("createPlaylistModal");
+    if (modal) {
+      modal.classList.add("hidden");
+      modal.style.removeProperty("display");
     }
     this.editingPlaylistId = null;
+    this.pendingTracksForNewPlaylist = null;
   }
 
   submitCreatePlaylist() {
-    const inputEl = this.elements.newPlaylistNameInput;
+    const inputEl = this.elements.newPlaylistNameInput || document.getElementById("newPlaylistNameInput");
     const name = (inputEl?.value || "").trim();
     if (!name) {
       if (window.showToast) window.showToast(this.t("playlistNameRequired", "Nama playlist tidak boleh kosong"), "error");
@@ -6127,7 +6349,9 @@ class NimiyoMusicPlayer {
     if (this.editingPlaylistId) {
       const pl = this.playlists.find(p => p.id === this.editingPlaylistId);
       if (pl) {
+        const oldName = pl.name;
         pl.name = name;
+        this.renamePlaylistOnDisk(oldName, name, pl);
         this.savePlaylists();
         this.renderPlaylistsList();
         if (this.activePlaylistId === pl.id) {
@@ -6136,26 +6360,47 @@ class NimiyoMusicPlayer {
         if (window.showToast) window.showToast(this.t("playlistNameUpdated", "Nama playlist diperbarui"), "success");
       }
     } else {
+      const initialTrackIds = [];
+      if (this.pendingTracksForNewPlaylist && this.pendingTracksForNewPlaylist.length > 0) {
+        this.pendingTracksForNewPlaylist.forEach(t => {
+          if (t && t.id != null) {
+            const tid = t.id;
+            if (!initialTrackIds.some(existing => String(existing) === String(tid))) {
+              initialTrackIds.push(tid);
+            }
+          }
+        });
+      }
+
       const newPl = {
         id: "pl_" + Date.now(),
         name: name,
         createdAt: Date.now(),
-        trackIds: []
+        trackIds: initialTrackIds
       };
       this.playlists.unshift(newPl);
       this.savePlaylists();
       this.renderPlaylistsList();
+
+      if (this.pendingTracksForNewPlaylist && this.pendingTracksForNewPlaylist.length > 0) {
+        this.exitSelectionMode();
+        this.closeAddToPlaylistModal();
+      }
+
       this.openPlaylistDetail(newPl.id);
-      if (window.showToast) window.showToast(this.t("playlistCreatedToast", `Playlist "${name}" dibuat`, { name }), "success");
+      const toastMsg = initialTrackIds.length > 0
+        ? this.t("playlistCreatedWithTracksToast", `Playlist "${name}" dibuat dengan ${initialTrackIds.length} lagu`, { name, count: initialTrackIds.length })
+        : this.t("playlistCreatedToast", `Playlist "${name}" dibuat`, { name });
+      if (window.showToast) window.showToast(toastMsg, "success");
     }
 
     this.closeCreatePlaylistDialog();
   }
 
   renderPlaylistsList() {
-    const grid = this.elements.playlistCardsGrid;
-    const empty = this.elements.playlistEmptyState;
-    const countSub = this.elements.playlistCountSubtitle;
+    const grid = this.elements.playlistCardsGrid || document.getElementById("playlistCardsGrid");
+    const empty = this.elements.playlistEmptyState || document.getElementById("playlistEmptyState");
+    const countSub = this.elements.playlistCountSubtitle || document.getElementById("playlistCountSubtitle");
     if (!grid) return;
 
     if (countSub) {
@@ -6243,7 +6488,9 @@ class NimiyoMusicPlayer {
 
     if (pl.trackIds && pl.trackIds.length > 0) {
       for (const tid of pl.trackIds) {
-        const t = this.allTracks.find(item => item.id === tid);
+        const tidStr = String(tid);
+        const t = this.allTracks.find(item => String(item.id) === tidStr)
+               || (this.nimiyoTracks && this.nimiyoTracks.find(item => String(item.id) === tidStr));
         if (t) {
           trackObjects.push(t);
           totalDurMs += (t.duration || 0);
@@ -6603,7 +6850,9 @@ class NimiyoMusicPlayer {
     const pl = this.playlists.find(p => p.id === this.activePlaylistId);
     if (!pl) return;
     if (confirm(this.t("confirmDeletePlaylist", `Hapus playlist "${pl.name}"?`, { name: pl.name }))) {
+      const plName = pl.name;
       this.playlists = this.playlists.filter(p => p.id !== this.activePlaylistId);
+      this.deletePlaylistFromDisk(plName);
       this.savePlaylists();
       this.closePlaylistDetail();
       if (window.showToast) window.showToast(this.t("playlistDeletedToast", "Playlist berhasil dihapus"), "success");
@@ -6798,6 +7047,7 @@ class NimiyoMusicPlayer {
   showAddToPlaylistModal(track) {
     if (!track) return;
     this.targetTrackForPlaylist = track;
+    this.selectedTracksForPlaylist = null;
 
     if (this.elements.addToPlaylistTrackTitle) {
       this.elements.addToPlaylistTrackTitle.innerText = `${track.displayTitle}`;
@@ -6814,7 +7064,7 @@ class NimiyoMusicPlayer {
       } else {
         listEl.innerHTML = this.playlists.map(pl => {
           const count = pl.trackIds ? pl.trackIds.length : 0;
-          const hasTrack = pl.trackIds && pl.trackIds.includes(track.id);
+          const hasTrack = pl.trackIds && pl.trackIds.some(id => String(id) === String(track.id));
           return `
             <div class="quick-playlist-item" data-playlist-id="${pl.id}">
               <div class="quick-playlist-item-left">
@@ -6843,14 +7093,18 @@ class NimiyoMusicPlayer {
       }
     }
 
-    if (this.elements.addToPlaylistModal) {
-      this.elements.addToPlaylistModal.classList.remove("hidden");
+    const modal = this.elements.addToPlaylistModal || document.getElementById("addToPlaylistModal");
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.style.removeProperty("display");
     }
   }
 
   closeAddToPlaylistModal() {
-    if (this.elements.addToPlaylistModal) {
-      this.elements.addToPlaylistModal.classList.add("hidden");
+    const modal = this.elements.addToPlaylistModal || document.getElementById("addToPlaylistModal");
+    if (modal) {
+      modal.classList.add("hidden");
+      modal.style.removeProperty("display");
     }
     this.targetTrackForPlaylist = null;
   }
@@ -6860,7 +7114,8 @@ class NimiyoMusicPlayer {
     if (!pl) return;
 
     if (!pl.trackIds) pl.trackIds = [];
-    if (pl.trackIds.includes(track.id)) {
+    const trackIdStr = String(track.id);
+    if (pl.trackIds.some(id => String(id) === trackIdStr)) {
       if (window.showToast) window.showToast(this.t("playlistSongAlreadyIn", `Lagu sudah ada di "${pl.name}"`, { name: pl.name }), "info");
     } else {
       pl.trackIds.push(track.id);
@@ -6981,10 +7236,15 @@ class NimiyoMusicPlayer {
     this.closeMoveTargetDialog();
     const selectedTracks = [];
     for (const tid of this.selectedTrackIds) {
-      const t = this.allTracks.find(item => item.id === tid);
+      const tidStr = String(tid);
+      const t = this.allTracks.find(item => String(item.id) === tidStr)
+             || (this.currentSelectionTrackList && this.currentSelectionTrackList.find(item => String(item.id) === tidStr))
+             || (this.nimiyoTracks && this.nimiyoTracks.find(item => String(item.id) === tidStr));
       if (t) selectedTracks.push(t);
     }
     if (selectedTracks.length === 0) return;
+
+    this.selectedTracksForPlaylist = selectedTracks;
 
     // Show playlist picker
     if (this.elements.addToPlaylistTrackTitle) {
@@ -7025,7 +7285,8 @@ class NimiyoMusicPlayer {
                 if (!targetPl.trackIds) targetPl.trackIds = [];
                 let addedCount = 0;
                 selectedTracks.forEach(t => {
-                  if (!targetPl.trackIds.includes(t.id)) {
+                  const tidStr = String(t.id);
+                  if (!targetPl.trackIds.some(existingId => String(existingId) === tidStr)) {
                     targetPl.trackIds.push(t.id);
                     addedCount++;
                   }
@@ -7038,6 +7299,7 @@ class NimiyoMusicPlayer {
                   this.renderPlaylistDetailTracks();
                 }
               }
+              this.selectedTracksForPlaylist = null;
               this.closeAddToPlaylistModal();
               this.exitSelectionMode();
             }
@@ -7046,8 +7308,10 @@ class NimiyoMusicPlayer {
       }
     }
 
-    if (this.elements.addToPlaylistModal) {
-      this.elements.addToPlaylistModal.classList.remove("hidden");
+    const modal = this.elements.addToPlaylistModal || document.getElementById("addToPlaylistModal");
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.style.removeProperty("display");
     }
   }
 
@@ -7821,15 +8085,18 @@ class NimiyoMusicPlayer {
       });
     }
 
-    if (this.elements.playlistBackBtn) {
-      this.elements.playlistBackBtn.addEventListener("click", () => this.handlePlaylistBack());
+    const plBackBtn = this.elements.playlistBackBtn || document.getElementById("playlistBackBtn");
+    if (plBackBtn) {
+      plBackBtn.addEventListener("click", () => this.handlePlaylistBack());
     }
 
-    if (this.elements.playlistCreateBtn) {
-      this.elements.playlistCreateBtn.addEventListener("click", () => this.openCreatePlaylistDialog());
+    const plCreateBtn = this.elements.playlistCreateBtn || document.getElementById("playlistCreateBtn");
+    if (plCreateBtn) {
+      plCreateBtn.addEventListener("click", () => this.openCreatePlaylistDialog());
     }
-    if (this.elements.playlistEmptyCreateBtn) {
-      this.elements.playlistEmptyCreateBtn.addEventListener("click", () => this.openCreatePlaylistDialog());
+    const plEmptyCreateBtn = this.elements.playlistEmptyCreateBtn || document.getElementById("playlistEmptyCreateBtn");
+    if (plEmptyCreateBtn) {
+      plEmptyCreateBtn.addEventListener("click", () => this.openCreatePlaylistDialog());
     }
 
     if (this.elements.playlistPlayAllBtn) {
@@ -7937,8 +8204,11 @@ class NimiyoMusicPlayer {
     }
     if (this.elements.quickCreatePlaylistBtn) {
       this.elements.quickCreatePlaylistBtn.addEventListener("click", () => {
+        const preselected = (this.selectedTracksForPlaylist && this.selectedTracksForPlaylist.length > 0)
+          ? [...this.selectedTracksForPlaylist]
+          : (this.targetTrackForPlaylist ? [this.targetTrackForPlaylist] : null);
         this.closeAddToPlaylistModal();
-        this.openCreatePlaylistDialog();
+        this.openCreatePlaylistDialog(null, preselected);
       });
     }
 
@@ -7959,10 +8229,13 @@ class NimiyoMusicPlayer {
       if (modal) {
         modal.addEventListener("click", (e) => {
           if (e.target === modal) {
-            if (modal === this.elements.sortModal && this._sortModalOpenedAt && (Date.now() - this._sortModalOpenedAt < 300)) {
+            const sm = this.elements.sortModal || document.getElementById("musicSortModal");
+            if (modal === sm && this._sortModalOpenedAt && (Date.now() - this._sortModalOpenedAt < 350)) {
               return;
             }
             modal.classList.add("hidden");
+            modal.style.removeProperty("display");
+            modal.style.display = "none";
           }
         });
       }
@@ -8105,6 +8378,11 @@ class NimiyoMusicPlayer {
       this.closeAddToPlaylistModal();
       return true;
     }
+    const sortModal = this.elements.sortModal || document.getElementById("musicSortModal");
+    if (sortModal && !sortModal.classList.contains("hidden")) {
+      this.closeSortModal();
+      return true;
+    }
     if (this.elements.playlistModal && !this.elements.playlistModal.classList.contains("hidden")) {
       this.handlePlaylistBack();
       return true;
@@ -8138,6 +8416,7 @@ function initGlobalMusicPlayer() {
   if (!window.nimiyoMusicPlayer) {
     window.nimiyoMusicPlayer = new NimiyoMusicPlayer();
   }
+  window.musicPlayer = window.nimiyoMusicPlayer;
   return window.nimiyoMusicPlayer;
 }
 window.initGlobalMusicPlayer = initGlobalMusicPlayer;

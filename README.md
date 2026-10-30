@@ -6,7 +6,7 @@
 
   **A Premium, Ultra-Fast & Lightweight Universal Media Downloader for Android**
 
-  [![Release](https://img.shields.io/badge/Release-v2.3.1--Lite-00C48C.svg?style=for-the-badge&logo=android&logoColor=white)](https://github.com/nimidz/Nimiyo-Downloader/releases)
+  [![Release](https://img.shields.io/badge/Release-v2.3.2--Lite-00C48C.svg?style=for-the-badge&logo=android&logoColor=white)](https://github.com/nimidz/Nimiyo-Downloader/releases)
   [![Total Downloads](https://img.shields.io/github/downloads/nimidz/Nimiyo-Downloader/total?style=for-the-badge&logo=github&color=3b82f6&label=Downloads)](https://github.com/nimidz/Nimiyo-Downloader/releases)
   [![Stars](https://img.shields.io/github/stars/nimidz/Nimiyo-Downloader?style=for-the-badge&logo=apachespark&color=f59e0b&label=Stars)](https://github.com/nimidz/Nimiyo-Downloader/stargazers)
   [![License](https://img.shields.io/badge/License-GPL--3.0-black.svg?style=for-the-badge)](LICENSE)
@@ -22,8 +22,11 @@
   </p>
 
   <p align="center">
+    <a href="https://github.com/nimidz/Nimiyo-Downloader/releases/download/v2.3.2/Nimiyo.v2.3.2.apk">
+      <img src="https://img.shields.io/badge/Direct_Download_APK-📥-FF5722?style=for-the-badge&logo=android&logoColor=white" alt="Direct Download APK" />
+    </a>
     <a href="https://github.com/nimidz/Nimiyo-Downloader/releases/latest">
-      <img src="https://img.shields.io/badge/Download_Latest_APK-🚀-FF5722?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
+      <img src="https://img.shields.io/badge/GitHub_Releases-🚀-3b82f6?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Releases" />
     </a>
     <a href="https://trakteer.id/nimidz">
       <img src="https://img.shields.io/badge/Dukung_Saya-Trakteer_☕-be1e2d?style=for-the-badge" alt="Support on Trakteer" />
@@ -31,20 +34,6 @@
   </p>
 
 </div>
-
----
-
-## 🌟 What's New in v2.3.1
-
-- 🛡️ **Play Protect False Alarm Fixed**: Completely resolved Google Play Protect flagging the app as potentially harmful.
-- 🔒 **Removed Unknown App Install Permission**: Removed `REQUEST_INSTALL_PACKAGES` permission and in-app auto-installer to keep system permissions minimal and 100% compliant with Android device security standards.
-- ☁️ **SoundCloud Support**: Added SoundCloud as a brand-new audio downloading platform with high-bitrate streaming extraction, embedded metadata tags, and full-resolution cover art.
-- 🎼 **Smart Hierarchical Lyrics Engine**: Integrated multi-provider lyrics resolution featuring **KuGou Studio**, **LRCLIB**, **BetterLyrics**, and **Boidu** for unmatched lyrics accuracy and coverage across Asian and Western songs.
-- 🎤 **Word-by-Word Karaoke Lyrics (TTML Mode)**: Full real-time syllable-by-syllable lyric highlighting with glowing word trails, smooth back-vocal transitions, and an interactive Spotlight guide.
-- 🚀 **Ultra-Lightweight Background Playback**: Pure Android native media session pipeline with zero DOM activity and halted animation loops when minimized or controlled from the lockscreen/notification shade.
-- 🎨 **Dynamic Accent Color Synchronization**: Adaptive color harmony extracted from album artwork seamlessly synchronized across the player cards, floating bubbles, and notifications.
-
----
 
 ## 📱 App Screenshots & Interactive Showcase
 
@@ -251,7 +240,7 @@ Nimiyo-Downloader/
 ## 🤝 Acknowledgements & Credits
 
 - Built with ❤️ by [nimidz](https://github.com/nimidz)
-- Powered by `scrapr` engine by [@coflyn](https://github.com/coflyn)
+- Powered by the Open-Source Community
 - Built with [Capacitor](https://capacitorjs.com/)
 
 ---

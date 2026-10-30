@@ -23,6 +23,8 @@ android/**/build/
 # Temporary logs & assets
 /*Screenshot*.jpg
 /*.woff2
+/*.png
+!assets/**
 *.log
 logcat*.txt
 check_screen*.png
@@ -31,6 +33,9 @@ check_screen*.png
 
 # Reference & external scrapers (non-Nimiyo sources)
 ContohJS_untukScraper_PastikanHanyaMenyontekCode/
+ingredientsforAPP/
+*Bahan*/
+scratch/
 edjing_dump/
 search_contoh.js
 
@@ -39,6 +44,8 @@ search_contoh.js
 !assets/**
 
 # IDE, Agent, & OS
+GEMINI.md
+AGENTS.md
 .agents/
 Rules/
 .idea/
@@ -47,3 +54,4 @@ Rules/
 *.swo
 .DS_Store
 Thumbs.db
+

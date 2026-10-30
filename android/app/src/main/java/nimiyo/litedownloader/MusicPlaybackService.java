@@ -31,8 +31,12 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import java.io.File;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -135,8 +139,46 @@ public class MusicPlaybackService extends Service {
         return instance;
     }
 
+    private final ExecutorService artworkExecutor = Executors.newSingleThreadExecutor();
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
     public static void setPendingArtwork(String artworkData) {
         pendingArtworkData = artworkData;
+    }
+
+    public void updateArtwork(String data) {
+        if (data == null || data.trim().isEmpty()) {
+            currentArtwork = getDefaultArtworkBitmap();
+            return;
+        }
+
+        if (data.startsWith("http://") || data.startsWith("https://")) {
+            currentArtwork = getDefaultArtworkBitmap();
+            artworkExecutor.execute(() -> {
+                try {
+                    URL url = new URL(data);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setConnectTimeout(8000);
+                    conn.setReadTimeout(8000);
+                    conn.setDoInput(true);
+                    conn.connect();
+                    InputStream is = conn.getInputStream();
+                    Bitmap bmp = BitmapFactory.decodeStream(is);
+                    is.close();
+                    conn.disconnect();
+                    if (bmp != null) {
+                        currentArtwork = bmp;
+                        mainHandler.post(() -> {
+                            updateMediaMetadata();
+                            buildAndShowNotification();
+                        });
+                    }
+                } catch (Exception ignored) {}
+            });
+            return;
+        }
+
+        currentArtwork = loadArtworkBitmap(data);
     }
 
     public boolean isPlaying() {
@@ -196,6 +238,10 @@ public class MusicPlaybackService extends Service {
     }
 
     public void updateDirectly(String title, String artist, String album, long durationMs, long positionMs, boolean isPlaying, float playbackSpeed, String sourceUrl, String trackId) {
+        updateDirectly(title, artist, album, durationMs, positionMs, isPlaying, playbackSpeed, sourceUrl, trackId, null);
+    }
+
+    public void updateDirectly(String title, String artist, String album, long durationMs, long positionMs, boolean isPlaying, float playbackSpeed, String sourceUrl, String trackId, String artworkData) {
         if (title != null) this.currentTitle = title;
         if (artist != null) this.currentArtist = artist;
         if (album != null) this.currentAlbum = album;
@@ -205,6 +251,15 @@ public class MusicPlaybackService extends Service {
         if (playbackSpeed > 0) this.currentPlaybackSpeed = playbackSpeed;
         if (sourceUrl != null) this.currentSourceUrl = sourceUrl;
         if (trackId != null) this.currentTrackId = trackId;
+
+        String art = (artworkData != null && !artworkData.isEmpty()) ? artworkData : pendingArtworkData;
+        if (art != null && !art.isEmpty()) {
+            updateArtwork(art);
+            pendingArtworkData = null;
+        } else {
+            currentArtwork = getDefaultArtworkBitmap();
+            pendingArtworkData = null;
+        }
 
         updateMediaMetadata();
         updatePlaybackState(this.isPlaying, this.currentPositionMs, this.currentPlaybackSpeed);
@@ -320,10 +375,13 @@ public class MusicPlaybackService extends Service {
             parseQueue(queueJson, index);
         }
 
-        if (artwork != null && !artwork.isEmpty()) {
-            currentArtwork = loadArtworkBitmap(artwork);
-        } else if (currentArtwork == null) {
+        String art = (artwork != null && !artwork.isEmpty()) ? artwork : pendingArtworkData;
+        if (art != null && !art.isEmpty()) {
+            updateArtwork(art);
+            pendingArtworkData = null;
+        } else {
             currentArtwork = getDefaultArtworkBitmap();
+            pendingArtworkData = null;
         }
 
         updateMediaMetadata();
@@ -706,7 +764,13 @@ public class MusicPlaybackService extends Service {
         if (artworkData == null || artworkData.isEmpty()) {
             artworkData = pendingArtworkData;
         }
-        currentArtwork = loadArtworkBitmap(artworkData);
+        if (artworkData != null && !artworkData.isEmpty()) {
+            updateArtwork(artworkData);
+            pendingArtworkData = null;
+        } else {
+            currentArtwork = getDefaultArtworkBitmap();
+            pendingArtworkData = null;
+        }
 
         this.isPlaying = intent.getBooleanExtra(EXTRA_IS_PLAYING, isPlaying);
         updateMediaMetadata();
@@ -918,6 +982,20 @@ public class MusicPlaybackService extends Service {
     }
 
     private Bitmap getDefaultArtworkBitmap() {
+        try {
+            Bitmap logo = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+            if (logo != null) {
+                return logo;
+            }
+        } catch (Exception ignored) {}
+
+        try {
+            Bitmap logoRound = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_round);
+            if (logoRound != null) {
+                return logoRound;
+            }
+        } catch (Exception ignored) {}
+
         int size = 256;
         Bitmap bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bmp);

@@ -19,6 +19,9 @@ import android.util.Base64;
 import android.database.Cursor;
 import android.media.MediaScannerConnection;
 import android.os.PowerManager;
+import android.net.wifi.WifiManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -58,26 +61,47 @@ public class ShareActivity extends AppCompatActivity {
     private static final int NOTIFICATION_ID = 8802;
     private final ExecutorService httpExecutor = Executors.newFixedThreadPool(4);
     private PowerManager.WakeLock wakeLock = null;
+    private WifiManager.WifiLock wifiLock = null;
+    private final java.util.concurrent.atomic.AtomicInteger activeDownloads = new java.util.concurrent.atomic.AtomicInteger(0);
+    private volatile boolean isDismissRequested = false;
+    private volatile boolean isBatchActive = false;
 
     private synchronized void acquireDownloadWakeLock() {
         try {
+            Context appContext = getApplicationContext();
             if (wakeLock == null) {
-                PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+                PowerManager pm = (PowerManager) appContext.getSystemService(Context.POWER_SERVICE);
                 if (pm != null) {
                     wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Nimiyo:ShareDownloadWakeLock");
                     wakeLock.setReferenceCounted(false);
                 }
             }
             if (wakeLock != null && !wakeLock.isHeld()) {
-                wakeLock.acquire(15 * 60 * 1000L); // 15 min max
+                wakeLock.acquire(20 * 60 * 1000L); // 20 min max
+            }
+            if (wifiLock == null) {
+                WifiManager wm = (WifiManager) appContext.getSystemService(Context.WIFI_SERVICE);
+                if (wm != null) {
+                    int mode = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? WifiManager.WIFI_MODE_FULL_HIGH_PERF : WifiManager.WIFI_MODE_FULL;
+                    wifiLock = wm.createWifiLock(mode, "Nimiyo:ShareWifiLock");
+                    wifiLock.setReferenceCounted(false);
+                }
+            }
+            if (wifiLock != null && !wifiLock.isHeld()) {
+                wifiLock.acquire();
             }
         } catch (Exception ignored) {}
     }
 
     private synchronized void releaseDownloadWakeLock() {
         try {
-            if (wakeLock != null && wakeLock.isHeld()) {
-                wakeLock.release();
+            if (activeDownloads.get() <= 0 && !isBatchActive) {
+                if (wakeLock != null && wakeLock.isHeld()) {
+                    wakeLock.release();
+                }
+                if (wifiLock != null && wifiLock.isHeld()) {
+                    wifiLock.release();
+                }
             }
         } catch (Exception ignored) {}
     }
@@ -98,6 +122,8 @@ public class ShareActivity extends AppCompatActivity {
         }
 
         handleIntent(getIntent());
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         // Create embedded transparent WebView
         webView = new WebView(this);
@@ -148,12 +174,43 @@ public class ShareActivity extends AppCompatActivity {
             loadUrl += "&accentColor=" + Uri.encode(accentColor.trim());
         }
 
+        DownloadService.setListener(new DownloadService.DownloadListener() {
+            @Override
+            public void onProgress(String reqId, int percent) {
+                runOnUiThread(() -> {
+                    if (webView != null) {
+                        webView.evaluateJavascript("if (window.__onNativeDownloadProgress) { window.__onNativeDownloadProgress('" + reqId + "', " + percent + "); }", null);
+                    }
+                });
+            }
+
+            @Override
+            public void onComplete(String reqId, boolean success, String error, String filePath) {
+                runOnUiThread(() -> {
+                    if (webView != null) {
+                        String safeErr = error != null ? error.replace("\"", "\\\"") : "";
+                        String safePath = filePath != null ? filePath.replace("\\", "\\\\").replace("\"", "\\\"") : "";
+                        String payload = "{\"success\":" + success + ",\"error\":\"" + safeErr + "\",\"filePath\":\"" + safePath + "\"}";
+                        webView.evaluateJavascript(
+                            "if (window.__nimiyoShareCallbacks && window.__nimiyoShareCallbacks['" + reqId + "']) {" +
+                            "  window.__nimiyoShareCallbacks['" + reqId + "'](" + payload + ");" +
+                            "  delete window.__nimiyoShareCallbacks['" + reqId + "'];" +
+                            "}",
+                            null
+                        );
+                    }
+                });
+            }
+        });
+
         webView.loadUrl(loadUrl);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        isBatchActive = false;
+        DownloadService.setListener(null);
         releaseDownloadWakeLock();
     }
 
@@ -232,6 +289,12 @@ public class ShareActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        if (DownloadService.hasActiveDownloads() || activeDownloads.get() > 0 || isBatchActive) {
+            isDismissRequested = true;
+            moveTaskToBack(true);
+            Toast.makeText(this, "Mengunduh di latar belakang...", Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (webView != null) {
             webView.evaluateJavascript("if (window.dismissPanel) { window.dismissPanel(); } else { window.NimiyoShareBridge.dismiss(); }", null);
         } else {
@@ -241,6 +304,12 @@ public class ShareActivity extends AppCompatActivity {
 
     public void dismissDialog() {
         runOnUiThread(() -> {
+            if (DownloadService.hasActiveDownloads() || activeDownloads.get() > 0 || isBatchActive) {
+                isDismissRequested = true;
+                moveTaskToBack(true);
+                Toast.makeText(this, "Mengunduh di latar belakang...", Toast.LENGTH_SHORT).show();
+                return;
+            }
             finish();
             overridePendingTransition(0, android.R.anim.fade_out);
         });
@@ -265,6 +334,42 @@ public class ShareActivity extends AppCompatActivity {
         }
     }
 
+    private Map<String, String> getDownloadHeaders(String url) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
+        headers.put("Accept", "*/*");
+        headers.put("Accept-Language", "en-US,en;q=0.9,id;q=0.8");
+
+        if (url != null) {
+            String lower = url.toLowerCase();
+            if (lower.contains("snaptik.app") || lower.contains("snaptik")) {
+                headers.put("Referer", "https://snaptik.app/");
+                headers.put("Origin", "https://snaptik.app");
+            } else if (lower.contains("ssstik.io") || lower.contains("tikcdn.io")) {
+                headers.put("Referer", "https://ssstik.io/");
+                headers.put("Origin", "https://ssstik.io");
+            } else if (lower.contains("tiktokio.com")) {
+                headers.put("Referer", "https://tiktokio.com/");
+                headers.put("Origin", "https://tiktokio.com");
+            } else if (lower.contains("tiktok.com") || lower.contains("byteoversea") || lower.contains("ibytedtos") || lower.contains("tikwm")) {
+                headers.put("Referer", "https://www.tiktok.com/");
+            } else if (lower.contains("instagram.com") || lower.contains("cdninstagram") || lower.contains("fbcdn.net")) {
+                headers.put("Referer", "https://www.instagram.com/");
+            } else if (lower.contains("spotidown") || lower.contains("spotify")) {
+                headers.put("Referer", "https://spotidown.app/");
+            } else if (lower.contains("forhub.io") || lower.contains("dl.forhub.io")) {
+                headers.put("Referer", "https://www.forhub.io/download.php");
+            } else if (lower.contains("klickaud.org") || lower.contains("dl.klickaud.org")) {
+                headers.put("Referer", "https://www.klickaud.org/download.php");
+            } else if (lower.contains("facebook.com") || lower.contains("fbcdn")) {
+                headers.put("Referer", "https://www.facebook.com/");
+            } else if (lower.contains("twitter.com") || lower.contains("x.com") || lower.contains("twimg")) {
+                headers.put("Referer", "https://twitter.com/");
+            }
+        }
+        return headers;
+    }
+
     private HttpURLConnection connectWithRedirects(String initialUrl, String method, Map<String, String> headers, byte[] postData) throws Exception {
         String currentUrl = initialUrl;
         int redirectCount = 0;
@@ -274,13 +379,14 @@ public class ShareActivity extends AppCompatActivity {
             URL url = new URL(currentUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod(method);
-            conn.setConnectTimeout(30000);
-            conn.setReadTimeout(30000);
+            conn.setConnectTimeout(45000);
+            conn.setReadTimeout(45000);
             conn.setInstanceFollowRedirects(false); // Manually handle cross-protocol/domain redirects
 
             // Default headers
             conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
             conn.setRequestProperty("Accept", "*/*");
+            conn.setRequestProperty("Accept-Language", "en-US,en;q=0.9,id;q=0.8");
 
             if (headers != null) {
                 for (Map.Entry<String, String> entry : headers.entrySet()) {
@@ -311,6 +417,9 @@ public class ShareActivity extends AppCompatActivity {
                     method = "GET"; // Redirects convert to GET
                     postData = null;
                     redirectCount++;
+                    if (headers != null) {
+                        headers.putAll(getDownloadHeaders(currentUrl));
+                    }
                     continue;
                 }
             }
@@ -349,6 +458,7 @@ public class ShareActivity extends AppCompatActivity {
 
         @JavascriptInterface
         public void minimize() {
+            isDismissRequested = true;
             activity.runOnUiThread(() -> {
                 activity.moveTaskToBack(true);
             });
@@ -366,10 +476,60 @@ public class ShareActivity extends AppCompatActivity {
                     } catch (Exception e) {
                         arr = new org.json.JSONArray();
                     }
-                    arr.put(new org.json.JSONObject(itemJson));
-                    prefs.edit().putString("pending_history_list", arr.toString()).apply();
+                    org.json.JSONObject newObj = new org.json.JSONObject(itemJson);
+                    String newFilename = newObj.optString("filename", "").trim().toLowerCase();
+                    boolean exists = false;
+                    for (int i = 0; i < arr.length(); i++) {
+                        org.json.JSONObject ex = arr.optJSONObject(i);
+                        if (ex != null) {
+                            String exFn = ex.optString("filename", "").trim().toLowerCase();
+                            if (!newFilename.isEmpty() && newFilename.equals(exFn)) {
+                                exists = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!exists) {
+                        arr.put(newObj);
+                        prefs.edit().putString("pending_history_list", arr.toString()).apply();
+                    }
                 }
             } catch (Exception ignored) {}
+        }
+
+        @JavascriptInterface
+        public void setBatchActive(boolean active, int totalCount) {
+            isBatchActive = active;
+            if (active) {
+                acquireDownloadWakeLock();
+            } else {
+                releaseDownloadWakeLock();
+                if (isDismissRequested && activeDownloads.get() <= 0) {
+                    activity.runOnUiThread(() -> {
+                        activity.finish();
+                        activity.overridePendingTransition(0, android.R.anim.fade_out);
+                    });
+                }
+            }
+        }
+
+        @JavascriptInterface
+        public void setBatchActive(boolean active) {
+            setBatchActive(active, 0);
+        }
+
+        @JavascriptInterface
+        public void notifyBatchComplete(int count, String message) {
+            isBatchActive = false;
+            showNotification("Nimiyo Downloader", message, 100, 100, true);
+            activity.runOnUiThread(() -> {
+                Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
+                if (isDismissRequested && activeDownloads.get() <= 0) {
+                    activity.finish();
+                    activity.overridePendingTransition(0, android.R.anim.fade_out);
+                }
+            });
+            releaseDownloadWakeLock();
         }
 
         @JavascriptInterface
@@ -441,168 +601,18 @@ public class ShareActivity extends AppCompatActivity {
         // Native Direct Stream Downloader with Full Cross-Protocol Redirect Support
         @JavascriptInterface
         public void downloadFileAsync(String fileUrl, String filename, String mimeType, boolean isAudio, String reqId) {
-            httpExecutor.execute(() -> {
-                acquireDownloadWakeLock();
-                boolean success = false;
-                String errorMsg = "";
-                String actualSavedPath = null;
-                HttpURLConnection conn = null;
-                OutputStream outStream = null;
-                Uri itemUri = null;
-                File targetFile = null;
-                ContentResolver resolver = activity.getContentResolver();
-                ContentValues contentValues = new ContentValues();
+            downloadFileAsync(fileUrl, filename, mimeType, isAudio, reqId, "", false);
+        }
 
-                String lowerFileName = filename.toLowerCase();
-                String subFolder;
-                if (isAudio || lowerFileName.endsWith(".mp3") || lowerFileName.endsWith(".m4a") || lowerFileName.endsWith(".wav") || lowerFileName.endsWith(".flac")) {
-                    subFolder = "AudioYo";
-                } else if (lowerFileName.endsWith(".jpg") || lowerFileName.endsWith(".jpeg") || lowerFileName.endsWith(".png") || lowerFileName.endsWith(".webp")) {
-                    subFolder = "ImageYo";
-                } else {
-                    subFolder = "VideoYo";
-                }
+        @JavascriptInterface
+        public void downloadFileAsync(String fileUrl, String filename, String mimeType, boolean isAudio, String reqId, String historyItemJson) {
+            downloadFileAsync(fileUrl, filename, mimeType, isAudio, reqId, historyItemJson, false);
+        }
 
-                try {
-                    Map<String, String> headers = new HashMap<>();
-                    headers.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
-                    headers.put("Accept", "*/*");
-                    if (fileUrl.contains("spotidown") || fileUrl.contains("spotify")) {
-                        headers.put("Referer", "https://spotidown.app/");
-                    } else if (fileUrl.contains("forhub.io") || fileUrl.contains("dl.forhub.io")) {
-                        headers.put("Referer", "https://www.forhub.io/download.php");
-                    } else if (fileUrl.contains("klickaud.org") || fileUrl.contains("dl.klickaud.org")) {
-                        headers.put("Referer", "https://www.klickaud.org/download.php");
-                    }
-
-                    conn = connectWithRedirects(fileUrl, "GET", headers, null);
-                    int statusCode = conn.getResponseCode();
-
-                    if (statusCode < 200 || statusCode >= 400) {
-                        throw new Exception("HTTP server error " + statusCode);
-                    }
-
-                    long contentLength = conn.getContentLength();
-                    InputStream is = conn.getInputStream();
-
-                    // Open Target Stream
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, filename);
-                        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
-                        contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/Nimiyo/" + subFolder);
-                        contentValues.put(MediaStore.MediaColumns.IS_PENDING, 1);
-
-                        Uri collectionUri = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
-                        itemUri = resolver.insert(collectionUri, contentValues);
-                        if (itemUri != null) {
-                            outStream = resolver.openOutputStream(itemUri);
-                        }
-                    } else {
-                        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Nimiyo/" + subFolder);
-                        if (!dir.exists()) dir.mkdirs();
-                        targetFile = new File(dir, filename);
-                        outStream = new FileOutputStream(targetFile);
-                    }
-
-                    if (outStream == null) {
-                        throw new Exception("Could not open output storage stream");
-                    }
-
-                    byte[] buffer = new byte[16384];
-                    int bytesRead;
-                    long totalBytesRead = 0;
-                    int lastPercent = 0;
-
-                    while ((bytesRead = is.read(buffer)) != -1) {
-                        outStream.write(buffer, 0, bytesRead);
-                        totalBytesRead += bytesRead;
-
-                        if (contentLength > 0) {
-                            int percent = (int) ((totalBytesRead * 100) / contentLength);
-                            if (percent - lastPercent >= 5) {
-                                lastPercent = percent;
-                                final int curPercent = percent;
-                                activity.runOnUiThread(() -> {
-                                    if (webView != null) {
-                                        webView.evaluateJavascript("if (window.__onNativeDownloadProgress) { window.__onNativeDownloadProgress('" + reqId + "', " + curPercent + "); }", null);
-                                    }
-                                });
-                            }
-                        }
-                    }
-
-                    outStream.flush();
-                    try { is.close(); } catch (Exception ignored) {}
-
-                    if (totalBytesRead <= 0) {
-                        throw new Exception("Unduhan gagal: tidak ada data berkas yang diterima");
-                    }
-
-                    if (totalBytesRead < 200 && !lowerFileName.endsWith(".jpg") && !lowerFileName.endsWith(".png")) {
-                        throw new Exception("Downloaded file is invalid or empty (" + totalBytesRead + " bytes)");
-                    }
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && itemUri != null) {
-                        contentValues.clear();
-                        contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0);
-                        resolver.update(itemUri, contentValues, null, null);
-
-                        try (Cursor cursor = resolver.query(itemUri, new String[]{MediaStore.MediaColumns.DATA}, null, null, null)) {
-                            if (cursor != null && cursor.moveToFirst()) {
-                                int dataIdx = cursor.getColumnIndex(MediaStore.MediaColumns.DATA);
-                                if (dataIdx != -1) {
-                                    actualSavedPath = cursor.getString(dataIdx);
-                                }
-                            }
-                        } catch (Exception ignored) {}
-                    } else if (targetFile != null) {
-                        actualSavedPath = targetFile.getAbsolutePath();
-                    }
-
-                    if (actualSavedPath != null && !actualSavedPath.isEmpty()) {
-                        MediaScannerConnection.scanFile(
-                            activity,
-                            new String[]{actualSavedPath},
-                            new String[]{mimeType},
-                            null
-                        );
-                    }
-
-                    success = true;
-
-                } catch (Exception e) {
-                    errorMsg = e.getMessage() != null ? e.getMessage() : "Unknown download error";
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && itemUri != null) {
-                        try { resolver.delete(itemUri, null, null); } catch (Exception ignored) {}
-                    }
-                    if (targetFile != null && targetFile.exists()) {
-                        try { targetFile.delete(); } catch (Exception ignored) {}
-                    }
-                } finally {
-                    if (outStream != null) {
-                        try { outStream.close(); } catch (Exception ignored) {}
-                    }
-                    if (conn != null) conn.disconnect();
-                    releaseDownloadWakeLock();
-                }
-
-                final boolean finalSuccess = success;
-                final String finalErrorMsg = errorMsg;
-                final String finalSavedPath = actualSavedPath != null ? actualSavedPath : "";
-
-                activity.runOnUiThread(() -> {
-                    if (webView != null) {
-                        String payload = "{\"success\":" + finalSuccess + ",\"error\":\"" + finalErrorMsg.replace("\"", "\\\"") + "\",\"filePath\":\"" + finalSavedPath.replace("\\", "\\\\").replace("\"", "\\\"") + "\"}";
-                        webView.evaluateJavascript(
-                            "if (window.__nimiyoShareCallbacks && window.__nimiyoShareCallbacks['" + reqId + "']) {" +
-                            "  window.__nimiyoShareCallbacks['" + reqId + "'](" + payload + ");" +
-                            "  delete window.__nimiyoShareCallbacks['" + reqId + "'];" +
-                            "}",
-                            null
-                        );
-                    }
-                });
-            });
+        @JavascriptInterface
+        public void downloadFileAsync(String fileUrl, String filename, String mimeType, boolean isAudio, String reqId, String historyItemJson, boolean isBatch) {
+            Context appContext = activity.getApplicationContext();
+            DownloadService.startDownload(appContext, fileUrl, filename, mimeType, isAudio, reqId, historyItemJson, isBatch);
         }
 
         @JavascriptInterface

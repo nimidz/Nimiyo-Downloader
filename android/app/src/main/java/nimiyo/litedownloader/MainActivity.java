@@ -15,7 +15,8 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(MediaSaverPlugin.class);
         super.onCreate(savedInstanceState);
 
-        // 1. Force Hardware Acceleration on Window
+        // 1. Force Hardware Acceleration on Window & Enable WebView debugging
+        WebView.setWebContentsDebuggingEnabled(true);
         getWindow().setFlags(
             WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
             WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED

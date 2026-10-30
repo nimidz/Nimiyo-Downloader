@@ -907,7 +907,9 @@ body.theme-softui.dark-mode .player-action-pill.primary-action-pill {
 }
 
 body.theme-softui .player-action-pill.active,
-body.theme-softui .player-action-pill.primary-action-pill.active {
+body.theme-softui .player-action-pill.primary-action-pill.active,
+body.theme-softui .player-action-pill[data-active="true"],
+body.theme-softui .player-action-pill.primary-action-pill[data-active="true"] {
   background: var(--soft-primary) !important;
   color: #1A1200 !important;
   border: 1px solid var(--soft-primary) !important;
