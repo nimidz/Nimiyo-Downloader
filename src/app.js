@@ -3364,7 +3364,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   setTimeout(() => {
     checkForAppUpdates(false);
-  }, 2500);
+  }, 600);
 });
 
 // Load Settings from LocalStorage
@@ -4919,17 +4919,21 @@ function setupEventListeners() {
 
   const AppPlugin = window.Capacitor?.Plugins?.App;
   if (AppPlugin && typeof AppPlugin.addListener === "function") {
-    AppPlugin.addListener("appStateChange", ({ isActive }) => {
-      if (isActive) {
-        loadHistory();
-        setTimeout(checkClipboardOnResume, 350);
-        if (window.nimiyoMusicPlayer) window.nimiyoMusicPlayer.autoCheckPermissionOnResume().catch(() => {});
-      }
-    });
-    AppPlugin.addListener("resume", () => {
+    const handleAppResume = () => {
       loadHistory();
       setTimeout(checkClipboardOnResume, 350);
       if (window.nimiyoMusicPlayer) window.nimiyoMusicPlayer.autoCheckPermissionOnResume().catch(() => {});
+      if (typeof checkForAppUpdates === "function" && (Date.now() - lastUpdateCheckTimestamp > 10 * 60 * 1000)) {
+        setTimeout(() => checkForAppUpdates(false), 1200);
+      }
+    };
+    AppPlugin.addListener("appStateChange", ({ isActive }) => {
+      if (isActive) {
+        handleAppResume();
+      }
+    });
+    AppPlugin.addListener("resume", () => {
+      handleAppResume();
     });
   }
 }
@@ -7768,35 +7772,66 @@ function openGitHubReleases() {
   }
 }
 
+let lastUpdateCheckTimestamp = 0;
+
+// Semantic Version Comparator (e.g. "2.3.2" > "2.3.1")
+function isNewerVersion(remoteVer, currentVer) {
+  if (!remoteVer || !currentVer) return false;
+  const parse = v => String(v).replace(/^v/i, "").split(".").map(n => parseInt(n, 10) || 0);
+  const r = parse(remoteVer);
+  const c = parse(currentVer);
+  const len = Math.max(r.length, c.length);
+  for (let i = 0; i < len; i++) {
+    const rVal = r[i] || 0;
+    const cVal = c[i] || 0;
+    if (rVal > cVal) return true;
+    if (rVal < cVal) return false;
+  }
+  return false;
+}
+
 // Check for App Updates from GitHub
 async function checkForAppUpdates(isManual = false) {
   if (isManual) {
     showToast(getTranslation("toastUpdateChecking"), "info");
   }
+  lastUpdateCheckTimestamp = Date.now();
 
   try {
     const fetchUrl = `${UPDATE_MANIFEST_URL}?_nocache=${Date.now()}`;
     let manifestData = null;
 
     if (window.Capacitor?.Plugins?.CapacitorHttp && window.Capacitor?.isNativePlatform()) {
-      const res = await window.Capacitor.Plugins.CapacitorHttp.request({
-        method: "GET",
-        url: fetchUrl,
-        headers: { "Cache-Control": "no-cache" }
-      });
-      manifestData = typeof res.data === "string" ? JSON.parse(res.data) : res.data;
-    } else {
-      const res = await fetch(fetchUrl);
+      try {
+        const res = await window.Capacitor.Plugins.CapacitorHttp.request({
+          method: "GET",
+          url: fetchUrl,
+          headers: { "Cache-Control": "no-cache" }
+        });
+        manifestData = typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+      } catch (nativeHttpErr) {
+        console.warn("[Update] CapacitorHttp failed, attempting web fetch fallback:", nativeHttpErr);
+      }
+    }
+
+    if (!manifestData) {
+      const res = await fetch(fetchUrl, { cache: "no-store" });
+      if (!res.ok) {
+        throw new Error(`Failed to fetch version manifest: status ${res.status}`);
+      }
       manifestData = await res.json();
     }
 
-    if (!manifestData || typeof manifestData.versionCode !== "number") {
+    if (!manifestData || (typeof manifestData.versionCode !== "number" && !manifestData.versionName)) {
       throw new Error("Invalid version manifest format");
     }
 
     latestUpdateInfo = manifestData;
 
-    if (manifestData.versionCode > APP_VERSION_CODE) {
+    const hasNewerCode = typeof manifestData.versionCode === "number" && manifestData.versionCode > APP_VERSION_CODE;
+    const hasNewerName = manifestData.versionName && isNewerVersion(manifestData.versionName, APP_VERSION_NAME);
+
+    if (hasNewerCode || hasNewerName) {
       // Check if update is currently snoozed (only bypass snooze on manual check)
       const snoozeVersion = localStorage.getItem("nimiyo_update_snooze_version");
       const snoozeUntil = Number(localStorage.getItem("nimiyo_update_snooze_until")) || 0;
