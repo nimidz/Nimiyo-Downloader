@@ -23,8 +23,6 @@ android/**/build/
 # Temporary logs & assets
 /*Screenshot*.jpg
 /*.woff2
-/*.png
-!assets/**
 *.log
 logcat*.txt
 check_screen*.png
@@ -38,6 +36,10 @@ ingredientsforAPP/
 scratch/
 edjing_dump/
 search_contoh.js
+
+# Temporary root png images
+/*.png
+!assets/**
 
 # Explicitly track assets directory
 !assets/
