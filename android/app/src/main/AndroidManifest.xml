@@ -38,9 +38,9 @@
             android:exported="true"
             android:taskAffinity="nimiyo.litedownloader.shareactivity"
             android:launchMode="singleInstance"
-            android:documentLaunchMode="always"
-            android:excludeFromRecents="true"
+            android:excludeFromRecents="false"
             android:noHistory="false"
+            android:autoRemoveFromRecents="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
@@ -79,13 +79,6 @@
         <service
             android:name=".MusicPlaybackService"
             android:foregroundServiceType="mediaPlayback"
-            android:stopWithTask="true"
-            android:exported="false" />
-
-        <!-- Background Download Resilient Foreground Service -->
-        <service
-            android:name=".DownloadService"
-            android:foregroundServiceType="dataSync"
             android:stopWithTask="false"
             android:exported="false" />
     </application>
@@ -97,9 +90,9 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
+    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />

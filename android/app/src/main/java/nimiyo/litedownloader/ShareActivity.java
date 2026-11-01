@@ -2,6 +2,12 @@ package nimiyo.litedownloader;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.ComponentName;
+import android.app.DownloadManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ClipData;
@@ -19,7 +25,6 @@ import android.util.Base64;
 import android.database.Cursor;
 import android.media.MediaScannerConnection;
 import android.os.PowerManager;
-import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
@@ -57,53 +62,183 @@ public class ShareActivity extends AppCompatActivity {
 
     private WebView webView;
     private String extractedUrl = "";
-    private static final String CHANNEL_ID = "nimiyo_download_channel";
+    private static final String CHANNEL_ID = "nimiyo_quicksave_pinned_v1";
     private static final int NOTIFICATION_ID = 8802;
+    private BroadcastReceiver downloadCompleteReceiver = null;
+    private final java.util.concurrent.ConcurrentHashMap<Long, String> activeDownloadHistories = new java.util.concurrent.ConcurrentHashMap<>();
+    private final java.util.Set<Long> activeDownloadIds = java.util.concurrent.ConcurrentHashMap.newKeySet();
+    private final java.util.concurrent.ConcurrentHashMap<Long, Integer> activeProgressMap = new java.util.concurrent.ConcurrentHashMap<>();
     private final ExecutorService httpExecutor = Executors.newFixedThreadPool(4);
-    private PowerManager.WakeLock wakeLock = null;
-    private WifiManager.WifiLock wifiLock = null;
-    private final java.util.concurrent.atomic.AtomicInteger activeDownloads = new java.util.concurrent.atomic.AtomicInteger(0);
+    private static PowerManager.WakeLock downloadWakeLock = null;
+    private static final java.util.concurrent.atomic.AtomicInteger activeDownloads = new java.util.concurrent.atomic.AtomicInteger(0);
+    private static final java.util.concurrent.atomic.AtomicInteger sessionTotalDownloads = new java.util.concurrent.atomic.AtomicInteger(0);
+    private static final java.util.concurrent.atomic.AtomicInteger sessionCompletedDownloads = new java.util.concurrent.atomic.AtomicInteger(0);
     private volatile boolean isDismissRequested = false;
-    private volatile boolean isBatchActive = false;
+    private static volatile boolean isBatchActive = false;
+    private static volatile boolean isClosingScheduled = false;
 
-    private synchronized void acquireDownloadWakeLock() {
+    private static synchronized void acquireDownloadWakeLock(Context context) {
         try {
-            Context appContext = getApplicationContext();
-            if (wakeLock == null) {
+            Context appContext = context.getApplicationContext();
+            if (downloadWakeLock == null) {
                 PowerManager pm = (PowerManager) appContext.getSystemService(Context.POWER_SERVICE);
                 if (pm != null) {
-                    wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Nimiyo:ShareDownloadWakeLock");
-                    wakeLock.setReferenceCounted(false);
+                    downloadWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Nimiyo:ShareDownloadWakeLock");
+                    downloadWakeLock.setReferenceCounted(false);
                 }
             }
-            if (wakeLock != null && !wakeLock.isHeld()) {
-                wakeLock.acquire(20 * 60 * 1000L); // 20 min max
-            }
-            if (wifiLock == null) {
-                WifiManager wm = (WifiManager) appContext.getSystemService(Context.WIFI_SERVICE);
-                if (wm != null) {
-                    int mode = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? WifiManager.WIFI_MODE_FULL_HIGH_PERF : WifiManager.WIFI_MODE_FULL;
-                    wifiLock = wm.createWifiLock(mode, "Nimiyo:ShareWifiLock");
-                    wifiLock.setReferenceCounted(false);
-                }
-            }
-            if (wifiLock != null && !wifiLock.isHeld()) {
-                wifiLock.acquire();
+            if (downloadWakeLock != null && !downloadWakeLock.isHeld()) {
+                downloadWakeLock.acquire(45 * 60 * 1000L); // 45 min max safety timeout
             }
         } catch (Exception ignored) {}
     }
 
-    private synchronized void releaseDownloadWakeLock() {
+    private static synchronized void releaseDownloadWakeLock() {
         try {
             if (activeDownloads.get() <= 0 && !isBatchActive) {
-                if (wakeLock != null && wakeLock.isHeld()) {
-                    wakeLock.release();
-                }
-                if (wifiLock != null && wifiLock.isHeld()) {
-                    wifiLock.release();
+                if (downloadWakeLock != null && downloadWakeLock.isHeld()) {
+                    downloadWakeLock.release();
                 }
             }
         } catch (Exception ignored) {}
+    }
+
+    public void updateDownloadNotification(int completedCount, int totalCount, int percent, boolean isCompleted) {
+        try {
+            ensureNotificationChannel();
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if (manager == null) return;
+
+            if (isCompleted || (!isBatchActive && totalCount > 0 && completedCount >= totalCount && activeDownloads.get() <= 0)) {
+                manager.cancel(NOTIFICATION_ID);
+                return;
+            }
+
+            if (!isBatchActive && totalCount <= 0 && activeDownloads.get() <= 0) {
+                manager.cancel(NOTIFICATION_ID);
+                return;
+            }
+
+            Intent intent = new Intent(this, ShareActivity.class);
+            intent.setAction(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.putExtra("from_notification", true);
+
+            int pendingFlags = PendingIntent.FLAG_UPDATE_CURRENT;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                pendingFlags |= PendingIntent.FLAG_IMMUTABLE;
+            }
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, pendingFlags);
+
+            String title = "Nimiyo Quicksave";
+            String text = "(" + completedCount + "/" + totalCount + ") Downloading - Jangan hapus dari Riwayat app.";
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setSmallIcon(android.R.drawable.stat_sys_download)
+                .setOngoing(true)
+                .setAutoCancel(false)
+                .setOnlyAlertOnce(true)
+                .setSilent(true)
+                .setShowWhen(false)
+                .setCategory(NotificationCompat.CATEGORY_PROGRESS)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setContentIntent(pendingIntent);
+
+            if (totalCount > 0) {
+                int overallPercent = Math.min(Math.max(percent, 0), 100);
+                builder.setProgress(100, overallPercent, false);
+            } else {
+                builder.setProgress(0, 0, true);
+            }
+
+            manager.notify(NOTIFICATION_ID, builder.build());
+        } catch (Exception ignored) {}
+    }
+
+    private void cleanAndFinishShareActivity() {
+        try {
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if (manager != null) {
+                manager.cancel(NOTIFICATION_ID);
+            }
+        } catch (Exception ignored) {}
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+                if (am != null) {
+                    List<ActivityManager.AppTask> appTasks = am.getAppTasks();
+                    if (appTasks != null) {
+                        for (ActivityManager.AppTask appTask : appTasks) {
+                            try {
+                                ActivityManager.RecentTaskInfo info = appTask.getTaskInfo();
+                                if (info != null && info.baseIntent != null && info.baseIntent.getComponent() != null) {
+                                    String cls = info.baseIntent.getComponent().getClassName();
+                                    if (cls != null && cls.contains("ShareActivity")) {
+                                        appTask.finishAndRemoveTask();
+                                    }
+                                }
+                            } catch (Exception ignored) {}
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                finishAndRemoveTask();
+            } else {
+                finish();
+            }
+        } catch (Exception ignored) {}
+
+        try {
+            overridePendingTransition(0, android.R.anim.fade_out);
+        } catch (Exception ignored) {}
+    }
+
+    private void scheduleAutoCloseAndCleanTask() {
+        if (isClosingScheduled) return;
+        isClosingScheduled = true;
+
+        runOnUiThread(() -> {
+            try {
+                NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                if (manager != null) manager.cancel(NOTIFICATION_ID);
+            } catch (Exception ignored) {}
+
+            String lang = "en";
+            try {
+                android.content.SharedPreferences prefs = getSharedPreferences("nimiyo_app_settings_prefs", Context.MODE_PRIVATE);
+                String settingsJson = prefs.getString("settings_json", "{}");
+                JSONObject obj = new JSONObject(settingsJson);
+                lang = obj.optString("appLanguage", "en");
+            } catch (Exception ignored) {}
+
+            int total = sessionTotalDownloads.get();
+            if (total <= 0) total = sessionCompletedDownloads.get();
+            if (total > 0) {
+                String msg;
+                if ("id".equals(lang)) {
+                    msg = total + " Berhasil tersimpan, App ditutup.";
+                } else if ("zh".equals(lang)) {
+                    msg = total + " 个文件保存成功，正在关闭应用。";
+                } else if ("ja".equals(lang)) {
+                    msg = total + " 件の保存が完了しました。アプリを終了します。";
+                } else {
+                    msg = total + " Successfully saved, App closing.";
+                }
+                Toast.makeText(ShareActivity.this, msg, Toast.LENGTH_SHORT).show();
+            }
+
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                cleanAndFinishShareActivity();
+            }, 1600);
+        });
     }
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
@@ -174,43 +309,26 @@ public class ShareActivity extends AppCompatActivity {
             loadUrl += "&accentColor=" + Uri.encode(accentColor.trim());
         }
 
-        DownloadService.setListener(new DownloadService.DownloadListener() {
-            @Override
-            public void onProgress(String reqId, int percent) {
-                runOnUiThread(() -> {
-                    if (webView != null) {
-                        webView.evaluateJavascript("if (window.__onNativeDownloadProgress) { window.__onNativeDownloadProgress('" + reqId + "', " + percent + "); }", null);
-                    }
-                });
-            }
-
-            @Override
-            public void onComplete(String reqId, boolean success, String error, String filePath) {
-                runOnUiThread(() -> {
-                    if (webView != null) {
-                        String safeErr = error != null ? error.replace("\"", "\\\"") : "";
-                        String safePath = filePath != null ? filePath.replace("\\", "\\\\").replace("\"", "\\\"") : "";
-                        String payload = "{\"success\":" + success + ",\"error\":\"" + safeErr + "\",\"filePath\":\"" + safePath + "\"}";
-                        webView.evaluateJavascript(
-                            "if (window.__nimiyoShareCallbacks && window.__nimiyoShareCallbacks['" + reqId + "']) {" +
-                            "  window.__nimiyoShareCallbacks['" + reqId + "'](" + payload + ");" +
-                            "  delete window.__nimiyoShareCallbacks['" + reqId + "'];" +
-                            "}",
-                            null
-                        );
-                    }
-                });
-            }
-        });
-
+        registerDownloadCompleteReceiver();
         webView.loadUrl(loadUrl);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (downloadCompleteReceiver != null) {
+            try {
+                unregisterReceiver(downloadCompleteReceiver);
+            } catch (Exception ignored) {}
+            downloadCompleteReceiver = null;
+        }
+        try {
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if (manager != null) {
+                manager.cancel(NOTIFICATION_ID);
+            }
+        } catch (Exception ignored) {}
         isBatchActive = false;
-        DownloadService.setListener(null);
         releaseDownloadWakeLock();
     }
 
@@ -218,8 +336,17 @@ public class ShareActivity extends AppCompatActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        handleIntent(intent);
-        dispatchUrlToWebview();
+        isDismissRequested = false;
+        if (intent != null && intent.getBooleanExtra("from_notification", false)) {
+            if (webView != null) {
+                webView.evaluateJavascript("if (window.onWindowBroughtToFront) { window.onWindowBroughtToFront(); }", null);
+            }
+            return;
+        }
+        if (intent != null && Intent.ACTION_SEND.equals(intent.getAction())) {
+            handleIntent(intent);
+            dispatchUrlToWebview();
+        }
     }
 
     private void dispatchUrlToWebview() {
@@ -289,10 +416,9 @@ public class ShareActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (DownloadService.hasActiveDownloads() || activeDownloads.get() > 0 || isBatchActive) {
+        if (activeDownloads.get() > 0 || isBatchActive) {
             isDismissRequested = true;
             moveTaskToBack(true);
-            Toast.makeText(this, "Mengunduh di latar belakang...", Toast.LENGTH_SHORT).show();
             return;
         }
         if (webView != null) {
@@ -304,15 +430,70 @@ public class ShareActivity extends AppCompatActivity {
 
     public void dismissDialog() {
         runOnUiThread(() -> {
-            if (DownloadService.hasActiveDownloads() || activeDownloads.get() > 0 || isBatchActive) {
+            if (activeDownloads.get() > 0 || isBatchActive) {
                 isDismissRequested = true;
                 moveTaskToBack(true);
-                Toast.makeText(this, "Mengunduh di latar belakang...", Toast.LENGTH_SHORT).show();
                 return;
             }
-            finish();
-            overridePendingTransition(0, android.R.anim.fade_out);
+            cleanAndFinishShareActivity();
         });
+    }
+
+    private void registerDownloadCompleteReceiver() {
+        if (downloadCompleteReceiver != null) return;
+        downloadCompleteReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(intent.getAction())) {
+                    long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+                    if (id != -1) {
+                        String historyJson = activeDownloadHistories.remove(id);
+                        if (historyJson != null && !historyJson.trim().isEmpty()) {
+                            saveHistoryItemDirect(context, historyJson);
+                        }
+                    }
+                }
+            }
+        };
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(downloadCompleteReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), Context.RECEIVER_NOT_EXPORTED);
+            } else {
+                registerReceiver(downloadCompleteReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+            }
+        } catch (Exception ignored) {}
+    }
+
+    private static void saveHistoryItemDirect(Context context, String itemJson) {
+        try {
+            if (itemJson != null && !itemJson.trim().isEmpty()) {
+                android.content.SharedPreferences prefs = context.getSharedPreferences("nimiyo_app_history_prefs", Context.MODE_PRIVATE);
+                String current = prefs.getString("pending_history_list", "[]");
+                org.json.JSONArray arr;
+                try {
+                    arr = new org.json.JSONArray(current);
+                } catch (Exception e) {
+                    arr = new org.json.JSONArray();
+                }
+                org.json.JSONObject newObj = new org.json.JSONObject(itemJson);
+                String newFilename = newObj.optString("filename", "").trim().toLowerCase();
+                boolean exists = false;
+                for (int i = 0; i < arr.length(); i++) {
+                    org.json.JSONObject ex = arr.optJSONObject(i);
+                    if (ex != null) {
+                        String exFn = ex.optString("filename", "").trim().toLowerCase();
+                        if (!newFilename.isEmpty() && newFilename.equals(exFn)) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                }
+                if (!exists) {
+                    arr.put(newObj);
+                    prefs.edit().putString("pending_history_list", arr.toString()).apply();
+                }
+            }
+        } catch (Exception ignored) {}
     }
 
     private void ensureNotificationChannel() {
@@ -323,15 +504,161 @@ public class ShareActivity extends AppCompatActivity {
                 if (channel == null) {
                     NotificationChannel newChannel = new NotificationChannel(
                         CHANNEL_ID,
-                        "Nimiyo Downloads",
-                        NotificationManager.IMPORTANCE_LOW
+                        "Nimiyo QuickSave",
+                        NotificationManager.IMPORTANCE_DEFAULT
                     );
-                    newChannel.setDescription("Status unduhan berkas Nimiyo");
+                    newChannel.setDescription("Status unduhan berkas Nimiyo QuickSave");
                     newChannel.setShowBadge(false);
+                    newChannel.setSound(null, null);
+                    newChannel.enableVibration(false);
                     manager.createNotificationChannel(newChannel);
                 }
             }
         }
+    }
+
+    private void trackDownloadTask(long downloadId, String reqId, String filename, String mimeType, String subFolder, String historyItemJson, boolean isBatch) {
+        if (historyItemJson != null && !historyItemJson.trim().isEmpty()) {
+            activeDownloadHistories.put(downloadId, historyItemJson);
+        }
+
+        httpExecutor.execute(() -> {
+            DownloadManager dm = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+            boolean downloading = true;
+            boolean success = false;
+            String errorMsg = "";
+            String savedPath = "";
+
+            while (downloading) {
+                try {
+                    Thread.sleep(400);
+                } catch (InterruptedException e) {
+                    break;
+                }
+
+                DownloadManager.Query q = new DownloadManager.Query();
+                q.setFilterById(downloadId);
+                try (Cursor c = dm.query(q)) {
+                    if (c != null && c.moveToFirst()) {
+                        int statusIdx = c.getColumnIndex(DownloadManager.COLUMN_STATUS);
+                        int status = c.getInt(statusIdx);
+
+                        int bytesDownloadedIdx = c.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR);
+                        int bytesTotalIdx = c.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES);
+
+                        long bytesDownloaded = bytesDownloadedIdx != -1 ? c.getLong(bytesDownloadedIdx) : 0;
+                        long bytesTotal = bytesTotalIdx != -1 ? c.getLong(bytesTotalIdx) : 0;
+
+                        if (bytesTotal > 0) {
+                            int percent = (int) ((bytesDownloaded * 100) / bytesTotal);
+                            final int curPercent = Math.min(Math.max(percent, 0), 99);
+                            activeProgressMap.put(downloadId, curPercent);
+
+                            int total = sessionTotalDownloads.get();
+                            int completed = sessionCompletedDownloads.get();
+                            if (total <= 0) total = Math.max(1, activeDownloads.get());
+                            int sumProgress = completed * 100;
+                            for (Integer p : activeProgressMap.values()) {
+                                if (p != null) sumProgress += p;
+                            }
+                            int avg = Math.min(99, sumProgress / Math.max(1, total));
+                            updateDownloadNotification(completed, total, avg, false);
+
+                            runOnUiThread(() -> {
+                                if (webView != null) {
+                                    webView.evaluateJavascript("if (window.__onNativeDownloadProgress) { window.__onNativeDownloadProgress('" + reqId + "', " + curPercent + "); }", null);
+                                }
+                            });
+                        }
+
+                        if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                            downloading = false;
+                            success = true;
+
+                            int uriIdx = c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI);
+                            if (uriIdx != -1) {
+                                String localUriStr = c.getString(uriIdx);
+                                if (localUriStr != null) {
+                                    try {
+                                        Uri lUri = Uri.parse(localUriStr);
+                                        savedPath = lUri.getPath();
+                                    } catch (Exception ignored) {}
+                                }
+                            }
+                            if (savedPath == null || savedPath.isEmpty()) {
+                                File pubDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                                File target = new File(pubDir, "Nimiyo/" + subFolder + "/" + filename);
+                                savedPath = target.getAbsolutePath();
+                            }
+
+                            if (savedPath != null && !savedPath.isEmpty()) {
+                                MediaScannerConnection.scanFile(
+                                    ShareActivity.this,
+                                    new String[]{savedPath},
+                                    new String[]{mimeType},
+                                    null
+                                );
+                            }
+
+                            if (historyItemJson != null && !historyItemJson.trim().isEmpty()) {
+                                saveHistoryItemDirect(ShareActivity.this, historyItemJson);
+                            }
+
+                        } else if (status == DownloadManager.STATUS_FAILED) {
+                            downloading = false;
+                            int reasonIdx = c.getColumnIndex(DownloadManager.COLUMN_REASON);
+                            int reason = reasonIdx != -1 ? c.getInt(reasonIdx) : -1;
+                            errorMsg = "DownloadManager error code: " + reason;
+                        }
+                    } else {
+                        downloading = false;
+                    }
+                } catch (Exception e) {
+                    // Query error, will retry in next loop
+                }
+            }
+
+            final boolean finalSuccess = success;
+            final String finalErrorMsg = errorMsg;
+            final String finalSavedPath = savedPath;
+
+            runOnUiThread(() -> {
+                if (webView != null) {
+                    String payload = "{\"success\":" + finalSuccess + ",\"error\":\"" + finalErrorMsg.replace("\"", "\\\"") + "\",\"filePath\":\"" + finalSavedPath.replace("\\", "\\\\").replace("\"", "\\\"") + "\"}";
+                    webView.evaluateJavascript(
+                        "if (window.__nimiyoShareCallbacks && window.__nimiyoShareCallbacks['" + reqId + "']) {" +
+                        "  window.__nimiyoShareCallbacks['" + reqId + "'](" + payload + ");" +
+                        "  delete window.__nimiyoShareCallbacks['" + reqId + "'];" +
+                        "}",
+                        null
+                    );
+                }
+            });
+
+            activeProgressMap.remove(downloadId);
+            activeDownloadIds.remove(downloadId);
+            int completed = sessionCompletedDownloads.incrementAndGet();
+            int remaining = activeDownloads.decrementAndGet();
+            releaseDownloadWakeLock();
+
+            int total = sessionTotalDownloads.get();
+            if (total <= 0) total = completed;
+
+            if (remaining <= 0 && !isBatchActive) {
+                updateDownloadNotification(completed, total, 100, true);
+                scheduleAutoCloseAndCleanTask();
+            } else if (isBatchActive && remaining <= 0 && completed >= total && total > 0) {
+                updateDownloadNotification(completed, total, 100, true);
+                scheduleAutoCloseAndCleanTask();
+            } else {
+                int sumProgress = completed * 100;
+                for (Integer p : activeProgressMap.values()) {
+                    if (p != null) sumProgress += p;
+                }
+                int avg = Math.min(99, sumProgress / Math.max(1, total));
+                updateDownloadNotification(completed, total, avg, false);
+            }
+        });
     }
 
     private Map<String, String> getDownloadHeaders(String url) {
@@ -379,8 +706,8 @@ public class ShareActivity extends AppCompatActivity {
             URL url = new URL(currentUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod(method);
-            conn.setConnectTimeout(45000);
-            conn.setReadTimeout(45000);
+            conn.setConnectTimeout(30000);
+            conn.setReadTimeout(60000);
             conn.setInstanceFollowRedirects(false); // Manually handle cross-protocol/domain redirects
 
             // Default headers
@@ -430,9 +757,9 @@ public class ShareActivity extends AppCompatActivity {
 
     // Native Bridge for Javascript
     public class NimiyoShareBridge {
-        private final Activity activity;
+        private final ShareActivity activity;
 
-        public NimiyoShareBridge(Activity activity) {
+        public NimiyoShareBridge(ShareActivity activity) {
             this.activity = activity;
         }
 
@@ -454,6 +781,55 @@ public class ShareActivity extends AppCompatActivity {
         @JavascriptInterface
         public void dismiss() {
             dismissDialog();
+        }
+
+        @JavascriptInterface
+        public void finishAndClose() {
+            scheduleAutoCloseAndCleanTask();
+        }
+
+        @JavascriptInterface
+        public void cancelAllDownloads() {
+            isClosingScheduled = true;
+            activeProgressMap.clear();
+            sessionTotalDownloads.set(0);
+            sessionCompletedDownloads.set(0);
+            httpExecutor.execute(() -> {
+                try {
+                    DownloadManager dm = (DownloadManager) activity.getSystemService(Context.DOWNLOAD_SERVICE);
+                    if (dm != null && !activeDownloadIds.isEmpty()) {
+                        long[] ids = new long[activeDownloadIds.size()];
+                        int idx = 0;
+                        for (Long id : activeDownloadIds) {
+                            ids[idx++] = id;
+                        }
+                        dm.remove(ids);
+                        activeDownloadIds.clear();
+                    }
+                } catch (Exception ignored) {}
+
+                try {
+                    NotificationManager manager = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
+                    if (manager != null) {
+                        manager.cancel(NOTIFICATION_ID);
+                    }
+                } catch (Exception ignored) {}
+
+                activeDownloads.set(0);
+                isBatchActive = false;
+                releaseDownloadWakeLock();
+
+                activity.runOnUiThread(() -> {
+                    activity.cleanAndFinishShareActivity();
+                });
+            });
+        }
+
+        @JavascriptInterface
+        public void updateQuickSaveNotification(int completedCount, int totalCount, int percent, boolean isCompleted) {
+            activity.runOnUiThread(() -> {
+                activity.updateDownloadNotification(completedCount, totalCount, percent, isCompleted);
+            });
         }
 
         @JavascriptInterface
@@ -500,15 +876,22 @@ public class ShareActivity extends AppCompatActivity {
         @JavascriptInterface
         public void setBatchActive(boolean active, int totalCount) {
             isBatchActive = active;
+            Context appContext = activity.getApplicationContext();
             if (active) {
-                acquireDownloadWakeLock();
+                isClosingScheduled = false;
+                if (totalCount > 0) {
+                    sessionTotalDownloads.set(totalCount);
+                }
+                sessionCompletedDownloads.set(0);
+                activeProgressMap.clear();
+                acquireDownloadWakeLock(activity);
+                updateDownloadNotification(0, totalCount, 0, false);
             } else {
                 releaseDownloadWakeLock();
-                if (isDismissRequested && activeDownloads.get() <= 0) {
-                    activity.runOnUiThread(() -> {
-                        activity.finish();
-                        activity.overridePendingTransition(0, android.R.anim.fade_out);
-                    });
+                int total = sessionTotalDownloads.get();
+                int completed = sessionCompletedDownloads.get();
+                if (activeDownloads.get() <= 0 && completed >= total && total > 0) {
+                    scheduleAutoCloseAndCleanTask();
                 }
             }
         }
@@ -520,16 +903,17 @@ public class ShareActivity extends AppCompatActivity {
 
         @JavascriptInterface
         public void notifyBatchComplete(int count, String message) {
+            if (downloadCompleteReceiver != null) {
+                try {
+                    unregisterReceiver(downloadCompleteReceiver);
+                } catch (Exception ignored) {}
+                downloadCompleteReceiver = null;
+            }
             isBatchActive = false;
-            showNotification("Nimiyo Downloader", message, 100, 100, true);
-            activity.runOnUiThread(() -> {
-                Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
-                if (isDismissRequested && activeDownloads.get() <= 0) {
-                    activity.finish();
-                    activity.overridePendingTransition(0, android.R.anim.fade_out);
-                }
-            });
             releaseDownloadWakeLock();
+            if (activeDownloads.get() <= 0) {
+                scheduleAutoCloseAndCleanTask();
+            }
         }
 
         @JavascriptInterface
@@ -539,66 +923,21 @@ public class ShareActivity extends AppCompatActivity {
 
         @JavascriptInterface
         public void showNotification(String title, String message, int progress, int max, boolean isCompleted) {
+            if (activeDownloads.get() > 0) return;
             try {
-                ensureNotificationChannel();
                 NotificationManager manager = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
-                if (manager != null) {
-                    NotificationCompat.Builder builder = new NotificationCompat.Builder(activity, CHANNEL_ID)
-                        .setContentTitle(title)
-                        .setContentText(message)
-                        .setSmallIcon(isCompleted ? android.R.drawable.stat_sys_download_done : android.R.drawable.stat_sys_download)
-                        .setOngoing(!isCompleted)
-                        .setAutoCancel(isCompleted)
-                        .setOnlyAlertOnce(true)
-                        .setPriority(isCompleted ? NotificationCompat.PRIORITY_DEFAULT : NotificationCompat.PRIORITY_LOW);
-
-                    if (!isCompleted) {
-                        if (max > 0) {
-                            builder.setProgress(max, progress, false);
-                        } else {
-                            builder.setProgress(0, 0, true);
-                        }
-                    } else {
-                        builder.setProgress(0, 0, false);
-                    }
-
-                    manager.notify(NOTIFICATION_ID, builder.build());
+                if (manager != null && isCompleted) {
+                    manager.cancel(NOTIFICATION_ID);
                 }
             } catch (Exception ignored) {}
         }
 
         @JavascriptInterface
         public void showBatchNotification(String title, String message, int current, int total, int itemPercent, boolean isCompleted) {
-            try {
-                ensureNotificationChannel();
-                NotificationManager manager = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
-                if (manager != null) {
-                    NotificationCompat.Builder builder = new NotificationCompat.Builder(activity, CHANNEL_ID)
-                        .setContentTitle(title)
-                        .setContentText(message)
-                        .setSmallIcon(isCompleted ? android.R.drawable.stat_sys_download_done : android.R.drawable.stat_sys_download)
-                        .setOngoing(!isCompleted)
-                        .setAutoCancel(isCompleted)
-                        .setOnlyAlertOnce(true)
-                        .setPriority(isCompleted ? NotificationCompat.PRIORITY_DEFAULT : NotificationCompat.PRIORITY_LOW);
-
-                    if (!isCompleted) {
-                        if (total > 0) {
-                            int overall = (int) Math.min(Math.max((((current - 1) * 100) + itemPercent) / total, 0), 99);
-                            builder.setProgress(100, overall, false);
-                        } else {
-                            builder.setProgress(0, 0, true);
-                        }
-                    } else {
-                        builder.setProgress(0, 0, false);
-                    }
-
-                    manager.notify(NOTIFICATION_ID, builder.build());
-                }
-            } catch (Exception ignored) {}
+            // Handled natively by updateDownloadNotification
         }
 
-        // Native Direct Stream Downloader with Full Cross-Protocol Redirect Support
+        // OS-Level Native DownloadManager Implementation (100% Background Resilient & Play Protect Safe)
         @JavascriptInterface
         public void downloadFileAsync(String fileUrl, String filename, String mimeType, boolean isAudio, String reqId) {
             downloadFileAsync(fileUrl, filename, mimeType, isAudio, reqId, "", false);
@@ -611,8 +950,74 @@ public class ShareActivity extends AppCompatActivity {
 
         @JavascriptInterface
         public void downloadFileAsync(String fileUrl, String filename, String mimeType, boolean isAudio, String reqId, String historyItemJson, boolean isBatch) {
-            Context appContext = activity.getApplicationContext();
-            DownloadService.startDownload(appContext, fileUrl, filename, mimeType, isAudio, reqId, historyItemJson, isBatch);
+            httpExecutor.execute(() -> {
+                activeDownloads.incrementAndGet();
+                if (!isBatch && sessionTotalDownloads.get() <= 0) {
+                    sessionTotalDownloads.set(1);
+                }
+                acquireDownloadWakeLock(activity);
+
+                String lowerFileName = filename.toLowerCase();
+                String subFolder;
+                if (isAudio || lowerFileName.endsWith(".mp3") || lowerFileName.endsWith(".m4a") || lowerFileName.endsWith(".wav") || lowerFileName.endsWith(".flac")) {
+                    subFolder = "AudioYo";
+                } else if (lowerFileName.endsWith(".jpg") || lowerFileName.endsWith(".jpeg") || lowerFileName.endsWith(".png") || lowerFileName.endsWith(".webp")) {
+                    subFolder = "ImageYo";
+                } else {
+                    subFolder = "VideoYo";
+                }
+
+                try {
+                    DownloadManager dm = (DownloadManager) activity.getSystemService(Context.DOWNLOAD_SERVICE);
+                    if (dm == null) {
+                        throw new Exception("Layanan DownloadManager sistem tidak tersedia");
+                    }
+
+                    Uri downloadUri = Uri.parse(fileUrl);
+                    DownloadManager.Request request = new DownloadManager.Request(downloadUri);
+
+                    String relativeDir = "Nimiyo/" + subFolder;
+                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, relativeDir + "/" + filename);
+                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN);
+                    request.setTitle(filename);
+                    request.setDescription("Mengunduh dengan Nimiyo Quick Save");
+                    if (mimeType != null && !mimeType.isEmpty()) {
+                        request.setMimeType(mimeType);
+                    }
+                    request.setAllowedOverMetered(true);
+                    request.setAllowedOverRoaming(true);
+
+                    Map<String, String> headers = getDownloadHeaders(fileUrl);
+                    for (Map.Entry<String, String> entry : headers.entrySet()) {
+                        try {
+                            request.addRequestHeader(entry.getKey(), entry.getValue());
+                        } catch (Exception ignored) {}
+                    }
+
+                    long downloadId = dm.enqueue(request);
+                    activeDownloadIds.add(downloadId);
+
+                    trackDownloadTask(downloadId, reqId, filename, mimeType, subFolder, historyItemJson, isBatch);
+
+                } catch (Exception e) {
+                    final String errorMsg = e.getMessage() != null ? e.getMessage() : "Gagal memulai unduhan";
+                    activeDownloads.decrementAndGet();
+                    releaseDownloadWakeLock();
+
+                    activity.runOnUiThread(() -> {
+                        if (webView != null) {
+                            String payload = "{\"success\":false,\"error\":\"" + errorMsg.replace("\"", "\\\"") + "\",\"filePath\":\"\"}";
+                            webView.evaluateJavascript(
+                                "if (window.__nimiyoShareCallbacks && window.__nimiyoShareCallbacks['" + reqId + "']) {" +
+                                "  window.__nimiyoShareCallbacks['" + reqId + "'](" + payload + ");" +
+                                "  delete window.__nimiyoShareCallbacks['" + reqId + "'];" +
+                                "}",
+                                null
+                            );
+                        }
+                    });
+                }
+            });
         }
 
         @JavascriptInterface

@@ -326,7 +326,7 @@ const translations = {
     btnResetSettings: "RESET ALL SETTINGS TO DEFAULT",
     groupAbout: "About & Help",
     menuAboutDesc: "Version, Info & Developer",
-    aboutVersion: "Version 2.3.2 (Lite)",
+    aboutVersion: "Version 2.4.0 (Lite)",
     aboutDesc: "A premium, modern, and lightweight media downloader engine.",
     aboutThanks: "Thanks to :",
     aboutThanksDesc: "for scrapers media engine",
@@ -357,11 +357,13 @@ const translations = {
     toastDownloadStart: "Starting download of {filename}...",
     toastDownloadSuccess: "File saved successfully!",
     toastDownloadFail: "Download failed after multiple attempts.",
+    toastSwitchServer: "Switched to {server}",
     toastDownloadFailSwitchServer: "Download Failed - Switching Server to {server}...",
     toastDownloadFailManualServer: "Download Failed - Switch Server",
     toastDownloadCancelled: "Download cancelled by user.",
     toastDownloadCancelledItem: "Download cancelled: {title}",
     toastBatchCompleted: "Downloads completed! ({count} items saved to Downloads/Nimiyo/)",
+    dontCloseRecent: "Do not close App from recent history",
     toastHistoryCleared: "History cleared successfully.",
     toastSettingsSaved: "Settings saved.",
     toastCacheCleared: "App cache cleared successfully.",
@@ -1103,7 +1105,7 @@ const translations = {
     btnResetSettings: "KEMBALIKAN SEMUA SETELAN KE DEFAULT",
     groupAbout: "Tentang & Bantuan",
     menuAboutDesc: "Versi, Info & Pengembang",
-    aboutVersion: "Versi 2.3.2 (Lite)",
+    aboutVersion: "Versi 2.4.0 (Lite)",
     aboutDesc: "Mesin pengunduh media premium, modern, dan ringan.",
     aboutThanks: "Terima kasih kepada :",
     aboutThanksDesc: "for scrapers media engine",
@@ -1134,11 +1136,13 @@ const translations = {
     toastDownloadStart: "Memulai unduhan {filename}...",
     toastDownloadSuccess: "Berkas berhasil disimpan!",
     toastDownloadFail: "Unduhan gagal setelah beberapa kali mencoba.",
+    toastSwitchServer: "Beralih ke {server}",
     toastDownloadFailSwitchServer: "Download Gagal - Ganti Server ke {server}...",
     toastDownloadFailManualServer: "Download Gagal - Ganti Server",
     toastDownloadCancelled: "Unduhan dibatalkan oleh pengguna.",
     toastDownloadCancelledItem: "Unduhan dibatalkan: {title}",
     toastBatchCompleted: "Unduhan selesai! ({count} item tersimpan di Downloads/Nimiyo/)",
+    dontCloseRecent: "Jangan tutup App di riwayat",
     toastHistoryCleared: "Riwayat berhasil dihapus.",
     toastSettingsSaved: "Setelan berhasil disimpan.",
     toastCacheCleared: "Cache aplikasi berhasil dibersihkan.",
@@ -1879,7 +1883,7 @@ const translations = {
     btnResetSettings: "恢复所有设置到默认值",
     groupAbout: "关于与帮助",
     menuAboutDesc: "版本信息、开源与开发团队",
-    aboutVersion: "版本 2.3.2 (Lite)",
+    aboutVersion: "版本 2.4.0 (Lite)",
     aboutDesc: "高级、现代且轻量级的媒体下载引擎。",
     aboutThanks: "致谢 :",
     aboutThanksDesc: "for scrapers media engine",
@@ -1910,11 +1914,13 @@ const translations = {
     toastDownloadStart: "开始下载 {filename}...",
     toastDownloadSuccess: "文件保存成功！",
     toastDownloadFail: "多次尝试后下载失败。",
+    toastSwitchServer: "已切换至 {server}",
     toastDownloadFailSwitchServer: "下载失败 - 正在自动切换至服务器 {server}...",
     toastDownloadFailManualServer: "下载失败 - 请切换服务器",
     toastDownloadCancelled: "用户已取消下载。",
     toastDownloadCancelledItem: "已取消下载：{title}",
     toastBatchCompleted: "下载完成！（已保存 {count} 个项目至 Downloads/Nimiyo/）",
+    dontCloseRecent: "请勿从后台历史记录中关闭应用",
     toastHistoryCleared: "历史记录已清空。",
     toastSettingsSaved: "设置已保存。",
     toastCacheCleared: "应用缓存已清空。",
@@ -2657,7 +2663,7 @@ const translations = {
     btnResetSettings: "すべての設定を初期値に戻す",
     groupAbout: "アプリについてとヘルプ",
     menuAboutDesc: "バージョン、情報と開発チーム",
-    aboutVersion: "バージョン 2.3.2 (Lite)",
+    aboutVersion: "バージョン 2.4.0 (Lite)",
     aboutDesc: "プレミアムでモダン、軽量なメディアダウンローダー。",
     aboutThanks: "スペシャルサンクス :",
     aboutThanksDesc: "for scrapers media engine",
@@ -2688,11 +2694,13 @@ const translations = {
     toastDownloadStart: "{filename} のダウンロードを開始中...",
     toastDownloadSuccess: "ファイルを正常に保存しました！",
     toastDownloadFail: "複数回試行後、ダウンロードに失敗しました。",
+    toastSwitchServer: "{server} に切り替えました",
     toastDownloadFailSwitchServer: "ダウンロード失敗 - サーバー {server} に切り替えています...",
     toastDownloadFailManualServer: "ダウンロード失敗 - サーバーを変更してください",
     toastDownloadCancelled: "ユーザーによってダウンロードがキャンセルされました。",
     toastDownloadCancelledItem: "ダウンロードをキャンセルしました: {title}",
     toastBatchCompleted: "ダウンロード完了！（{count} 件を Downloads/Nimiyo/ に保存しました）",
+    dontCloseRecent: "履歴からアプリを終了しないでください",
     toastHistoryCleared: "履歴を正常にクリアしました。",
     toastSettingsSaved: "設定を保存しました。",
     toastCacheCleared: "アプリキャッシュを正常にクリアしました。",
@@ -3296,8 +3304,8 @@ const fallbackChains = {
 };
 
 // App Version Constants & GitHub Auto-Update Engine
-const APP_VERSION_NAME = "2.3.2";
-const APP_VERSION_CODE = 9;
+const APP_VERSION_NAME = "2.4.0";
+const APP_VERSION_CODE = 10;
 const UPDATE_MANIFEST_URL = "https://raw.githubusercontent.com/nimidz/Nimiyo-Downloader/main/version.json";
 let latestUpdateInfo = null;
 let updateTabIndicator = null;
@@ -3353,6 +3361,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   setTimeout(() => {
     checkClipboardOnResume();
+    checkBalloonIntent();
   }, 450);
   checkRulesOnboarding();
 
@@ -4176,13 +4185,51 @@ function setupEventListeners() {
     });
   }
 
-  // Server selection change triggers re-analysis using chosen scraper
-  document.getElementById("serverSelect").addEventListener("change", (e) => {
-    triggerHaptic();
-    const scraperMethod = e.target.value;
-    const url = urlInput.value.trim();
-    analyzeLink(url, scraperMethod);
-  });
+  // Server switch button triggers cycling to next scraper server
+  const serverSwitchBtn = document.getElementById("serverSwitchBtn");
+  if (serverSwitchBtn) {
+    serverSwitchBtn.addEventListener("click", () => {
+      triggerHaptic();
+      const platform = currentPlatform;
+      if (!platform) return;
+      const chain = fallbackChains[platform];
+      if (!chain || chain.length <= 1) return;
+
+      const currentIdx = chain.indexOf(activeScraperMethod);
+      const nextIdx = (currentIdx + 1) % chain.length;
+      const nextMethod = chain[nextIdx];
+
+      let formatted = nextMethod;
+      if (platform === "youtube") {
+        if (nextMethod === "auto") formatted = "Server 1 (Auto)";
+        else if (nextMethod === "gg") formatted = "Server 2 (YTMP3.gg)";
+        else if (nextMethod === "mobi") formatted = "Server 3 (YTMP3.mobi)";
+        else if (nextMethod === "direct") formatted = "Server 4 (Direct)";
+      } else if (platform === "spotify") {
+        if (nextMethod === "soundloaders") formatted = "Server 1 (SoundLoaders)";
+        else if (nextMethod === "spotidown") formatted = "Server 2 (SpotiDown)";
+        else if (nextMethod === "spotisaver") formatted = "Server 3 (Spotisaver)";
+      } else if (platform === "tiktok") {
+        if (nextMethod === "tiktokio") formatted = "Server 1 (TikTokIO)";
+        else if (nextMethod === "snaptik") formatted = "Server 2 (SnapTik)";
+        else if (nextMethod === "ssstik") formatted = "Server 3 (SSSTik)";
+        else if (nextMethod === "tikdownloader") formatted = "Server 4 (TikDownloader)";
+        else if (nextMethod === "direct") formatted = "Server 5 (Direct)";
+      } else {
+        formatted = nextMethod.charAt(0).toUpperCase() + nextMethod.slice(1);
+      }
+
+      showToast(getTranslation("toastSwitchServer", { server: formatted }) || `Beralih ke ${formatted}`, "info");
+
+      const serverLabel = document.getElementById("serverLabel");
+      if (serverLabel) serverLabel.textContent = formatted;
+
+      const url = urlInput ? urlInput.value.trim() : "";
+      if (url) {
+        analyzeLink(url, nextMethod);
+      }
+    });
+  }
 
   // ===================== BOTTOM TAB BAR SWITCHING =====================
   updateTabIndicator = function(activeBtn, retryCount = 0) {
@@ -4876,7 +4923,7 @@ function setupEventListeners() {
       btnSubmitBugReport.textContent = "Mengirim...";
 
       const issueTitle = `[Bug Report] [${platform}] Issue Report`;
-      const issueBody = `### Platform\n${platform}\n\n### Deskripsi Masalah\n${desc}\n\n### Detail Perangkat & Aplikasi\n- Versi: v2.3.2 (Lite)\n- User-Agent: ${navigator.userAgent}\n- Waktu: ${new Date().toLocaleString()}`;
+      const issueBody = `### Platform\n${platform}\n\n### Deskripsi Masalah\n${desc}\n\n### Detail Perangkat & Aplikasi\n- Versi: v2.4.0 (Lite)\n- User-Agent: ${navigator.userAgent}\n- Waktu: ${new Date().toLocaleString()}`;
 
       try {
         const ghUrl = `https://github.com/nimidz/Nimiyo-Downloader/issues/new?title=${encodeURIComponent(issueTitle)}&body=${encodeURIComponent(issueBody)}`;
@@ -4914,6 +4961,7 @@ function setupEventListeners() {
   window.addEventListener("focus", () => {
     loadHistory();
     setTimeout(checkClipboardOnResume, 350);
+    checkBalloonIntent();
     if (window.nimiyoMusicPlayer) window.nimiyoMusicPlayer.autoCheckPermissionOnResume().catch(() => {});
   });
 
@@ -4922,6 +4970,7 @@ function setupEventListeners() {
     const handleAppResume = () => {
       loadHistory();
       setTimeout(checkClipboardOnResume, 350);
+      checkBalloonIntent();
       if (window.nimiyoMusicPlayer) window.nimiyoMusicPlayer.autoCheckPermissionOnResume().catch(() => {});
       if (typeof checkForAppUpdates === "function" && (Date.now() - lastUpdateCheckTimestamp > 10 * 60 * 1000)) {
         setTimeout(() => checkForAppUpdates(false), 1200);
@@ -5353,8 +5402,8 @@ function renderResult(result, platform, activeMethod) {
   const previewContainer = document.querySelector(".result-preview");
   const title = document.getElementById("resultTitle");
   const platformTag = document.getElementById("platformTag");
-  const serverSelect = document.getElementById("serverSelect");
-  const serverContainer = document.getElementById("serverSelectorContainer");
+  const serverSwitchBtn = document.getElementById("serverSwitchBtn");
+  const serverLabel = document.getElementById("serverLabel");
 
   // Check for multi-photo content (TikTok slideshow, Instagram carousel, etc.)
   let photoUrls = [];
@@ -5521,40 +5570,38 @@ function renderResult(result, platform, activeMethod) {
     descContainer.classList.add("hidden");
   }
 
-  // Server selection population
+  // Server button visibility and label
   const chain = fallbackChains[platform];
   if (chain && chain.length > 1) {
-    serverContainer.classList.remove("hidden");
-    serverSelect.innerHTML = "";
-    chain.forEach(method => {
-      const option = document.createElement("option");
-      option.value = method;
-      let label = method;
+    if (serverSwitchBtn) {
+      serverSwitchBtn.classList.remove("hidden");
+      let activeLabel = activeMethod;
       if (platform === "youtube") {
-        if (method === "auto") label = "Server 1 (Auto Fast)";
-        else if (method === "gg") label = "Server 2 (YTMP3.gg)";
-        else if (method === "mobi") label = "Server 3 (YTMP3.mobi)";
-        else if (method === "direct") label = "Server 4 (Direct)";
+        if (activeMethod === "auto") activeLabel = "Server 1 (Auto)";
+        else if (activeMethod === "gg") activeLabel = "Server 2 (YTMP3.gg)";
+        else if (activeMethod === "mobi") activeLabel = "Server 3 (YTMP3.mobi)";
+        else if (activeMethod === "direct") activeLabel = "Server 4 (Direct)";
       } else if (platform === "spotify") {
-        if (method === "soundloaders") label = "Server 1 (SoundLoaders)";
-        else if (method === "spotidown") label = "Server 2 (SpotiDown)";
-        else if (method === "spotisaver") label = "Server 3 (Spotisaver)";
+        if (activeMethod === "soundloaders") activeLabel = "Server 1 (SoundLoaders)";
+        else if (activeMethod === "spotidown") activeLabel = "Server 2 (SpotiDown)";
+        else if (activeMethod === "spotisaver") activeLabel = "Server 3 (Spotisaver)";
       } else if (platform === "tiktok") {
-        if (method === "tiktokio") label = "Server 1 (TikTokIO)";
-        else if (method === "snaptik") label = "Server 2 (SnapTik)";
-        else if (method === "ssstik") label = "Server 3 (SSSTik)";
-        else if (method === "tikdownloader") label = "Server 4 (TikDownloader)";
-        else if (method === "direct") label = "Server 5 (Direct)";
-        else label = method.charAt(0).toUpperCase() + method.slice(1);
+        if (activeMethod === "tiktokio") activeLabel = "Server 1 (TikTokIO)";
+        else if (activeMethod === "snaptik") activeLabel = "Server 2 (SnapTik)";
+        else if (activeMethod === "ssstik") activeLabel = "Server 3 (SSSTik)";
+        else if (activeMethod === "tikdownloader") activeLabel = "Server 4 (TikDownloader)";
+        else if (activeMethod === "direct") activeLabel = "Server 5 (Direct)";
       } else {
-        label = method.charAt(0).toUpperCase() + method.slice(1);
+        activeLabel = activeMethod ? (activeMethod.charAt(0).toUpperCase() + activeMethod.slice(1)) : "Server";
       }
-      option.innerText = label;
-      option.selected = (method === activeMethod);
-      serverSelect.appendChild(option);
-    });
+      if (serverLabel) {
+        serverLabel.textContent = activeLabel;
+      }
+    }
   } else {
-    serverContainer.classList.add("hidden");
+    if (serverSwitchBtn) {
+      serverSwitchBtn.classList.add("hidden");
+    }
   }
 
   // Populate download options
@@ -5933,7 +5980,7 @@ function buildTargetFilename(dlItem, mediaResult, mediaCategory, platform, exten
 }
 
 // Execute Core Single File Download
-async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retryCount = 0) {
+async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retryCount = 0, onProgress = null, taskObj = null) {
   if (!dlItem || !dlItem.url) {
     throw new Error("Invalid download url provided");
   }
@@ -6405,12 +6452,69 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
 
   // Update UI Progress Info
   const updateProgressPercent = (percent) => {
+    if (typeof onProgress === "function") {
+      try { onProgress(percent); } catch (_) {}
+    }
     let displayPercent = percent;
     if (batchOptions) {
       const base = ((batchOptions.current - 1) / batchOptions.total) * 100;
       const slice = (1 / batchOptions.total) * percent;
       displayPercent = Math.min(Math.round(base + slice), 99);
       showBalloonProgress(batchOptions.current, batchOptions.total, sanitizedFilename, displayPercent, false);
+    }
+  };
+
+  const recordDownloadedItemToHistory = (finalFileName, finalFileUri) => {
+    let historyTitle = "";
+    if (dlItem?.title && !isGenericMediaTitle(dlItem.title)) {
+      historyTitle = dlItem.title;
+    } else if (dlItem?.name && !isGenericMediaTitle(dlItem.name)) {
+      historyTitle = dlItem.name;
+    } else if (finalFileName && !isGenericMediaTitle(finalFileName)) {
+      historyTitle = finalFileName.replace(/\.(mp4|mp3|png|jpg|jpeg|webp|m4a|wav|webm|mov)$/i, "").replace(/_+/g, " ").trim();
+    } else if (mediaResult?.title && !isGenericMediaTitle(mediaResult.title)) {
+      historyTitle = mediaResult.title;
+    } else {
+      historyTitle = finalFileName.replace(/\.(mp4|mp3|png|jpg|jpeg|webp|m4a|wav|webm|mov)$/i, "").replace(/_+/g, " ").trim();
+    }
+
+    const curIdx = dlItem?.itemIndex || dlItem?.index;
+    const totCount = dlItem?.totalItems;
+    if (curIdx && totCount && totCount > 1 && !historyTitle.includes(`(${curIdx}/${totCount})`)) {
+      historyTitle += ` (${curIdx}/${totCount})`;
+    } else if (curIdx && !totCount && !historyTitle.includes(`(${curIdx})`)) {
+      historyTitle += ` (${curIdx})`;
+    }
+
+    const isImageMedia = mediaCategory === "image" || dlItem.type?.toUpperCase().includes("PHOTO") || dlItem.type?.toUpperCase().includes("IMAGE") || finalFileName.match(/\.(png|jpg|jpeg|webp)$/i);
+    let historyThumb = dlItem.thumbnail || dlItem.cover;
+
+    // For downloaded images, prioritize the exact downloaded local file URI!
+    if (isImageMedia && finalFileUri && window.Capacitor?.convertFileSrc) {
+      historyThumb = window.Capacitor.convertFileSrc(finalFileUri);
+    } else if (!historyThumb && isImageMedia && dlItem.url && dlItem.url.startsWith("http")) {
+      historyThumb = dlItem.url;
+    }
+    if (!historyThumb) {
+      historyThumb = mediaResult?.thumbnail || "nimiyo_icon.webp";
+    }
+
+    // Add immediately to History on single file finish
+    addToHistory({
+      title: historyTitle,
+      thumbnail: historyThumb,
+      originalUrl: document.getElementById("urlInput")?.value || "",
+      platform: currentPlatform,
+      mediaType: mediaCategory,
+      filename: finalFileName,
+      timestamp: Date.now()
+    });
+
+    // Auto-refresh Music Library if audio was downloaded
+    if (mediaCategory === "audio" || finalFileName.match(/\.(mp3|m4a|wav|flac|ogg|opus|aac|wma)$/i)) {
+      if (window.nimiyoMusicPlayer && typeof window.nimiyoMusicPlayer.refreshLibrary === "function") {
+        window.nimiyoMusicPlayer.refreshLibrary();
+      }
     }
   };
 
@@ -6443,60 +6547,6 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
         updateProgressPercent(currentPercent);
       }
     }, 250);
-
-    const recordDownloadedItemToHistory = (finalFileName, finalFileUri) => {
-      let historyTitle = "";
-      if (dlItem?.title && !isGenericMediaTitle(dlItem.title)) {
-        historyTitle = dlItem.title;
-      } else if (dlItem?.name && !isGenericMediaTitle(dlItem.name)) {
-        historyTitle = dlItem.name;
-      } else if (finalFileName && !isGenericMediaTitle(finalFileName)) {
-        historyTitle = finalFileName.replace(/\.(mp4|mp3|png|jpg|jpeg|webp|m4a|wav|webm|mov)$/i, "").replace(/_+/g, " ").trim();
-      } else if (mediaResult?.title && !isGenericMediaTitle(mediaResult.title)) {
-        historyTitle = mediaResult.title;
-      } else {
-        historyTitle = finalFileName.replace(/\.(mp4|mp3|png|jpg|jpeg|webp|m4a|wav|webm|mov)$/i, "").replace(/_+/g, " ").trim();
-      }
-
-      const curIdx = dlItem?.itemIndex || dlItem?.index;
-      const totCount = dlItem?.totalItems;
-      if (curIdx && totCount && totCount > 1 && !historyTitle.includes(`(${curIdx}/${totCount})`)) {
-        historyTitle += ` (${curIdx}/${totCount})`;
-      } else if (curIdx && !totCount && !historyTitle.includes(`(${curIdx})`)) {
-        historyTitle += ` (${curIdx})`;
-      }
-
-      const isImageMedia = mediaCategory === "image" || dlItem.type?.toUpperCase().includes("PHOTO") || dlItem.type?.toUpperCase().includes("IMAGE") || finalFileName.match(/\.(png|jpg|jpeg|webp)$/i);
-      let historyThumb = dlItem.thumbnail || dlItem.cover;
-
-      // For downloaded images, prioritize the exact downloaded local file URI!
-      if (isImageMedia && finalFileUri && window.Capacitor?.convertFileSrc) {
-        historyThumb = window.Capacitor.convertFileSrc(finalFileUri);
-      } else if (!historyThumb && isImageMedia && dlItem.url && dlItem.url.startsWith("http")) {
-        historyThumb = dlItem.url;
-      }
-      if (!historyThumb) {
-        historyThumb = mediaResult?.thumbnail || "nimiyo_icon.webp";
-      }
-
-      // Add immediately to History on single file finish
-      addToHistory({
-        title: historyTitle,
-        thumbnail: historyThumb,
-        originalUrl: document.getElementById("urlInput")?.value || "",
-        platform: currentPlatform,
-        mediaType: mediaCategory,
-        filename: finalFileName,
-        timestamp: Date.now()
-      });
-
-      // Auto-refresh Music Library if audio was downloaded
-      if (mediaCategory === "audio" || finalFileName.match(/\.(mp3|m4a|wav|flac|ogg|opus|aac|wma)$/i)) {
-        if (window.nimiyoMusicPlayer && typeof window.nimiyoMusicPlayer.refreshLibrary === "function") {
-          window.nimiyoMusicPlayer.refreshLibrary();
-        }
-      }
-    };
 
     try {
       updateProgressPercent(15);
@@ -6653,49 +6703,40 @@ async function downloadSingleFile(dlItem, mediaResult, batchOptions = null, retr
   return { success: true, filename: sanitizedFilename };
 }
 
-let balloonPillTimer = null;
-
-// Show or Update Floating Download Balloon
-function showBalloonProgress(current, total, filename = "", percent = 0) {
-  const balloon = document.getElementById("downloadBalloon");
-  const circle = document.getElementById("balloonProgressCircle");
-  const sheetCounter = document.getElementById("balloonSheetCounter");
-  const sheetItem = document.getElementById("balloonSheetItem");
-  const sheetProgressBar = document.getElementById("balloonSheetProgressBar");
-
-  if (!balloon) return;
-
-  balloon.classList.remove("hidden", "hiding");
-
-  // Update SVG Circular Ring (Circumference = 2 * PI * 23 ≈ 144.5)
-  const circumference = 144.5;
-  const validPercent = Math.max(0, Math.min(100, percent));
-  const offset = circumference - (circumference * (validPercent / 100));
-  if (circle) {
-    circle.style.strokeDashoffset = offset;
+// Open Floating Balloon Sheet (called when notification is clicked or when intent is received)
+window.openDownloadBalloonSheet = function() {
+  try {
+    const balloon = document.getElementById("downloadBalloon");
+    const sheet = document.getElementById("balloonSheet");
+    if (balloon) {
+      balloon.classList.remove("hidden", "hiding");
+    }
+    if (sheet) {
+      sheet.classList.remove("hidden");
+    }
+    updateBalloonQueueUI();
+    if (typeof triggerHaptic === "function") {
+      triggerHaptic();
+    }
+  } catch (err) {
+    console.warn("[BALLOON] openDownloadBalloonSheet failed:", err);
   }
+};
 
-  // Update sheet flyout details
-  if (sheetCounter) sheetCounter.innerText = `${current}/${total}`;
-  if (sheetItem) sheetItem.innerText = filename || `Item ${current}`;
-  if (sheetProgressBar) sheetProgressBar.style.width = `${validPercent}%`;
-}
-
-// Hide Floating Download Balloon
-function hideBalloonProgress() {
-  const balloon = document.getElementById("downloadBalloon");
-  if (!balloon) return;
-
-  const sheet = document.getElementById("balloonSheet");
-  if (sheet) sheet.classList.add("hidden");
-
-  balloon.classList.add("hiding");
-  setTimeout(() => {
-    balloon.classList.add("hidden");
-    balloon.classList.remove("hiding");
-    const circle = document.getElementById("balloonProgressCircle");
-    if (circle) circle.style.strokeDashoffset = 144.5;
-  }, 250);
+async function checkBalloonIntent() {
+  try {
+    const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
+    if (MediaSaver && typeof MediaSaver.checkOpenBalloon === "function") {
+      const res = await MediaSaver.checkOpenBalloon();
+      if (res && res.openBalloon) {
+        if (typeof window.openDownloadBalloonSheet === "function") {
+          window.openDownloadBalloonSheet();
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("[BALLOON INTENT] Check failed:", e);
+  }
 }
 
 // Native Android System Notification
@@ -6819,6 +6860,11 @@ function enqueueDownloads(items, mediaResult) {
     showToast(getTranslation("toastDownloadingMulti", { count: targetItems.length }), "info");
   }
 
+  // Peringatan jangan tutup App di riwayat
+  setTimeout(() => {
+    showToast(getTranslation("dontCloseRecent"), "info");
+  }, 1000);
+
   updateBalloonQueueUI();
   processDownloadQueue();
 }
@@ -6837,6 +6883,7 @@ function updateBalloonQueueUI() {
 
   if (remainingActiveCount === 0 && activeDownloadQueue.length === 0) {
     hideBalloonProgress();
+    clearSystemDownloadNotification();
     return;
   }
 
@@ -6862,6 +6909,21 @@ function updateBalloonQueueUI() {
 
   if (sheetCounter) {
     sheetCounter.innerText = `${currentCompleted}/${totalSessionCount || remainingActiveCount}`;
+  }
+
+  // Update unified ongoing notification matching QuickSave: (x/y) Downloading - Jangan hapus dari Riwayat app.
+  if (remainingActiveCount > 0) {
+    const totalCount = totalSessionCount || remainingActiveCount;
+    const notifText = `(${currentCompleted}/${totalCount}) Downloading - Jangan hapus dari Riwayat app.`;
+    updateSystemDownloadNotification(
+      "Nimiyo Downloader",
+      notifText,
+      overallPercent,
+      100,
+      false
+    );
+  } else {
+    clearSystemDownloadNotification();
   }
 
   // Render Queue List inside Sheet
@@ -6969,13 +7031,7 @@ async function processDownloadQueue() {
       if (!nextTask) break;
 
       nextTask.status = 'downloading';
-      const isBatch = totalSessionCount > 1;
-      const taskIndex = completedQueueCount + 1;
-      const initialMsg = isBatch
-        ? `Mengunduh (${taskIndex}/${totalSessionCount}): ${nextTask.filename}`
-        : `Mengunduh: ${nextTask.filename}`;
-
-      updateSystemDownloadNotification("Nimiyo Downloader", initialMsg, 10, 100, false);
+      updateBalloonQueueUI();
 
       const maxAttempts = (settings.autoRetry && settings.maxRetry) ? Math.max(1, parseInt(settings.maxRetry, 10) || 1) : 1;
       let downloadSuccess = false;
@@ -6984,15 +7040,6 @@ async function processDownloadQueue() {
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         if (nextTask.isCancelled) break;
         try {
-          if (attempt > 1) {
-            updateSystemDownloadNotification(
-              "Nimiyo Downloader",
-              `Mencoba ulang (${attempt}/${maxAttempts}): ${nextTask.filename}`,
-              10,
-              100,
-              false
-            );
-          }
           await downloadSingleFile(
             nextTask.dlItem,
             nextTask.mediaResult,
@@ -7001,16 +7048,6 @@ async function processDownloadQueue() {
             (p) => {
               nextTask.progress = p;
               updateBalloonQueueUI();
-              const progMsg = isBatch
-                ? `Mengunduh (${taskIndex}/${totalSessionCount}): ${nextTask.filename} (${p}%)`
-                : `Mengunduh: ${nextTask.filename} (${p}%)`;
-              updateSystemDownloadNotification(
-                "Nimiyo Downloader",
-                progMsg,
-                p,
-                100,
-                false
-              );
             },
             nextTask
           );
@@ -7036,18 +7073,6 @@ async function processDownloadQueue() {
         completedQueueCount++;
         updateBalloonQueueUI();
 
-        const finishMsg = isBatch
-          ? `Selesai (${completedQueueCount}/${totalSessionCount}): ${nextTask.filename}`
-          : `Selesai: ${nextTask.filename}`;
-
-        updateSystemDownloadNotification(
-          "Nimiyo Downloader",
-          finishMsg,
-          100,
-          100,
-          completedQueueCount >= totalSessionCount
-        );
-
         setTimeout(() => {
           activeDownloadQueue = activeDownloadQueue.filter(t => t.id !== nextTask.id);
           updateBalloonQueueUI();
@@ -7058,21 +7083,10 @@ async function processDownloadQueue() {
         activeDownloadQueue = activeDownloadQueue.filter(t => t.id !== nextTask.id);
         updateBalloonQueueUI();
 
-        // Release ongoing lock on notification drawer so it doesn't get stuck
-        updateSystemDownloadNotification(
-          "Nimiyo Downloader",
-          `Gagal mengunduh: ${nextTask.filename}`,
-          0,
-          0,
-          true
-        );
-
-        setTimeout(() => {
-          const hasRunning = activeDownloadQueue.some(t => t.status === 'downloading' || t.status === 'pending');
-          if (!hasRunning) {
-            clearSystemDownloadNotification();
-          }
-        }, 3000);
+        const hasRunning = activeDownloadQueue.some(t => t.status === 'downloading' || t.status === 'pending');
+        if (!hasRunning) {
+          clearSystemDownloadNotification();
+        }
 
         // Auto-switch server on download failure and re-analyze
         const platform = currentPlatform || nextTask.mediaResult?.platform || nextTask.dlItem?.platform;
@@ -7081,13 +7095,17 @@ async function processDownloadQueue() {
 
         if (scrapers.length > 1 && currentUrl) {
           const currentIdx = scrapers.indexOf(activeScraperMethod);
-          const nextScraper = scrapers[(currentIdx + 1) % scrapers.length];
-          const formatted = nextScraper.charAt(0).toUpperCase() + nextScraper.slice(1);
-          showToast(getTranslation("toastDownloadFailSwitchServer", { server: formatted }), "error");
+          if (currentIdx >= 0 && currentIdx < scrapers.length - 1) {
+            const nextScraper = scrapers[currentIdx + 1];
+            const formatted = nextScraper.charAt(0).toUpperCase() + nextScraper.slice(1);
+            showToast(getTranslation("toastDownloadFailSwitchServer", { server: formatted }), "error");
 
-          setTimeout(() => {
-            analyzeLink(currentUrl, nextScraper);
-          }, 800);
+            setTimeout(() => {
+              analyzeLink(currentUrl, nextScraper);
+            }, 800);
+          } else {
+            showToast(getTranslation("toastDownloadFailManualServer"), "error");
+          }
         } else {
           showToast(getTranslation("toastDownloadFailManualServer"), "error");
         }
@@ -7107,23 +7125,12 @@ async function processDownloadQueue() {
   const remainingActive = activeDownloadQueue.filter(t => t.status === 'downloading' || t.status === 'pending');
   if (remainingActive.length === 0) {
     hideBalloonProgress();
+    clearSystemDownloadNotification();
     if (completedQueueCount > 0) {
-      updateSystemDownloadNotification(
-        "Nimiyo Downloader",
-        getTranslation("toastBatchCompleted", { count: completedQueueCount }),
-        100,
-        100,
-        true
-      );
       playCompletionSound();
       triggerHaptic();
       showToast(getTranslation("toastBatchCompleted", { count: completedQueueCount }), "success");
       completedQueueCount = 0;
-    } else {
-      // If 0 items succeeded (all failed or cancelled), ensure notification is cleared
-      setTimeout(() => {
-        clearSystemDownloadNotification();
-      }, 3000);
     }
   }
 }

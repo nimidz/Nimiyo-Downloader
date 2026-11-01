@@ -1,29 +1,27 @@
 {
-  "versionCode": 9,
-  "versionName": "2.3.2",
+  "versionCode": 10,
+  "versionName": "2.4.0",
   "minRequiredVersion": "2.0.0",
-  "releaseDate": "2026-10-30",
-  "downloadUrl": "https://github.com/nimidz/Nimiyo-Downloader/releases/download/v2.3.2/Nimiyo.v2.3.2.apk",
+  "releaseDate": "2026-11-02",
+  "downloadUrl": "https://github.com/nimidz/Nimiyo-Downloader/releases/download/v2.4.0/Nimiyo.v2.4.0.apk",
   "changelog": [
-    "Fixed the Sort button not working in Music Player.",
-    "Fixed the Shuffle button not working.",
-    "Fixed the Playlist button not opening.",
-    "Fixed the Refresh Music button not working.",
-    "Fixed Share Nimiyo downloads failing or getting stuck when the Share window is closed too early.",
-    "Fixed downloads not appearing completely in download history, including multiple images downloaded in a single task or using Download All.",
-    "Improved playlist database storage reliability. Databases are now stored in Download/Nimiyo/Database.",
-    "Improved background downloads to prevent ongoing downloads from stopping unexpectedly.",
-    "Improved Nimiyo QuickSave background processing to prevent ongoing downloads from stopping unexpectedly."
+    "Security: Mengatasi deteksi Google Play Protect dan menghapus kode yang bermasalah.",
+    "New: Menambahkan server unduhan baru untuk TikTok, Instagram, YouTube, dan Spotify.",
+    "Fixed: Perbaikan tombol Sort, Shuffle, Playlist, dan Refresh Music di Music Player.",
+    "Fixed: Perbaikan Share Nimiyo agar unduhan tidak gagal atau macet saat jendela Share ditutup lebih awal.",
+    "Fixed: Perbaikan unduhan agar muncul lengkap di riwayat unduhan (termasuk multi-gambar).",
+    "Improvements: Database playlist tersimpan lebih andal di Download/Nimiyo/Database.",
+    "Improvements: Nimiyo QuickSave lebih mulus tanpa perlu menunggu di halaman QuickSave.",
+    "Improvements: Mengurangi spam popup berlebih selama unduhan berlangsung, notifikasi realtime."
   ],
   "changelog_en": [
-    "Fixed the Sort button not working in Music Player.",
-    "Fixed the Shuffle button not working.",
-    "Fixed the Playlist button not opening.",
-    "Fixed the Refresh Music button not working.",
-    "Fixed Share Nimiyo downloads failing or getting stuck when the Share window is closed too early.",
-    "Fixed downloads not appearing completely in download history, including multiple images downloaded in a single task or using Download All.",
-    "Improved playlist database storage reliability. Databases are now stored in Download/Nimiyo/Database.",
-    "Improved background downloads to prevent ongoing downloads from stopping unexpectedly.",
-    "Improved Nimiyo QuickSave background processing to prevent ongoing downloads from stopping unexpectedly."
+    "Security: Addressed Google Play Protect detection and removed harmful code.",
+    "New: Added new download servers for TikTok, Instagram, YouTube, and Spotify.",
+    "Fixed: Fixed Sort button, Shuffle button, Playlist button, and Refresh Music button in Music Player.",
+    "Fixed: Fixed Share Nimiyo downloads failing or getting stuck when the Share window is closed too early.",
+    "Fixed: Fixed downloads not appearing completely in download history, including multi-images.",
+    "Improvements: Improved playlist database storage reliability in Download/Nimiyo/Database.",
+    "Improvements: Improved Nimiyo QuickSave downloads for smoother performance without waiting.",
+    "Improvements: Reduced excessive popup notifications during downloads with realtime notification."
   ]
 }

@@ -39,9 +39,20 @@ const shareTranslations = {
     photo: "PHOTO",
     video: "VIDEO",
     audio: "AUDIO",
-    noUrl: "No URL",
     downloadFailedSwitchServer: "Download Failed - Switching to Server {server}...",
-    downloadFailedManualServer: "Download Failed - Switch Server"
+    downloadFailedManualServer: "Download Failed - Switch Server",
+    downloadStarted: "{count} Downloads started",
+    dontCloseRecent: "Do not close App from recent history",
+    allSavedClosing: "{total} Successfully saved, App closing.",
+    activeDownloadsTitle: "Active Downloads",
+    activeTasksCount: "{count} Active",
+    backToMedia: "Back to Media",
+    tapForDetails: "Tap for details",
+    statusCompleted: "Completed ✓",
+    statusDownloading: "Downloading...",
+    statusQueued: "In queue",
+    statusCancelled: "Cancelled",
+    allDownloadsCancelled: "All downloads cancelled"
   },
   id: {
     panelTitle: "NIMIYO Simpan",
@@ -80,9 +91,20 @@ const shareTranslations = {
     photo: "FOTO",
     video: "VIDEO",
     audio: "AUDIO",
-    noUrl: "URL tidak tersedia",
     downloadFailedSwitchServer: "Download Gagal - Ganti Server ke {server}...",
-    downloadFailedManualServer: "Download Gagal - Ganti Server"
+    downloadFailedManualServer: "Download Gagal - Ganti Server",
+    downloadStarted: "{count} Downloads dimulai",
+    dontCloseRecent: "Jangan tutup App di riwayat",
+    allSavedClosing: "{total} Berhasil tersimpan, App ditutup.",
+    activeDownloadsTitle: "Daftar Unduhan Aktif",
+    activeTasksCount: "{count} Berjalan",
+    backToMedia: "Kembali ke Media",
+    tapForDetails: "Ketuk untuk rincian",
+    statusCompleted: "Selesai ✓",
+    statusDownloading: "Mengunduh...",
+    statusQueued: "Dalam antrean",
+    statusCancelled: "Dibatalkan",
+    allDownloadsCancelled: "Semua unduhan dibatalkan"
   },
   zh: {
     panelTitle: "NIMIYO 保存",
@@ -121,9 +143,20 @@ const shareTranslations = {
     photo: "图片",
     video: "视频",
     audio: "音频",
-    noUrl: "无可用 URL",
     downloadFailedSwitchServer: "下载失败 - 正在自动切换至服务器 {server}...",
-    downloadFailedManualServer: "下载失败 - 请切换服务器"
+    downloadFailedManualServer: "下载失败 - 请切换服务器",
+    downloadStarted: "{count} 个下载已开始",
+    dontCloseRecent: "请勿从后台历史记录中关闭应用",
+    allSavedClosing: "{total} 个文件保存成功，正在关闭应用。",
+    activeDownloadsTitle: "正在下载列表",
+    activeTasksCount: "{count} 个进行中",
+    backToMedia: "返回媒体",
+    tapForDetails: "点击查看详情",
+    statusCompleted: "已完成 ✓",
+    statusDownloading: "正在下载...",
+    statusQueued: "排队中",
+    statusCancelled: "已取消",
+    allDownloadsCancelled: "所有下载已取消"
   },
   ja: {
     panelTitle: "NIMIYO 保存",
@@ -162,9 +195,20 @@ const shareTranslations = {
     photo: "画像",
     video: "動画",
     audio: "音声",
-    noUrl: "URLなし",
     downloadFailedSwitchServer: "ダウンロード失敗 - サーバー {server} に切り替えています...",
-    downloadFailedManualServer: "ダウンロード失敗 - サーバーを変更してください"
+    downloadFailedManualServer: "ダウンロード失敗 - サーバーを変更してください",
+    downloadStarted: "{count} 件のダウンロードを開始しました",
+    dontCloseRecent: "履歴からアプリを終了しないでください",
+    allSavedClosing: "{total} 件の保存が完了しました。アプリを終了します。",
+    activeDownloadsTitle: "ダウンロード中のタスク一覧",
+    activeTasksCount: "{count} 件進行中",
+    backToMedia: "メディアに戻る",
+    tapForDetails: "タップして詳細",
+    statusCompleted: "完了 ✓",
+    statusDownloading: "ダウンロード中...",
+    statusQueued: "待機中",
+    statusCancelled: "キャンセル済み",
+    allDownloadsCancelled: "すべてのダウンロードがキャンセルされました"
   }
 };
 
@@ -226,33 +270,302 @@ function t(key, params = {}) {
   return str;
 }
 
-let activeDownloadProgressCallback = null;
+// Multi-Task Registry for Active Downloads
+const activeTasksMap = new Map(); // reqId -> { reqId, title, filename, category, percent, status, error }
+let isDownloadsViewExpanded = false;
+let totalSessionDownloads = 0;
+let completionTimeout = null;
 
 window.__onNativeDownloadProgress = function(reqId, percent) {
-  if (typeof activeDownloadProgressCallback === "function") {
-    try {
-      activeDownloadProgressCallback(reqId, Number(percent) || 0);
-    } catch (_) {}
+  const p = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)));
+  const task = activeTasksMap.get(reqId);
+  if (task) {
+    task.percent = p;
+    updateSingleTaskRow(task);
   }
+  updateOverallProgressCard();
 };
 
-function updateDownloadProgressCard(visible, title, percent) {
+function registerActiveTask(reqId, title, filename, category) {
+  activeTasksMap.set(reqId, {
+    reqId,
+    title: title || filename || "Media",
+    filename: filename || "download",
+    category: category || "video",
+    percent: 0,
+    status: 'downloading',
+    startedAt: Date.now()
+  });
+  updateOverallProgressCard();
+  if (isDownloadsViewExpanded) {
+    renderActiveTasksList();
+  }
+}
+
+function registerQueuedTask(reqId, title, filename, category) {
+  activeTasksMap.set(reqId, {
+    reqId,
+    title: title || filename || "Media",
+    filename: filename || "download",
+    category: category || "video",
+    percent: 0,
+    status: 'queued',
+    startedAt: Date.now()
+  });
+  updateOverallProgressCard();
+  if (isDownloadsViewExpanded) {
+    renderActiveTasksList();
+  }
+}
+
+function completeActiveTask(reqId, isSuccess, errorMsg) {
+  const task = activeTasksMap.get(reqId);
+  if (task) {
+    task.percent = 100;
+    task.status = isSuccess ? 'completed' : 'failed';
+    task.error = errorMsg || '';
+    updateSingleTaskRow(task);
+  }
+  updateOverallProgressCard();
+  checkAllDownloadsCompleted();
+}
+
+function checkAllDownloadsCompleted() {
+  if (activeTasksMap.size === 0) return;
+
+  // Do NOT auto-close while batch download loop is actively running!
+  if (window.__isBatchDownloading) return;
+
+  let anyPendingOrDownloading = false;
+  let successCount = 0;
+  for (const [id, task] of activeTasksMap.entries()) {
+    if (task.status === 'downloading' || task.status === 'queued') {
+      anyPendingOrDownloading = true;
+      break;
+    }
+    if (task.status === 'completed') {
+      successCount++;
+    }
+  }
+
+  // Only close when ALL tasks are finished and at least 1 succeeded
+  if (!anyPendingOrDownloading && successCount > 0) {
+    if (completionTimeout) clearTimeout(completionTimeout);
+
+    const totalDone = totalSessionDownloads > 0 ? totalSessionDownloads : successCount;
+    showNativeToast(t("allSavedClosing", { total: totalDone }));
+
+    completionTimeout = setTimeout(() => {
+      activeTasksMap.clear();
+      updateOverallProgressCard();
+      const bridge = window.NimiyoShareBridge || window.NimidzShareBridge;
+      if (bridge && typeof bridge.finishAndClose === "function") {
+        bridge.finishAndClose();
+      } else if (bridge && typeof bridge.dismiss === "function") {
+        bridge.dismiss();
+      }
+    }, 2200);
+  }
+}
+
+function updateNativeProgressNotification() {
+  if (activeTasksMap.size === 0) {
+    const bridge = window.NimiyoShareBridge || window.NimidzShareBridge;
+    if (bridge && typeof bridge.updateQuickSaveNotification === "function") {
+      bridge.updateQuickSaveNotification(0, 0, 100, true);
+    }
+    return;
+  }
+
+  let completedCount = 0;
+  let totalPercent = 0;
+  let anyActive = false;
+
+  for (const [id, task] of activeTasksMap.entries()) {
+    if (task.status === 'completed') {
+      completedCount++;
+      totalPercent += 100;
+    } else {
+      totalPercent += (task.percent || 0);
+      if (task.status === 'downloading' || task.status === 'queued') {
+        anyActive = true;
+      }
+    }
+  }
+
+  const totalCount = Math.max(activeTasksMap.size, totalSessionDownloads);
+  const avgPercent = Math.min(100, Math.round(totalPercent / Math.max(1, activeTasksMap.size)));
+  const isCompleted = !anyActive && completedCount > 0 && !window.__isBatchDownloading;
+
+  const bridge = window.NimiyoShareBridge || window.NimidzShareBridge;
+  if (bridge && typeof bridge.updateQuickSaveNotification === "function") {
+    bridge.updateQuickSaveNotification(completedCount, totalCount, avgPercent, isCompleted);
+  }
+}
+
+function updateOverallProgressCard() {
   const card = document.getElementById("downloadProgressCard");
   const titleEl = document.getElementById("progressTitle");
   const percentEl = document.getElementById("progressPercent");
   const fillEl = document.getElementById("progressBarFill");
+  const toggleIcon = document.getElementById("progressToggleIcon");
   if (!card) return;
 
-  if (!visible) {
+  if (activeTasksMap.size === 0) {
     card.classList.add("hidden");
+    if (isDownloadsViewExpanded) {
+      window.toggleActiveDownloadsView(false);
+    }
+    updateNativeProgressNotification();
     return;
   }
 
   card.classList.remove("hidden");
-  if (titleEl && title) titleEl.innerText = title;
-  const p = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)));
-  if (percentEl) percentEl.innerText = p + "%";
-  if (fillEl) fillEl.style.width = p + "%";
+
+  let totalPercent = 0;
+  let activeCount = 0;
+  let singleTask = null;
+
+  for (const [id, task] of activeTasksMap.entries()) {
+    totalPercent += task.percent;
+    if (task.status === 'downloading') activeCount++;
+    singleTask = task;
+  }
+
+  const avgPercent = Math.min(100, Math.round(totalPercent / Math.max(1, activeTasksMap.size)));
+
+  if (activeTasksMap.size === 1 && singleTask) {
+    if (titleEl) titleEl.innerText = singleTask.title;
+    if (percentEl) percentEl.innerText = singleTask.percent + "%";
+    if (fillEl) fillEl.style.width = singleTask.percent + "%";
+  } else {
+    if (titleEl) {
+      titleEl.innerText = `${activeTasksMap.size} ${t("downloading")} (${t("tapForDetails")})`;
+    }
+    if (percentEl) percentEl.innerText = avgPercent + "%";
+    if (fillEl) fillEl.style.width = avgPercent + "%";
+  }
+
+  const badge = document.getElementById("activeTasksBadge");
+  if (badge) {
+    badge.innerText = t("activeTasksCount", { count: activeCount || activeTasksMap.size });
+  }
+
+  if (toggleIcon) {
+    toggleIcon.innerText = isDownloadsViewExpanded ? "▴" : "▾";
+  }
+
+  updateNativeProgressNotification();
+}
+
+window.toggleActiveDownloadsView = function(forceState) {
+  const view = document.getElementById("activeDownloadsView");
+  const card = document.getElementById("downloadProgressCard");
+  const mediaHeader = document.getElementById("mediaHeaderCard");
+  const statusSec = document.getElementById("statusSection");
+  const errSec = document.getElementById("errorSection");
+  const dlListSec = document.getElementById("downloadListSection");
+  const actionRow = document.getElementById("actionRow");
+
+  if (!view) return;
+
+  if (forceState !== undefined) {
+    isDownloadsViewExpanded = forceState;
+  } else {
+    isDownloadsViewExpanded = !isDownloadsViewExpanded;
+  }
+
+  if (card) {
+    if (isDownloadsViewExpanded) card.classList.add("expanded");
+    else card.classList.remove("expanded");
+  }
+
+  const toggleIcon = document.getElementById("progressToggleIcon");
+  if (toggleIcon) toggleIcon.innerText = isDownloadsViewExpanded ? "▴" : "▾";
+
+  if (isDownloadsViewExpanded) {
+    renderActiveTasksList();
+    view.classList.remove("hidden");
+    if (mediaHeader) mediaHeader.classList.add("hidden");
+    if (statusSec) statusSec.classList.add("hidden");
+    if (errSec) errSec.classList.add("hidden");
+    if (dlListSec) dlListSec.classList.add("hidden");
+    if (actionRow) actionRow.classList.add("hidden");
+  } else {
+    view.classList.add("hidden");
+    if (mediaHeader) mediaHeader.classList.remove("hidden");
+    if (actionRow) actionRow.classList.remove("hidden");
+    if (isAnalyzing) {
+      if (statusSec) statusSec.classList.remove("hidden");
+    } else if (activeResult && activeResult.downloads && activeResult.downloads.length > 0) {
+      if (dlListSec) dlListSec.classList.remove("hidden");
+    } else {
+      if (statusSec) statusSec.classList.remove("hidden");
+    }
+  }
+};
+
+function renderActiveTasksList() {
+  const listEl = document.getElementById("activeTasksList");
+  if (!listEl) return;
+
+  if (activeTasksMap.size === 0) {
+    listEl.innerHTML = `<div style="text-align:center;padding:20px;font-size:12px;color:var(--text-muted);font-weight:700;">Tidak ada unduhan aktif</div>`;
+    return;
+  }
+
+  let html = "";
+  for (const [id, task] of activeTasksMap.entries()) {
+    const isDone = task.status === 'completed';
+    const catUpper = (task.category || "FILE").toUpperCase();
+    let statusText = t("statusDownloading");
+    if (isDone) statusText = t("statusCompleted");
+    else if (task.status === 'failed') statusText = t("downloadFailed");
+    else if (task.status === 'queued') statusText = t("statusQueued");
+    else if (task.status === 'cancelled') statusText = t("statusCancelled");
+
+    html += `
+      <div class="active-task-item ${isDone ? 'task-completed' : ''}" id="taskItem_${task.reqId}">
+        <div class="task-item-top">
+          <div class="task-item-title-group">
+            <span class="task-item-category-tag">${catUpper}</span>
+            <span class="task-item-name" title="${task.title}">${task.title}</span>
+          </div>
+          <span class="task-item-percent" id="taskPct_${task.reqId}">${task.percent}%</span>
+        </div>
+        <div class="task-item-track">
+          <div class="task-item-fill" id="taskFill_${task.reqId}" style="width: ${task.percent}%;"></div>
+        </div>
+        <div class="task-item-bottom">
+          <span class="task-item-status" id="taskStatus_${task.reqId}">${statusText}</span>
+        </div>
+      </div>
+    `;
+  }
+  listEl.innerHTML = html;
+}
+
+function updateSingleTaskRow(task) {
+  const pctEl = document.getElementById(`taskPct_${task.reqId}`);
+  const fillEl = document.getElementById(`taskFill_${task.reqId}`);
+  const statusEl = document.getElementById(`taskStatus_${task.reqId}`);
+  const itemEl = document.getElementById(`taskItem_${task.reqId}`);
+
+  if (pctEl) pctEl.innerText = task.percent + "%";
+  if (fillEl) fillEl.style.width = task.percent + "%";
+
+  if (task.status === 'completed') {
+    if (statusEl) statusEl.innerText = t("statusCompleted");
+    if (itemEl) itemEl.classList.add("task-completed");
+  } else if (task.status === 'failed') {
+    if (statusEl) statusEl.innerText = t("downloadFailed");
+  } else if (task.status === 'queued') {
+    if (statusEl) statusEl.innerText = t("statusQueued");
+  } else if (task.status === 'cancelled') {
+    if (statusEl) statusEl.innerText = t("statusCancelled");
+  } else {
+    if (statusEl) statusEl.innerText = t("statusDownloading");
+  }
 }
 
 function applyAccentColor(accentColor) {
@@ -370,6 +683,12 @@ function initLanguageAndTheme() {
 
   const errorRetryBtn = document.getElementById("errorRetryBtn");
   if (errorRetryBtn) errorRetryBtn.innerText = t("retry");
+
+  const backToMediaBtnText = document.getElementById("backToMediaBtnText");
+  if (backToMediaBtnText) backToMediaBtnText.innerText = t("backToMedia");
+
+  const activeDownloadsTitle = document.getElementById("activeDownloadsTitle");
+  if (activeDownloadsTitle) activeDownloadsTitle.innerText = t("activeDownloadsTitle");
 
   updateServerButtonLabel();
 }
@@ -1026,14 +1345,11 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
   const displayTitle = dlItem.title || result.title || sanitizedFilename;
 
   if (!isBatch) {
-    showToast(t("downloading"));
-    updateDownloadProgressCard(true, displayTitle, 10);
-    notifyNative("Nimiyo Downloader", `${t("downloading")} ${displayTitle}`, 10, 100, false);
-
-    activeDownloadProgressCallback = (reqId, pct) => {
-      updateDownloadProgressCard(true, displayTitle, pct);
-      notifyNative("Nimiyo Downloader", `${t("downloading")} ${displayTitle} (${Math.round(pct)}%)`, pct, 100, false);
-    };
+    totalSessionDownloads++;
+    showNativeToast(t("downloadStarted", { count: 1 }));
+    setTimeout(() => {
+      showNativeToast(t("dontCloseRecent"));
+    }, 1500);
   }
 
   try {
@@ -1423,7 +1739,18 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
       };
       const historyItemJson = JSON.stringify(preHistoryItem);
 
-      const reqId = "dl_" + Date.now() + "_" + Math.random().toString(36).substr(2, 6);
+      const reqId = dlItem?.__assignedReqId || ("dl_" + Date.now() + "_" + Math.random().toString(36).substr(2, 6));
+      const existingTask = activeTasksMap.get(reqId);
+      if (existingTask) {
+        existingTask.status = 'downloading';
+        existingTask.title = displayTitle;
+        existingTask.filename = sanitizedFilename;
+        updateSingleTaskRow(existingTask);
+        updateOverallProgressCard();
+      } else {
+        registerActiveTask(reqId, displayTitle, sanitizedFilename, isAudio ? "audio" : mediaCategory);
+      }
+
       const res = await new Promise((resolve) => {
         if (!window.__nimiyoShareCallbacks) window.__nimiyoShareCallbacks = {};
         window.__nimiyoShareCallbacks[reqId] = resolve;
@@ -1437,30 +1764,16 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
           optBtn.disabled = true;
         }
 
-        if (!isBatch) {
-          updateDownloadProgressCard(true, displayTitle, 100);
-          notifyNative("Nimiyo Downloader", `${sanitizedFilename} selesai diunduh!`, 100, 100, true);
-          showToast(t("saved"));
-          showNativeToast(t("saved"));
-
-          // Periksa jumlah opsi unduhan: tahan window jika ada banyak opsi, tutup jika hanya 1 opsi
-          const totalOptions = (result && Array.isArray(result.downloads)) ? result.downloads.length : 1;
-          if (totalOptions <= 1) {
-            setTimeout(() => {
-              window.dismissPanel();
-            }, 1200);
-          } else {
-            setTimeout(() => {
-              updateDownloadProgressCard(false);
-            }, 2000);
-          }
-        }
+        completeActiveTask(reqId, true);
         return true;
       } else {
+        completeActiveTask(reqId, false, res?.error);
         throw new Error(res?.error || "Download stream failed");
       }
     } else {
       // Browser Fallback
+      const fallbackReqId = "dl_blob_" + Date.now();
+      registerActiveTask(fallbackReqId, displayTitle, sanitizedFilename, isAudio ? "audio" : mediaCategory);
       const resp = await fetch(downloadUrl);
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const blob = await resp.blob();
@@ -1473,23 +1786,7 @@ async function executeSingleDownload(dlItem, result, index = 0, isBatch = false,
         optBtn.disabled = true;
       }
       saveToHistory(sanitizedFilename, result, dlItem, isAudio ? "audio" : mediaCategory, isBatch ? batchIndex : null, isBatch ? batchTotal : null);
-
-      if (!isBatch) {
-        updateDownloadProgressCard(true, displayTitle, 100);
-        showToast(t("saved"));
-        showNativeToast(t("saved"));
-
-        const totalOptions = (result && Array.isArray(result.downloads)) ? result.downloads.length : 1;
-        if (totalOptions <= 1) {
-          setTimeout(() => {
-            window.dismissPanel();
-          }, 1200);
-        } else {
-          setTimeout(() => {
-            updateDownloadProgressCard(false);
-          }, 2000);
-        }
-      }
+      completeActiveTask(fallbackReqId, true);
       return true;
     }
 
@@ -1558,128 +1855,59 @@ async function executeBatchDownload(items, result) {
   }
 
   const total = items.length;
-  showToast(t("downloading"));
-  showNativeToast(`Memulai unduhan ${total} berkas...`);
+  totalSessionDownloads += total;
+  showNativeToast(t("downloadStarted", { count: total }));
+  setTimeout(() => {
+    showNativeToast(t("dontCloseRecent"));
+  }, 1500);
 
-  updateDownloadProgressCard(true, `Mengunduh berkas 1 dari ${total}...`, 0);
+  // Pre-register all batch items into activeTasksMap as 'queued'
+  // so that:
+  // a) User sees all items when tapping progress bar
+  // b) checkAllDownloadsCompleted knows there are pending downloads and will not prematurely close
+  items.forEach((item, idx) => {
+    const itemReqId = "dl_batch_" + Date.now() + "_" + idx + "_" + Math.random().toString(36).substr(2, 5);
+    item.__assignedReqId = itemReqId;
+    const itemName = item.filename || item.title || item.name || `Item ${idx + 1}`;
+    registerQueuedTask(itemReqId, itemName, itemName, item.type || "media");
+  });
 
   if (window.NimiyoShareBridge && window.NimiyoShareBridge.setBatchActive) {
     window.NimiyoShareBridge.setBatchActive(true, total);
-  }
-
-  if (window.NimiyoShareBridge && window.NimiyoShareBridge.showBatchNotification) {
-    window.NimiyoShareBridge.showBatchNotification(
-      "Nimiyo Downloader",
-      `Mengunduh 1/${total} berkas...`,
-      1,
-      total,
-      0,
-      false
-    );
   }
 
   let successCount = 0;
 
   try {
     for (let i = 0; i < total; i++) {
+      if (analysisAborted || !window.__isBatchDownloading) {
+        break;
+      }
+
       const item = items[i];
       if (!item.itemIndex && !item.index) {
         item.itemIndex = i + 1;
       }
       item.batchTotal = total;
 
-      const baseProgress = (i / total) * 100;
-      const itemWeight = 100 / total;
-
       if (allBtn) {
         allBtn.innerText = `MENGUNDUH (${i + 1}/${total})...`;
       }
-
-      const cardTitle = `Mengunduh berkas ${i + 1} dari ${total}...`;
-      updateDownloadProgressCard(true, cardTitle, baseProgress);
-
-      activeDownloadProgressCallback = (reqId, pct) => {
-        const overall = Math.min(99, Math.round(baseProgress + ((pct / 100) * itemWeight)));
-        updateDownloadProgressCard(true, cardTitle, overall);
-        if (window.NimiyoShareBridge && window.NimiyoShareBridge.showBatchNotification) {
-          window.NimiyoShareBridge.showBatchNotification(
-            "Nimiyo Downloader",
-            `Mengunduh ${i + 1}/${total} berkas (${Math.round(pct)}%)...`,
-            i + 1,
-            total,
-            overall,
-            false
-          );
-        }
-      };
 
       const ok = await executeSingleDownload(item, result, i, true, i, total);
       if (ok) successCount++;
     }
   } finally {
-    activeDownloadProgressCallback = null;
     window.__isBatchDownloading = false;
-  }
-
-  // Finished batch
-  if (successCount === 0) {
-    updateDownloadProgressCard(false);
-    const failMsg = `Unduhan gagal: ${total} berkas tidak dapat diunduh`;
-    if (window.NimiyoShareBridge && window.NimiyoShareBridge.notifyBatchComplete) {
-      window.NimiyoShareBridge.notifyBatchComplete(0, failMsg);
-    } else {
-      if (window.NimiyoShareBridge && window.NimiyoShareBridge.showBatchNotification) {
-        window.NimiyoShareBridge.showBatchNotification(
-          "Nimiyo Downloader",
-          failMsg,
-          total,
-          total,
-          0,
-          true
-        );
-      }
-      if (window.NimiyoShareBridge && window.NimiyoShareBridge.setBatchActive) {
-        window.NimiyoShareBridge.setBatchActive(false, total);
-      }
-      showToast(failMsg);
-      showNativeToast(failMsg);
+    if (window.NimiyoShareBridge && window.NimiyoShareBridge.setBatchActive) {
+      window.NimiyoShareBridge.setBatchActive(false, total);
     }
-  } else {
-    updateDownloadProgressCard(true, `${successCount}/${total} berkas selesai diunduh!`, 100);
-    const completeMsg = `Semua ${successCount} berkas selesai diunduh!`;
-
-    if (window.NimiyoShareBridge && window.NimiyoShareBridge.notifyBatchComplete) {
-      window.NimiyoShareBridge.notifyBatchComplete(successCount, completeMsg);
-    } else {
-      if (window.NimiyoShareBridge && window.NimiyoShareBridge.showBatchNotification) {
-        window.NimiyoShareBridge.showBatchNotification(
-          "Nimiyo Downloader",
-          completeMsg,
-          total,
-          total,
-          100,
-          true
-        );
-      }
-      if (window.NimiyoShareBridge && window.NimiyoShareBridge.setBatchActive) {
-        window.NimiyoShareBridge.setBatchActive(false, total);
-      }
-      showToast(completeMsg);
-      showNativeToast(completeMsg);
+    if (allBtn) {
+      allBtn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg> ' + `SEMUA SELESAI (${successCount}/${total})`;
+      allBtn.disabled = true;
     }
+    checkAllDownloadsCompleted();
   }
-
-  if (allBtn) {
-    allBtn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg> ' + `SEMUA SELESAI (${successCount}/${total})`;
-    allBtn.disabled = true;
-  }
-
-  // Dismiss panel after 1500ms only if user is still on screen and no downloads are active
-  setTimeout(() => {
-    if (activeShareDownloadsCount === 0 && !window.__isMinimized) {
-      window.dismissPanel();
-    }
-  }, 1500);
 }
 
 function saveToHistory(filename, result, dlItem, mediaType = "media", batchIndex = null, batchTotal = null) {
@@ -1763,24 +1991,61 @@ function showNativeToast(message) {
 window.__isMinimized = false;
 
 window.dismissPanel = function () {
-  if (activeShareDownloadsCount > 0 || window.__isBatchDownloading) {
+  if (activeTasksMap.size > 0 || window.__isBatchDownloading) {
     window.__isMinimized = true;
     window.minimizeWindow();
     return;
   }
-  if (window.NimiyoShareBridge && window.NimiyoShareBridge.dismiss) {
+  if (window.NimiyoShareBridge && window.NimiyoShareBridge.finishAndClose) {
+    window.NimiyoShareBridge.finishAndClose();
+  } else if (window.NimiyoShareBridge && window.NimiyoShareBridge.dismiss) {
     window.NimiyoShareBridge.dismiss();
+  }
+};
+
+window.onWindowBroughtToFront = function () {
+  window.__isMinimized = false;
+  if (activeTasksMap.size > 0 && typeof window.toggleActiveDownloadsView === 'function') {
+    window.toggleActiveDownloadsView(true);
   }
 };
 
 window.minimizeWindow = function () {
   window.__isMinimized = true;
-  showToast(t("backgroundDl"));
-  showNativeToast(t("backgroundDl"));
   if (window.NimiyoShareBridge && window.NimiyoShareBridge.minimize) {
     window.NimiyoShareBridge.minimize();
   } else if (window.NimiyoShareBridge && window.NimiyoShareBridge.dismiss) {
     window.NimiyoShareBridge.dismiss();
+  }
+};
+
+window.cancelAllDownloads = function () {
+  if (completionTimeout) {
+    clearTimeout(completionTimeout);
+    completionTimeout = null;
+  }
+  window.__isBatchDownloading = false;
+  analysisAborted = true;
+
+  for (const [id, task] of activeTasksMap.entries()) {
+    if (task.status === 'downloading' || task.status === 'queued') {
+      task.status = 'cancelled';
+      task.percent = 0;
+      updateSingleTaskRow(task);
+    }
+  }
+  activeTasksMap.clear();
+  updateOverallProgressCard();
+
+  showNativeToast(t("allDownloadsCancelled"));
+
+  const bridge = window.NimiyoShareBridge || window.NimidzShareBridge;
+  if (bridge && typeof bridge.cancelAllDownloads === "function") {
+    bridge.cancelAllDownloads();
+  } else if (bridge && typeof bridge.finishAndClose === "function") {
+    bridge.finishAndClose();
+  } else if (bridge && typeof bridge.dismiss === "function") {
+    bridge.dismiss();
   }
 };
 

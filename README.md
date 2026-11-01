@@ -6,7 +6,7 @@
 
   **A Premium, Ultra-Fast & Lightweight Universal Media Downloader for Android**
 
-  [![Release](https://img.shields.io/badge/Release-v2.3.2--Lite-00C48C.svg?style=for-the-badge&logo=android&logoColor=white)](https://github.com/nimidz/Nimiyo-Downloader/releases)
+  [![Release](https://img.shields.io/badge/Release-v2.4.0--Lite-00C48C.svg?style=for-the-badge&logo=android&logoColor=white)](https://github.com/nimidz/Nimiyo-Downloader/releases)
   [![Total Downloads](https://img.shields.io/github/downloads/nimidz/Nimiyo-Downloader/total?style=for-the-badge&logo=github&color=3b82f6&label=Downloads)](https://github.com/nimidz/Nimiyo-Downloader/releases)
   [![Stars](https://img.shields.io/github/stars/nimidz/Nimiyo-Downloader?style=for-the-badge&logo=apachespark&color=f59e0b&label=Stars)](https://github.com/nimidz/Nimiyo-Downloader/stargazers)
   [![License](https://img.shields.io/badge/License-GPL--3.0-black.svg?style=for-the-badge)](LICENSE)
@@ -22,8 +22,8 @@
   </p>
 
   <p align="center">
-    <a href="https://github.com/nimidz/Nimiyo-Downloader/releases/download/v2.3.2/Nimiyo.v2.3.2.apk">
-      <img src="https://img.shields.io/badge/Direct_Download_APK-⬇️_v2.3.2-00C48C?style=for-the-badge&logo=android&logoColor=white" alt="Direct Download APK" />
+    <a href="https://github.com/nimidz/Nimiyo-Downloader/releases/download/v2.4.0/Nimiyo.v2.4.0.apk">
+      <img src="https://img.shields.io/badge/Direct_Download_APK-⬇️_v2.4.0-00C48C?style=for-the-badge&logo=android&logoColor=white" alt="Direct Download APK" />
     </a>
     <a href="https://github.com/nimidz/Nimiyo-Downloader/releases/latest">
       <img src="https://img.shields.io/badge/GitHub_Releases-🚀-3b82f6?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Releases" />

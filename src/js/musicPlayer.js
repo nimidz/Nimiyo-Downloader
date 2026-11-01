@@ -490,11 +490,13 @@ class NimiyoMusicPlayer {
       playlistBackBtn: document.getElementById("playlistBackBtn"),
       playlistHeaderTitle: document.getElementById("playlistHeaderTitle"),
       playlistCreateBtn: document.getElementById("playlistCreateBtn"),
+      playlistSyncBtn: document.getElementById("playlistSyncBtn"),
       playlistListView: document.getElementById("playlistListView"),
       playlistCountSubtitle: document.getElementById("playlistCountSubtitle"),
       playlistCardsGrid: document.getElementById("playlistCardsGrid"),
       playlistEmptyState: document.getElementById("playlistEmptyState"),
       playlistEmptyCreateBtn: document.getElementById("playlistEmptyCreateBtn"),
+      playlistEmptySyncBtn: document.getElementById("playlistEmptySyncBtn"),
       playlistDetailView: document.getElementById("playlistDetailView"),
       playlistDetailCover: document.getElementById("playlistDetailCover"),
       playlistDetailName: document.getElementById("playlistDetailName"),
@@ -768,6 +770,7 @@ class NimiyoMusicPlayer {
       this.processLibraryTracks(tracks);
       this.renderCurrentTab();
       this.updateLibraryStatsUi();
+      this.loadPlaylistsFromDisk(false);
 
       if (isUserTriggered && window.showToast) {
         const total = this.allTracks.length;
@@ -832,6 +835,9 @@ class NimiyoMusicPlayer {
     this.albumsMap.clear();
 
     for (const track of this.allTracks) {
+      if (track.filePath && !track.fileId) {
+        track.fileId = "file_" + Math.abs(this.javaHashCode(track.filePath));
+      }
       // Clean fallback strings
       const rawTitle = track.title || track.fileName?.replace(/\.[^.]+$/, "") || "";
       const rawArtist = track.artist && track.artist.trim() ? track.artist.trim() : "";
@@ -6150,6 +6156,69 @@ class NimiyoMusicPlayer {
   // -------------------------------------------------------------
   // Playlist Management Engine
   // -------------------------------------------------------------
+  javaHashCode(str) {
+    if (!str || typeof str !== "string") return 0;
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return hash;
+  }
+
+  findTrack(tid, pl = null) {
+    if (!tid) return null;
+    const tidStr = String(tid).trim();
+
+    // 1. Direct ID match
+    let t = this.allTracks.find(item => String(item.id) === tidStr);
+    if (t) return t;
+
+    // 2. Direct fileId match
+    t = this.allTracks.find(item => item.fileId && String(item.fileId) === tidStr);
+    if (t) return t;
+
+    // 3. Match by Java hashCode of filePath
+    t = this.allTracks.find(item => {
+      if (!item.filePath) return false;
+      const h1 = "file_" + Math.abs(this.javaHashCode(item.filePath));
+      if (h1 === tidStr) return true;
+      if (item.filePath.startsWith("/storage/emulated/0/")) {
+        const alt = "/sdcard/" + item.filePath.slice(19);
+        if (("file_" + Math.abs(this.javaHashCode(alt))) === tidStr) return true;
+      } else if (item.filePath.startsWith("/sdcard/")) {
+        const alt = "/storage/emulated/0/" + item.filePath.slice(8);
+        if (("file_" + Math.abs(this.javaHashCode(alt))) === tidStr) return true;
+      }
+      return false;
+    });
+    if (t) return t;
+
+    // 4. Match in nimiyoTracks
+    if (Array.isArray(this.nimiyoTracks)) {
+      t = this.nimiyoTracks.find(item => String(item.id) === tidStr || (item.fileId && String(item.fileId) === tidStr));
+      if (t) return t;
+    }
+
+    // 5. Match by fileName if recorded in pl
+    if (pl && Array.isArray(pl.trackFileNames) && Array.isArray(pl.trackIds)) {
+      const idx = pl.trackIds.findIndex(x => String(x) === tidStr);
+      if (idx !== -1 && pl.trackFileNames[idx]) {
+        const targetFileName = String(pl.trackFileNames[idx]).toLowerCase();
+        t = this.allTracks.find(item => item.fileName && item.fileName.toLowerCase() === targetFileName);
+        if (t) return t;
+      }
+    }
+
+    // 6. Match by fileName if tidStr has a filename hint
+    if (tidStr.startsWith("file_")) {
+      t = this.allTracks.find(item => item.fileName && tidStr.toLowerCase().includes(item.fileName.toLowerCase()));
+      if (t) return t;
+    }
+
+    return null;
+  }
+
   loadPlaylists() {
     try {
       const raw = localStorage.getItem("nimiyo_playlists");
@@ -6163,49 +6232,77 @@ class NimiyoMusicPlayer {
       this.playlists = [];
     }
 
-    // Proactively sync with persistent storage on device: Download/Nimiyo/database/playlist_*.json
-    this.loadPlaylistsFromDisk();
+    // Proactively sync with persistent storage on device: Download/Nimiyo/database/*.json
+    this.loadPlaylistsFromDisk(false);
   }
 
-  loadPlaylistsFromDisk() {
+  loadPlaylistsFromDisk(isUserTriggered = false) {
     try {
       const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
       if (!MediaSaver || typeof MediaSaver.loadAllPlaylists !== "function") return;
+
+      const syncBtn = document.getElementById("playlistSyncBtn");
+      if (syncBtn && isUserTriggered) {
+        syncBtn.classList.add("spinning");
+      }
+
       MediaSaver.loadAllPlaylists().then(res => {
+        if (syncBtn) {
+          setTimeout(() => syncBtn.classList.remove("spinning"), 600);
+        }
+
         if (res && Array.isArray(res.playlists)) {
-          if (res.playlists.length > 0) {
-            const diskMap = new Map();
-            res.playlists.forEach(pl => {
+          const diskPlaylists = res.playlists;
+          if (diskPlaylists.length > 0) {
+            const mergedMap = new Map();
+
+            // 1. Disk is persistent source of truth: key primarily by pl.id
+            diskPlaylists.forEach(pl => {
               if (pl && (pl.id || pl.name)) {
-                const key = pl.id || ("pl_" + pl.name);
-                diskMap.set(key, pl);
+                const key = pl.id || (pl.name || "").trim().toLowerCase();
+                mergedMap.set(key, pl);
               }
             });
-            // If localStorage had items not yet on disk, preserve and write them to disk
+
+            // 2. Preserve any memory/local playlists not yet written to disk
             if (Array.isArray(this.playlists)) {
               this.playlists.forEach(pl => {
-                const key = pl.id || ("pl_" + pl.name);
-                if (pl && !diskMap.has(key)) {
-                  diskMap.set(key, pl);
-                  this.savePlaylistToDisk(pl);
+                if (pl && (pl.id || pl.name)) {
+                  const key = pl.id || (pl.name || "").trim().toLowerCase();
+                  if (!mergedMap.has(key)) {
+                    mergedMap.set(key, pl);
+                    this.savePlaylistToDisk(pl);
+                  }
                 }
               });
             }
-            this.playlists = Array.from(diskMap.values()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+            this.playlists = Array.from(mergedMap.values()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
             try { localStorage.setItem("nimiyo_playlists", JSON.stringify(this.playlists)); } catch (_) {}
             this.renderPlaylistsList();
             if (this.activePlaylistId) {
               this.renderPlaylistDetailTracks();
             }
+
+            if (isUserTriggered && window.showToast) {
+              window.showToast(this.t("playlistSyncedToast", `Database playlist disinkronkan (${this.playlists.length} playlist)`), "success");
+            }
           } else if (Array.isArray(this.playlists) && this.playlists.length > 0) {
-            // Initial migration: write existing local playlists to disk
             this.playlists.forEach(pl => {
               this.savePlaylistToDisk(pl);
             });
+          } else {
+            if (isUserTriggered && window.showToast) {
+              window.showToast(this.t("playlistEmptyDatabaseToast", "Tidak ada berkas playlist di database Nimiyo"), "info");
+            }
           }
         }
       }).catch(err => {
+        if (syncBtn) syncBtn.classList.remove("spinning");
         console.warn("[MUSIC] Load playlists from disk error:", err);
+        if (isUserTriggered && window.showToast) {
+          window.showToast(this.t("playlistSyncError", "Gagal membaca database playlist"), "error");
+        }
       });
     } catch (e) {
       console.warn("[MUSIC] loadPlaylistsFromDisk exception:", e);
@@ -6229,9 +6326,21 @@ class NimiyoMusicPlayer {
       if (!playlist || !playlist.name) return;
       const MediaSaver = window.Capacitor?.Plugins?.MediaSaver;
       if (MediaSaver && typeof MediaSaver.savePlaylistFile === "function") {
+        const enriched = { ...playlist };
+        if (Array.isArray(playlist.trackIds) && Array.isArray(this.allTracks)) {
+          enriched.trackFileNames = [];
+          enriched.trackPaths = [];
+          for (const tid of playlist.trackIds) {
+            const trk = this.findTrack(tid, playlist);
+            if (trk) {
+              if (trk.fileName) enriched.trackFileNames.push(trk.fileName);
+              if (trk.filePath) enriched.trackPaths.push(trk.filePath);
+            }
+          }
+        }
         MediaSaver.savePlaylistFile({
           name: playlist.name,
-          playlistJson: JSON.stringify(playlist)
+          playlistJson: JSON.stringify(enriched)
         }).catch(e => console.warn("[MUSIC] savePlaylistFile error:", e));
       }
     } catch (_) {}
@@ -6278,6 +6387,7 @@ class NimiyoMusicPlayer {
         modal.style.display = "flex";
         this.closePlaylistDetail();
         this.renderPlaylistsList();
+        this.loadPlaylistsFromDisk(false);
       }
     } catch (err) {
       console.error("[MUSIC] openPlaylistModal error:", err);
@@ -6418,7 +6528,7 @@ class NimiyoMusicPlayer {
     grid.innerHTML = this.playlists.map(pl => {
       let coverSrc = "nimiyo_icon.webp";
       if (pl.trackIds && pl.trackIds.length > 0) {
-        const firstTrack = this.allTracks.find(t => t.id === pl.trackIds[0]);
+        const firstTrack = this.findTrack(pl.trackIds[0], pl);
         if (firstTrack) {
           coverSrc = this.artworkCache.get(firstTrack.id) || "nimiyo_icon.webp";
         }
@@ -6429,7 +6539,7 @@ class NimiyoMusicPlayer {
           <div class="playlist-card-cover-wrap">
             <img class="playlist-card-cover" src="${coverSrc}" alt="Cover" onerror="this.src='nimiyo_icon.webp'">
             <div class="playlist-card-play-overlay">
-              <div class="playlist-card-play-btn">
+              <div class="playlist-card-play-btn" data-play-playlist-id="${pl.id}" title="${this.t("playlistPlayAll", "Putar")}">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
               </div>
             </div>
@@ -6443,8 +6553,16 @@ class NimiyoMusicPlayer {
     }).join("");
 
     grid.querySelectorAll(".playlist-card").forEach(card => {
-      card.addEventListener("click", () => {
+      card.addEventListener("click", (e) => {
         const id = card.getAttribute("data-playlist-id");
+        if (e.target.closest(".playlist-card-play-btn")) {
+          e.stopPropagation();
+          if (id) {
+            this.activePlaylistId = id;
+            this.playActivePlaylist();
+          }
+          return;
+        }
         if (id) this.openPlaylistDetail(id);
       });
     });
@@ -6488,9 +6606,7 @@ class NimiyoMusicPlayer {
 
     if (pl.trackIds && pl.trackIds.length > 0) {
       for (const tid of pl.trackIds) {
-        const tidStr = String(tid);
-        const t = this.allTracks.find(item => String(item.id) === tidStr)
-               || (this.nimiyoTracks && this.nimiyoTracks.find(item => String(item.id) === tidStr));
+        const t = this.findTrack(tid, pl);
         if (t) {
           trackObjects.push(t);
           totalDurMs += (t.duration || 0);
@@ -6835,7 +6951,12 @@ class NimiyoMusicPlayer {
     const promptMsg = this.t("playlistConfirmRemoveSelected", `Hapus ${count} lagu dari playlist "${pl.name}"?`, { count, name: pl.name });
 
     if (confirm(promptMsg)) {
-      pl.trackIds = pl.trackIds.filter(id => !this.selectedPlaylistTrackIds.has(id));
+      pl.trackIds = pl.trackIds.filter(id => {
+        if (this.selectedPlaylistTrackIds.has(id)) return false;
+        const trk = this.findTrack(id, pl);
+        if (trk && this.selectedPlaylistTrackIds.has(trk.id)) return false;
+        return true;
+      });
       this.savePlaylists();
       this.exitPlaylistSelectionMode();
       this.renderPlaylistDetailTracks();
@@ -6861,8 +6982,13 @@ class NimiyoMusicPlayer {
 
   removeTrackFromPlaylist(trackId) {
     const pl = this.playlists.find(p => p.id === this.activePlaylistId);
-    if (!pl) return;
-    pl.trackIds = pl.trackIds.filter(id => id !== trackId);
+    if (!pl || !pl.trackIds) return;
+    const targetTrack = this.findTrack(trackId, pl);
+    pl.trackIds = pl.trackIds.filter(id => {
+      const trk = this.findTrack(id, pl);
+      if (trk && targetTrack && trk.id === targetTrack.id) return false;
+      return String(id) !== String(trackId);
+    });
     this.savePlaylists();
     this.renderPlaylistDetailTracks();
     if (window.showToast) window.showToast(this.t("playlistSongRemoved", "Lagu dihapus dari playlist"), "info");
@@ -6877,7 +7003,7 @@ class NimiyoMusicPlayer {
 
     const trackObjects = [];
     for (const tid of pl.trackIds) {
-      const t = this.allTracks.find(item => item.id === tid);
+      const t = this.findTrack(tid, pl);
       if (t) trackObjects.push(t);
     }
 
@@ -6901,7 +7027,19 @@ class NimiyoMusicPlayer {
     const pl = this.playlists.find(p => p.id === this.activePlaylistId);
     if (!pl) return;
 
-    this.selectedPickerTrackIds = new Set(pl.trackIds || []);
+    const initialSet = new Set();
+    if (Array.isArray(pl.trackIds)) {
+      for (const tid of pl.trackIds) {
+        const trk = this.findTrack(tid, pl);
+        if (trk) {
+          initialSet.add(trk.id);
+          if (trk.fileId) initialSet.add(trk.fileId);
+        } else {
+          initialSet.add(tid);
+        }
+      }
+    }
+    this.selectedPickerTrackIds = initialSet;
     this.pickerActiveTab = "all";
     this.pickerSearchQuery = "";
 
@@ -6979,7 +7117,7 @@ class NimiyoMusicPlayer {
     }
 
     listEl.innerHTML = tracks.map(track => {
-      const isSelected = this.selectedPickerTrackIds.has(track.id);
+      const isSelected = this.selectedPickerTrackIds.has(track.id) || (track.fileId && this.selectedPickerTrackIds.has(track.fileId));
       const artSrc = this.artworkCache.get(track.id) || "nimiyo_icon.webp";
       const durStr = this.formatTime(track.duration ? Math.floor(track.duration / 1000) : 0);
       return `
@@ -7008,10 +7146,16 @@ class NimiyoMusicPlayer {
   }
 
   togglePickerTrack(trackId) {
-    if (this.selectedPickerTrackIds.has(trackId)) {
+    const trk = this.findTrack(trackId);
+    const hasIt = this.selectedPickerTrackIds.has(trackId) || (trk && trk.fileId && this.selectedPickerTrackIds.has(trk.fileId));
+    if (hasIt) {
       this.selectedPickerTrackIds.delete(trackId);
+      if (trk && trk.fileId) this.selectedPickerTrackIds.delete(trk.fileId);
+      if (trk && trk.id) this.selectedPickerTrackIds.delete(trk.id);
     } else {
       this.selectedPickerTrackIds.add(trackId);
+      if (trk && trk.id) this.selectedPickerTrackIds.add(trk.id);
+      if (trk && trk.fileId) this.selectedPickerTrackIds.add(trk.fileId);
     }
     this.renderSongPicker();
   }
@@ -7115,7 +7259,12 @@ class NimiyoMusicPlayer {
 
     if (!pl.trackIds) pl.trackIds = [];
     const trackIdStr = String(track.id);
-    if (pl.trackIds.some(id => String(id) === trackIdStr)) {
+    const hasIt = pl.trackIds.some(id => {
+      const idStr = String(id);
+      return idStr === trackIdStr || (track.fileId && idStr === String(track.fileId));
+    });
+
+    if (hasIt) {
       if (window.showToast) window.showToast(this.t("playlistSongAlreadyIn", `Lagu sudah ada di "${pl.name}"`, { name: pl.name }), "info");
     } else {
       pl.trackIds.push(track.id);
@@ -8094,9 +8243,17 @@ class NimiyoMusicPlayer {
     if (plCreateBtn) {
       plCreateBtn.addEventListener("click", () => this.openCreatePlaylistDialog());
     }
+    const plSyncBtn = this.elements.playlistSyncBtn || document.getElementById("playlistSyncBtn");
+    if (plSyncBtn) {
+      plSyncBtn.addEventListener("click", () => this.loadPlaylistsFromDisk(true));
+    }
     const plEmptyCreateBtn = this.elements.playlistEmptyCreateBtn || document.getElementById("playlistEmptyCreateBtn");
     if (plEmptyCreateBtn) {
       plEmptyCreateBtn.addEventListener("click", () => this.openCreatePlaylistDialog());
+    }
+    const plEmptySyncBtn = this.elements.playlistEmptySyncBtn || document.getElementById("playlistEmptySyncBtn");
+    if (plEmptySyncBtn) {
+      plEmptySyncBtn.addEventListener("click", () => this.loadPlaylistsFromDisk(true));
     }
 
     if (this.elements.playlistPlayAllBtn) {

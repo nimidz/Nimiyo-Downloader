@@ -65,6 +65,14 @@ async function build() {
       }
     });
 
+    // 4. Sync directly to android/app/src/main/assets/public
+    const androidPublicDir = "android/app/src/main/assets/public";
+    if (fs.existsSync(androidPublicDir)) {
+      console.log("Syncing www to android assets public...");
+      copyDirSync("www", androidPublicDir);
+      console.log("Synced to android/app/src/main/assets/public successfully!");
+    }
+
     console.log("Build complete! Modular scrapers are now standalone folders in www.");
   } catch (error) {
     console.error("Build failed:", error);

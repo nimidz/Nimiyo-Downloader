@@ -148,11 +148,11 @@
             </div>
             <div class="result-meta">
               <span id="platformTag" class="tag">youtube</span>
-              <!-- Server Selector -->
-              <div id="serverSelectorContainer" class="server-selector-container hidden">
-                <label for="serverSelect">Server:</label>
-                <select id="serverSelect" class="server-select"></select>
-              </div>
+              <!-- Server Switch Button -->
+              <button class="server-switch-btn hidden" id="serverSwitchBtn" title="Change Server">
+                <span class="server-icon">⇄</span>
+                <span class="server-name" id="serverLabel">Server</span>
+              </button>
             </div>
             <!-- Description Container (Hidden if empty) -->
             <div id="descriptionContainer" class="description-container hidden">
@@ -297,7 +297,7 @@
                 <img src="icon_untukdi_aboutthisapp.webp" alt="Nimiyo App Logo" class="about-logo">
                 <div class="about-title-group">
                   <h4>NIMIYO Downloader</h4>
-                  <div class="about-badge-pill" data-i18n="aboutVersion">v2.3.2 (Lite)</div>
+                  <div class="about-badge-pill" data-i18n="aboutVersion">v2.4.0 (Lite)</div>
                 </div>
               </div>
               <button type="button" id="btnOpenBugReport" class="bug-report-btn" title="Laporkan Bug / Masalah">
@@ -994,7 +994,7 @@
       </div>
       <div class="modal-body update-modal-body">
         <div class="update-banner">
-          <div class="update-version-badge" id="updateVersionBadge">v2.3.2</div>
+          <div class="update-version-badge" id="updateVersionBadge">v2.4.0</div>
           <div class="update-app-title">NIMIYO Downloader (Lite)</div>
         </div>
         <div class="update-changelog-box">
@@ -1801,6 +1801,11 @@
         </button>
         <h1 class="logo playlist-header-title" id="playlistHeaderTitle" data-i18n="playlistHeaderTitle">PLAYLIST</h1>
         <div class="header-actions">
+          <button id="playlistSyncBtn" class="icon-btn playlist-sync-btn" aria-label="Sinkronkan Database" title="Sinkronkan Playlist dari Database">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+            </svg>
+          </button>
           <button id="playlistCreateBtn" class="icon-btn playlist-add-btn" aria-label="Tambah Playlist" title="Tambah Playlist Baru">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -1827,7 +1832,10 @@
             <div class="playlist-empty-icon"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></div>
             <h3 class="playlist-empty-title" data-i18n="playlistEmptyTitle">Belum Ada Playlist</h3>
             <p class="playlist-empty-desc" data-i18n="playlistEmptyDesc">Kumpulkan lagu favoritmu dari NIMIYO, Songs, Artists, dan Album ke dalam daftar putar khusus.</p>
-            <button id="playlistEmptyCreateBtn" class="btn primary-btn" style="margin-top: 14px; font-weight: 800;" data-i18n="playlistBtnCreateNew">+ Buat Playlist Baru</button>
+            <div style="display:flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px;">
+              <button id="playlistEmptyCreateBtn" class="btn primary-btn" style="font-weight: 800;" data-i18n="playlistBtnCreateNew">+ Buat Playlist Baru</button>
+              <button id="playlistEmptySyncBtn" class="btn secondary-btn" style="font-weight: 800;" data-i18n="playlistBtnSyncDb">Sinkronkan Database</button>
+            </div>
           </div>
         </div>
 

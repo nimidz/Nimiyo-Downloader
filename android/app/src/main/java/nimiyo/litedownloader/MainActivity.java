@@ -42,6 +42,34 @@ public class MainActivity extends BridgeActivity {
                 }, 102);
             }
         }
+        handleIncomingIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(android.content.Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIncomingIntent(intent);
+    }
+
+    private void handleIncomingIntent(android.content.Intent intent) {
+        if (intent != null && intent.getBooleanExtra("open_balloon", false)) {
+            intent.removeExtra("open_balloon");
+            triggerOpenBalloon();
+        }
+    }
+
+    private void triggerOpenBalloon() {
+        runOnUiThread(() -> {
+            try {
+                if (bridge != null && bridge.getWebView() != null) {
+                    bridge.getWebView().evaluateJavascript(
+                        "(function() { if (typeof window.openDownloadBalloonSheet === 'function') { window.openDownloadBalloonSheet(); } })()",
+                        null
+                    );
+                }
+            } catch (Exception ignored) {}
+        });
     }
 
     private void applyHighRefreshRate() {
@@ -90,6 +118,7 @@ public class MainActivity extends BridgeActivity {
         super.onResume();
         applyHighRefreshRate();
         optimizeWebView();
+        handleIncomingIntent(getIntent());
     }
 
     @Override

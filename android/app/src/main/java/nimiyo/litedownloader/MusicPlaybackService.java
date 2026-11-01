@@ -831,6 +831,21 @@ public class MusicPlaybackService extends Service {
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
+        try {
+            if (rootIntent != null && rootIntent.getComponent() != null) {
+                String className = rootIntent.getComponent().getClassName();
+                if (className != null && className.contains("ShareActivity")) {
+                    android.util.Log.d("MusicPlaybackService", "onTaskRemoved: ignoring QuickSave ShareActivity task removal");
+                    return;
+                }
+            }
+        } catch (Exception ignored) {}
+
+        if (isPlaying()) {
+            android.util.Log.d("MusicPlaybackService", "onTaskRemoved: music is playing, preserving playback");
+            return;
+        }
+
         handleClearAction();
     }
 

@@ -34,6 +34,9 @@ ContohJS_untukScraper_PastikanHanyaMenyontekCode/
 ingredientsforAPP/
 *Bahan*/
 scratch/
+scratch_log.txt
+scrapr_src/
+*.bak
 edjing_dump/
 search_contoh.js
 

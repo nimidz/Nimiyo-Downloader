@@ -3,6 +3,7 @@ package nimiyo.litedownloader;
 import android.app.DownloadManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -56,6 +57,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -70,7 +72,6 @@ public class MediaSaverPlugin extends Plugin {
     private static final String MUSIC_CHANNEL_ID = "nimiyo_media_channel";
     private static final int MUSIC_NOTIFICATION_ID = 8803;
     private android.os.PowerManager.WakeLock downloadWakeLock = null;
-    private android.net.wifi.WifiManager.WifiLock downloadWifiLock = null;
     private final java.util.concurrent.atomic.AtomicInteger activeDownloads = new java.util.concurrent.atomic.AtomicInteger(0);
     private BroadcastReceiver becomingNoisyReceiver = null;
     private static volatile boolean isAppForeground = true;
@@ -252,29 +253,44 @@ public class MediaSaverPlugin extends Plugin {
                 return;
             }
 
-            int appIcon = isCompleted ? android.R.drawable.stat_sys_download_done : android.R.drawable.stat_sys_download;
+            if (isCompleted) {
+                manager.cancel(NOTIFICATION_ID);
+                call.resolve(new JSObject().put("success", true));
+                return;
+            }
 
             Intent openAppIntent = new Intent(getContext(), MainActivity.class);
-            openAppIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            android.app.PendingIntent pendingIntent = android.app.PendingIntent.getActivity(
-                getContext(), 0, openAppIntent,
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? android.app.PendingIntent.FLAG_IMMUTABLE | android.app.PendingIntent.FLAG_UPDATE_CURRENT : android.app.PendingIntent.FLAG_UPDATE_CURRENT
+            openAppIntent.setAction(Intent.ACTION_MAIN);
+            openAppIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+            openAppIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            openAppIntent.putExtra("open_balloon", true);
+
+            int pendingFlags = PendingIntent.FLAG_UPDATE_CURRENT;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                pendingFlags |= PendingIntent.FLAG_IMMUTABLE;
+            }
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                getContext(), NOTIFICATION_ID, openAppIntent, pendingFlags
             );
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), CHANNEL_ID)
-                .setSmallIcon(appIcon)
+                .setSmallIcon(android.R.drawable.stat_sys_download)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setContentIntent(pendingIntent)
-                .setOngoing(!isCompleted)
-                .setAutoCancel(isCompleted)
+                .setOngoing(true)
+                .setAutoCancel(false)
                 .setOnlyAlertOnce(true)
-                .setPriority(isCompleted ? NotificationCompat.PRIORITY_DEFAULT : NotificationCompat.PRIORITY_LOW);
+                .setSilent(true)
+                .setShowWhen(false)
+                .setCategory(NotificationCompat.CATEGORY_PROGRESS)
+                .setPriority(NotificationCompat.PRIORITY_MAX);
 
-            if (isCompleted) {
-                builder.setProgress(0, 0, false);
+            if (max > 0) {
+                int overallPercent = Math.min(Math.max(progress, 0), 100);
+                builder.setProgress(100, overallPercent, false);
             } else {
-                builder.setProgress(max, progress, false);
+                builder.setProgress(0, 0, true);
             }
 
             manager.notify(NOTIFICATION_ID, builder.build());
@@ -282,6 +298,20 @@ public class MediaSaverPlugin extends Plugin {
         } catch (Exception e) {
             call.reject("Notification failed: " + e.getMessage());
         }
+    }
+
+    @PluginMethod
+    public void checkOpenBalloon(PluginCall call) {
+        boolean open = false;
+        if (getActivity() != null && getActivity().getIntent() != null) {
+            open = getActivity().getIntent().getBooleanExtra("open_balloon", false);
+            if (open) {
+                getActivity().getIntent().removeExtra("open_balloon");
+            }
+        }
+        JSObject ret = new JSObject();
+        ret.put("openBalloon", open);
+        call.resolve(ret);
     }
 
     @PluginMethod
@@ -692,20 +722,6 @@ public class MediaSaverPlugin extends Plugin {
                     downloadWakeLock.acquire(60 * 60 * 1000L); // 60 minutes safety timeout
                 }
 
-                if (downloadWifiLock == null) {
-                    android.net.wifi.WifiManager wm = (android.net.wifi.WifiManager) ctx.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                    if (wm != null) {
-                        int mode = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-                                ? android.net.wifi.WifiManager.WIFI_MODE_FULL_HIGH_PERF
-                                : android.net.wifi.WifiManager.WIFI_MODE_FULL;
-                        downloadWifiLock = wm.createWifiLock(mode, "Nimiyo:DownloadWifiLock");
-                        downloadWifiLock.setReferenceCounted(false);
-                    }
-                }
-                if (downloadWifiLock != null && !downloadWifiLock.isHeld()) {
-                    downloadWifiLock.acquire();
-                }
-
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         try {
@@ -714,9 +730,6 @@ public class MediaSaverPlugin extends Plugin {
                     });
                 }
             }
-
-            // Keep entire application process alive as foreground service
-            DownloadService.startForegroundHold(ctx, taskTitle != null ? taskTitle : "Mengunduh berkas...");
         } catch (Exception ignored) {}
     }
 
@@ -727,15 +740,10 @@ public class MediaSaverPlugin extends Plugin {
     private synchronized void releaseDownloadWakeLock() {
         try {
             Context ctx = getContext();
-            DownloadService.releaseForegroundHold(ctx);
-
             if (activeDownloads.decrementAndGet() <= 0) {
                 activeDownloads.set(0);
                 if (downloadWakeLock != null && downloadWakeLock.isHeld()) {
                     downloadWakeLock.release();
-                }
-                if (downloadWifiLock != null && downloadWifiLock.isHeld()) {
-                    downloadWifiLock.release();
                 }
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
@@ -859,7 +867,6 @@ public class MediaSaverPlugin extends Plugin {
             Uri fileUri = null;
             File targetFileLegacy = null;
             ContentResolver resolver = getContext().getContentResolver();
-            int notifId = 0;
 
             try {
                 String lowerFileName = fileName.toLowerCase();
@@ -877,12 +884,9 @@ public class MediaSaverPlugin extends Plugin {
                     targetSubFolder = "VideoYo";
                 }
 
-                notifId = 8000 + Math.abs((targetSubFolder + "/" + fileName).hashCode() % 10000);
-
                 if ("skip".equalsIgnoreCase(overwriteMode)) {
                     File existing = resolveMediaFile(targetSubFolder, fileName);
                     if (existing != null && existing.exists()) {
-                        showSystemNotificationDirect(notifId, "Nimiyo Downloader", "Berkas sudah ada (dilewati): " + existing.getName(), 100, 100, true);
                         JSObject ret = new JSObject();
                         ret.put("success", true);
                         ret.put("skipped", true);
@@ -897,9 +901,6 @@ public class MediaSaverPlugin extends Plugin {
                 } else if ("overwrite".equalsIgnoreCase(overwriteMode)) {
                     handleExistingFileForOverwrite(targetSubFolder, fileName);
                 }
-
-                ensureNotificationChannel();
-                showSystemNotificationDirect(notifId, "Nimiyo Downloader", "Mengunduh " + fileName, 10, 100, false);
 
                 Map<String, String> headers = new HashMap<>();
                 if (headersObj != null) {
@@ -1053,13 +1054,6 @@ public class MediaSaverPlugin extends Plugin {
                 while ((len = is.read(buf)) != -1) {
                     os.write(buf, 0, len);
                     totalDownloaded += len;
-
-                    long now = System.currentTimeMillis();
-                    if (contentLength > 0 && (now - lastProgressTime > 400)) {
-                        lastProgressTime = now;
-                        int percent = (int) Math.min((totalDownloaded * 100) / contentLength, 99);
-                        showSystemNotificationDirect(notifId, "Nimiyo Downloader", "Mengunduh " + fileName + " (" + percent + "%)", percent, 100, false);
-                    }
                 }
                 os.flush();
                 try { os.close(); } catch (Exception ignored) {}
@@ -1104,8 +1098,6 @@ public class MediaSaverPlugin extends Plugin {
                     );
                 }
 
-                showSystemNotificationDirect(notifId, "Nimiyo Downloader", "Selesai: " + actualFileName, 100, 100, true);
-
                 JSObject ret = new JSObject();
                 ret.put("success", true);
                 ret.put("uri", fileUri != null ? fileUri.toString() : "");
@@ -1124,7 +1116,6 @@ public class MediaSaverPlugin extends Plugin {
                 if (targetFileLegacy != null && targetFileLegacy.exists()) {
                     try { targetFileLegacy.delete(); } catch (Exception ignored) {}
                 }
-                showSystemNotificationDirect(notifId, "Nimiyo Downloader", "Gagal mengunduh: " + fileName, 0, 0, true);
                 call.reject("Download failed: " + e.getMessage());
             } finally {
                 try { if (is != null) is.close(); } catch (Exception ignored) {}
@@ -2181,6 +2172,9 @@ public class MediaSaverPlugin extends Plugin {
 
                             JSObject trk = new JSObject();
                             trk.put("id", "ms_" + id);
+                            if (data != null && !data.isEmpty()) {
+                                trk.put("fileId", "file_" + Math.abs(data.hashCode()));
+                            }
                             trk.put("title", title);
                             trk.put("artist", artist);
                             trk.put("album", album);
@@ -2272,6 +2266,7 @@ public class MediaSaverPlugin extends Plugin {
 
             JSObject trk = new JSObject();
             trk.put("id", "file_" + Math.abs(f.getAbsolutePath().hashCode()));
+            trk.put("fileId", "file_" + Math.abs(f.getAbsolutePath().hashCode()));
             trk.put("title", title);
             trk.put("artist", artist);
             trk.put("album", album);
@@ -2320,6 +2315,7 @@ public class MediaSaverPlugin extends Plugin {
         } catch (Exception e) {
             JSObject trk = new JSObject();
             trk.put("id", "file_" + Math.abs(f.getAbsolutePath().hashCode()));
+            trk.put("fileId", "file_" + Math.abs(f.getAbsolutePath().hashCode()));
             trk.put("title", f.getName().replaceFirst("[.][^.]+$", ""));
             trk.put("artist", "");
             trk.put("album", "");
@@ -3080,6 +3076,10 @@ public class MediaSaverPlugin extends Plugin {
         File downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         File dbDir = new File(downloads, "Nimiyo/database");
         if (!dbDir.exists()) {
+            File altDir = new File(downloads, "Nimiyo/Database");
+            if (altDir.exists() && altDir.isDirectory()) {
+                return altDir;
+            }
             dbDir.mkdirs();
         }
         return dbDir;
@@ -3236,12 +3236,27 @@ public class MediaSaverPlugin extends Plugin {
     public void loadAllPlaylists(PluginCall call) {
         downloadExecutor.execute(() -> {
             try {
-                File dir = getPlaylistDatabaseDir();
-                JSArray list = new JSArray();
+                File downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                File extStorage = Environment.getExternalStorageDirectory();
 
-                File[] files = dir.listFiles((d, fName) -> fName != null && fName.startsWith("playlist_") && fName.endsWith(".json"));
-                if (files != null) {
+                File[] possibleDirs = new File[] {
+                    new File(downloads, "Nimiyo/database"),
+                    new File(downloads, "Nimiyo/Database"),
+                    new File(downloads, "nimiyo/database"),
+                    new File(extStorage, "Download/Nimiyo/database"),
+                    new File(extStorage, "Download/Nimiyo/Database")
+                };
+
+                JSArray list = new JSArray();
+                java.util.HashSet<String> seenKeys = new java.util.HashSet<>();
+
+                for (File dir : possibleDirs) {
+                    if (dir == null || !dir.exists() || !dir.isDirectory()) continue;
+                    File[] files = dir.listFiles((d, fName) -> fName != null && fName.toLowerCase(Locale.ROOT).endsWith(".json"));
+                    if (files == null) continue;
+
                     for (File f : files) {
+                        if (!f.isFile() || f.length() == 0) continue;
                         try (FileInputStream fis = new FileInputStream(f);
                              InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
                              BufferedReader reader = new BufferedReader(isr)) {
@@ -3253,7 +3268,42 @@ public class MediaSaverPlugin extends Plugin {
                             String content = sb.toString().trim();
                             if (!content.isEmpty()) {
                                 org.json.JSONObject obj = new org.json.JSONObject(content);
-                                list.put(JSObject.fromJSONObject(obj));
+
+                                if (!obj.has("name") || obj.optString("name", "").trim().isEmpty()) {
+                                    String fallbackName = f.getName()
+                                        .replaceFirst("(?i)^playlist_", "")
+                                        .replaceFirst("(?i)\\.json$", "")
+                                        .replace("_", " ")
+                                        .trim();
+                                    obj.put("name", fallbackName);
+                                }
+
+                                if (!obj.has("id") || obj.optString("id", "").trim().isEmpty()) {
+                                    obj.put("id", "pl_" + Math.abs(f.getAbsolutePath().hashCode()));
+                                }
+
+                                if (!obj.has("trackIds") && obj.has("tracks")) {
+                                    org.json.JSONArray trks = obj.optJSONArray("tracks");
+                                    if (trks != null) {
+                                        org.json.JSONArray ids = new org.json.JSONArray();
+                                        for (int ti = 0; ti < trks.length(); ti++) {
+                                            Object item = trks.get(ti);
+                                            if (item instanceof org.json.JSONObject) {
+                                                ids.put(((org.json.JSONObject) item).optString("id", ""));
+                                            } else if (item instanceof String) {
+                                                ids.put(item);
+                                            }
+                                        }
+                                        obj.put("trackIds", ids);
+                                    }
+                                }
+
+                                String key = obj.optString("name", "").trim().toLowerCase(Locale.ROOT);
+                                if (!key.isEmpty() && !seenKeys.contains(key)) {
+                                    seenKeys.add(key);
+                                    list.put(JSObject.fromJSONObject(obj));
+                                    Log.d("MediaSaverPlugin", "Loaded playlist from disk: " + f.getAbsolutePath() + " (" + obj.optString("name") + ")");
+                                }
                             }
                         } catch (Exception err) {
                             Log.w("MediaSaverPlugin", "Error reading playlist file: " + f.getName(), err);
@@ -3270,5 +3320,3 @@ public class MediaSaverPlugin extends Plugin {
         });
     }
 }
-
-
