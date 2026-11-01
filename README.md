@@ -23,7 +23,7 @@
 
   <p align="center">
     <a href="https://github.com/nimidz/Nimiyo-Downloader/releases/download/v2.4.0/Nimiyo.v2.4.0.apk">
-      <img src="https://img.shields.io/badge/Direct_Download_APK-⬇️_v2.4.0-00C48C?style=for-the-badge&logo=android&logoColor=white" alt="Direct Download APK" />
+      <img src="https://img.shields.io/badge/Direct_Download_APK-⬇️_v2.4.0-00C48C?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
     </a>
     <a href="https://github.com/nimidz/Nimiyo-Downloader/releases/latest">
       <img src="https://img.shields.io/badge/GitHub_Releases-🚀-3b82f6?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Releases" />
