@@ -11,7 +11,7 @@
   [![Stars](https://img.shields.io/github/stars/nimidz/Nimiyo-Downloader?style=for-the-badge&logo=apachespark&color=f59e0b&label=Stars)](https://github.com/nimidz/Nimiyo-Downloader/stargazers)
   [![License](https://img.shields.io/badge/License-GPL--3.0-black.svg?style=for-the-badge)](LICENSE)
   [![Platform](https://img.shields.io/badge/Platform-Android%208.0+-3DDC84.svg?style=for-the-badge&logo=android&logoColor=white)](https://github.com/nimidz/Nimiyo-Downloader)
-  [![Size](https://img.shields.io/badge/App%20Size-~4.8%20MB-8b5cf6.svg?style=for-the-badge&logo=files)](https://github.com/nimidz/Nimiyo-Downloader/releases/latest)
+  [![Size](https://img.shields.io/badge/App%20Size-±3.0%20MB-8b5cf6.svg?style=for-the-badge&logo=files)](https://github.com/nimidz/Nimiyo-Downloader/releases/latest)
   [![Design](https://img.shields.io/badge/Design-Neobrutalism_%26_SoftUI-FFE500.svg?style=for-the-badge&logoColor=black)](https://github.com/nimidz/Nimiyo-Downloader)
   [![Trakteer](https://img.shields.io/badge/Support-Trakteer-be1e2d.svg?style=for-the-badge&logo=ko-fi&logoColor=white)](https://trakteer.id/nimidz)
 
