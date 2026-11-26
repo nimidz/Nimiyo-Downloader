@@ -230,7 +230,7 @@ class SocialPlatformScrapersTest {
         assertTrue(res!!.isPlaylist)
         assertEquals(1, res.items.size)
         assertEquals("Midnight City", res.items[0].title)
-        assertEquals("ytsearch1:Midnight City M83 audio", res.items[0].ytdlpTargetUrl)
+        assertEquals("ytsearch1:M83 - Midnight City Official Audio", res.items[0].ytdlpTargetUrl)
     }
 
     @Test

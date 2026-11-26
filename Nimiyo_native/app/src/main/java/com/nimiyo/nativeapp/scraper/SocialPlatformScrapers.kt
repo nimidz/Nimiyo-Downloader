@@ -6,6 +6,12 @@ import com.nimiyo.nativeapp.data.MediaCategory
 import com.nimiyo.nativeapp.data.PlatformId
 import com.nimiyo.nativeapp.data.ScrapeResult
 import com.nimiyo.nativeapp.data.ScraperDownloadItem
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import org.json.JSONArray
 import org.json.JSONObject
 import org.jsoup.Jsoup
@@ -564,7 +570,7 @@ object SocialPlatformScrapers {
     // SPOTIFY PLAYLIST / ALBUM EMBED (cookie-free)
     // -------------------------------------------------------------------------
 
-    fun analyzeSpotifyPlaylistOrAlbumEmbed(http: HttpClientFactory, cleanUrl: String): ScrapeResult? {
+    suspend fun analyzeSpotifyPlaylistOrAlbumEmbed(http: HttpClientFactory, cleanUrl: String): ScrapeResult? {
         val m = spotifyPlaylistOrAlbumRegex.find(cleanUrl) ?: return null
         val kind = m.groupValues[1].lowercase(Locale.US)
         val id = m.groupValues[2]
@@ -577,7 +583,55 @@ object SocialPlatformScrapers {
         }.getOrNull() ?: return null
         if (res.status !in 200..299 || res.body.isBlank()) return null
 
-        return parseSpotifyEmbedHtml(res.body, cleanUrl, kind)
+        val parsed = parseSpotifyEmbedHtml(res.body, cleanUrl, kind) ?: return null
+        if (kind != "playlist") return parsed
+
+        // Fetch per-track cover art so playlist tracks don't all share the playlist cover.
+        val trackIds = extractSpotifyTrackIdsFromEmbed(res.body, parsed.items.size)
+        if (trackIds.none { it.isNotBlank() }) return parsed
+
+        val sem = Semaphore(8)
+        val perTrackThumbs = coroutineScope {
+            trackIds.mapIndexed { idx, tid ->
+                async(Dispatchers.IO) {
+                    val fallback = parsed.items.getOrNull(idx)?.thumbnail.orEmpty()
+                    if (tid.isBlank()) return@async fallback
+                    sem.withPermit {
+                        runCatching {
+                            val oe = http.get(
+                                "https://open.spotify.com/oembed?url=${ScraperUtils.urlEncode("https://open.spotify.com/track/$tid")}"
+                            )
+                            JSONObject(oe.body).optString("thumbnail_url").ifBlank { fallback }
+                        }.getOrDefault(fallback)
+                    }
+                }
+            }.awaitAll()
+        }
+        val updatedItems = parsed.items.mapIndexed { idx, item ->
+            val trackThumb = perTrackThumbs.getOrNull(idx).orEmpty()
+            if (trackThumb.isNotBlank()) item.copy(thumbnail = trackThumb) else item
+        }
+        return parsed.copy(items = updatedItems)
+    }
+
+    private fun extractSpotifyTrackIdsFromEmbed(html: String, limit: Int): List<String> {
+        val nextMatch = nextDataRegex.find(html) ?: return emptyList()
+        val root = runCatching { JSONObject(nextMatch.groupValues[1]) }.getOrNull() ?: return emptyList()
+        val trackList = root.optJSONObject("props")
+            ?.optJSONObject("pageProps")
+            ?.optJSONObject("state")
+            ?.optJSONObject("data")
+            ?.optJSONObject("entity")
+            ?.optJSONArray("trackList") ?: return emptyList()
+        val out = mutableListOf<String>()
+        for (i in 0 until trackList.length().coerceAtMost(limit)) {
+            val uri = trackList.optJSONObject(i)?.optString("uri").orEmpty()
+            val tid = if (uri.startsWith("spotify:track:", ignoreCase = true)) {
+                uri.substringAfter("spotify:track:")
+            } else ""
+            out.add(tid)
+        }
+        return out
     }
 
     internal fun parseSpotifyEmbedHtml(html: String, sourceUrl: String, kind: String): ScrapeResult? {
@@ -605,7 +659,10 @@ object SocialPlatformScrapers {
             val t = trackList.optJSONObject(i) ?: continue
             val trackTitle = t.optString("title").trim()
             if (trackTitle.isBlank()) continue
-            val trackArtist = t.optString("subtitle").trim()
+            val trackArtist = t.optString("subtitle")
+                .replace('\u00A0', ' ')
+                .trim()
+                .let { if (it.equals("Spotify", ignoreCase = true)) "" else it }
             val durMs = t.optLong("duration", 0L)
 
             val safe = runCatching {
@@ -614,8 +671,8 @@ object SocialPlatformScrapers {
             }.getOrDefault(false)
             if (!safe) continue
 
-            val query = listOf(trackTitle, trackArtist).filter { it.isNotBlank() }.joinToString(" ")
-            val ytTarget = "ytsearch1:$query audio"
+            val query = listOf(trackArtist, trackTitle).filter { it.isNotBlank() }.joinToString(" - ")
+            val ytTarget = "ytsearch1:$query Official Audio"
             items.add(
                 ScraperDownloadItem(
                     id = "sp_${i}_${ytTarget.hashCode()}",

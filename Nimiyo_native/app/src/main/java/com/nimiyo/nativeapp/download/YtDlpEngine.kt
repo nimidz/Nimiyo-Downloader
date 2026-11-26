@@ -394,12 +394,26 @@ class YtDlpEngine(
     ): Triple<String, String, Long> = withContext(Dispatchers.IO) {
         ensureInitialized()
         val cfg = settings.current
-        val targetUrl = task.ytdlpTargetUrl.ifBlank { task.sourceUrl }.ifBlank { task.url }
+        var targetUrl = task.ytdlpTargetUrl.ifBlank { task.sourceUrl }.ifBlank { task.url }
         if (targetUrl.isBlank()) {
             throw IllegalStateException("Missing target URL for yt-dlp")
         }
+        val isCatalogMatch = task.platform == PlatformId.SPOTIFY || task.platform == PlatformId.APPLE_MUSIC
+        val catalogMeta = if (isCatalogMatch) {
+            enrichCatalogMetadata(task.title, task.author, task.thumbnail)
+        } else {
+            CatalogMeta(task.author, "", task.thumbnail, 0L)
+        }
+        val resolvedArtist = catalogMeta.artist
+        val resolvedAlbum = catalogMeta.album
+        val resolvedThumb = catalogMeta.thumb
+        if (isCatalogMatch && targetUrl.startsWith("ytsearch", ignoreCase = true)) {
+            resolveOfficialYouTubeAudioUrl(task.title, resolvedArtist, catalogMeta.durationMs)?.let { officialUrl ->
+                targetUrl = officialUrl
+            }
+        }
         NimiyoContentGuard.checkUrlBeforeAnalyze(targetUrl)
-        NimiyoContentGuard.checkTextCompliance(task.title, task.author)
+        NimiyoContentGuard.checkTextCompliance(task.title, resolvedArtist)
 
         val execProcId = "${task.id}_${System.nanoTime()}"
         activeAttemptProcIds[task.id] = execProcId
@@ -427,19 +441,18 @@ class YtDlpEngine(
                     addOption("-x")
                     addOption("--audio-format", task.ytdlpAudioFormat)
                     addOption("--audio-quality", task.ytdlpAudioQuality.ifBlank { "0" })
-                    if (cfg.embedMetadata) addOption("--embed-metadata")
-                    if (cfg.embedThumbnail) addOption("--embed-thumbnail")
-                    if ((task.platform == PlatformId.SPOTIFY || task.platform == PlatformId.APPLE_MUSIC) &&
-                        task.author.isNotBlank()
-                    ) {
-                        val safeArtist = task.author.replace("\"", "").trim()
+                    if (cfg.embedMetadata && !isCatalogMatch) addOption("--embed-metadata")
+                    if (cfg.embedThumbnail && !isCatalogMatch) addOption("--embed-thumbnail")
+                    if (isCatalogMatch && (resolvedArtist.isNotBlank() || resolvedAlbum.isNotBlank())) {
+                        val safeArtist = resolvedArtist.replace("\"", "").trim()
                         val safeTitle = task.title.replace("\"", "").trim()
-                        if (safeArtist.isNotEmpty()) {
-                            addOption(
-                                "--postprocessor-args",
-                                "ffmpeg:-metadata artist=\"$safeArtist\" -metadata title=\"$safeTitle\"",
-                            )
+                        val safeAlbum = resolvedAlbum.replace("\"", "").trim()
+                        val metaArgs = buildString {
+                            append("ffmpeg:-metadata title=\"$safeTitle\"")
+                            if (safeArtist.isNotEmpty()) append(" -metadata artist=\"$safeArtist\"")
+                            if (safeAlbum.isNotEmpty()) append(" -metadata album=\"$safeAlbum\"")
                         }
+                        addOption("--postprocessor-args", metaArgs)
                     }
                 } else {
                     val fmt = task.ytdlpFormatSelector.ifBlank { buildVideoFormatSelector(null) }
@@ -512,17 +525,17 @@ class YtDlpEngine(
             }
 
             val actualExt = outputFile.extension.lowercase(Locale.US).ifBlank { task.extension }
-            if ((task.platform == PlatformId.SPOTIFY || task.platform == PlatformId.APPLE_MUSIC) &&
+            if (isCatalogMatch &&
                 actualExt == "mp3" &&
-                (task.author.isNotBlank() || task.thumbnail.isNotBlank() || task.title.isNotBlank())
+                (resolvedArtist.isNotBlank() || resolvedThumb.isNotBlank() || task.title.isNotBlank())
             ) {
-                val (coverBytes, coverMime) = fetchCoverBytes(task.thumbnail)
+                val (coverBytes, coverMime) = fetchCoverBytes(resolvedThumb)
                 runCatching {
                     Mp3Id3Tagger.tagFileInPlaceIfNeeded(
                         mp3File = outputFile,
                         title = task.title,
-                        artist = task.author,
-                        album = task.platform.displayName,
+                        artist = resolvedArtist,
+                        album = resolvedAlbum,
                         coverBytes = coverBytes,
                         coverMime = coverMime,
                         forceOverwrite = true,
@@ -1059,18 +1072,23 @@ class YtDlpEngine(
             }
         }
         val cleanTitle = title.ifBlank { "Spotify Track" }
-        NimiyoContentGuard.checkTextCompliance(cleanTitle, artist, title)
-        val searchQuery = listOf(cleanTitle, artist).filter { it.isNotBlank() }.joinToString(" ")
-        val ytSearchTarget = "ytsearch1:$searchQuery audio"
+        val sanitizedArtist = artist.replace('\u00A0', ' ').trim()
+            .let { if (it.equals("Spotify", ignoreCase = true)) "" else it }
+        val enriched = enrichCatalogMetadata(cleanTitle, sanitizedArtist, thumb)
+        val enrichedArtist = enriched.artist
+        val enrichedThumb = enriched.thumb
+        NimiyoContentGuard.checkTextCompliance(cleanTitle, enrichedArtist, title)
+        val searchQuery = listOf(enrichedArtist, cleanTitle).filter { it.isNotBlank() }.joinToString(" - ")
+        val ytSearchTarget = "ytsearch1:$searchQuery Official Audio"
 
         ScrapeResult(
             platform = PlatformId.SPOTIFY,
-            serverUsed = "yt-dlp • Spotify -> YouTube Search",
+            serverUsed = "yt-dlp • Spotify -> Official Audio Match",
             title = cleanTitle,
-            author = artist,
-            thumbnail = thumb,
+            author = enrichedArtist,
+            thumbnail = enrichedThumb,
             sourceUrl = cleanUrl,
-            items = buildAudioPresetsForTarget(cleanTitle, artist, thumb, ytSearchTarget),
+            items = buildAudioPresetsForTarget(cleanTitle, enrichedArtist, enrichedThumb, ytSearchTarget),
             extractorName = "Spotify",
         )
     }
@@ -1259,6 +1277,162 @@ class YtDlpEngine(
                 val ext = it.extension.lowercase(Locale.US)
                 ext !in nonMediaExts && !fragmentPattern.containsMatchIn(it.name)
             }
+    }
+
+    private data class CatalogMeta(
+        val artist: String,
+        val album: String,
+        val thumb: String,
+        val durationMs: Long,
+    )
+
+    /**
+     * Enriches catalog track metadata (Artist, Album, Cover Art, Duration) via iTunes Search API
+     * when Spotify/Apple embed only gives partial info, and ensures "Spotify" is never
+     * written as Artist or Album.
+     */
+    private fun enrichCatalogMetadata(
+        title: String,
+        rawArtist: String,
+        rawThumb: String,
+    ): CatalogMeta {
+        var artist = rawArtist.replace('\u00A0', ' ').trim()
+            .let { if (it.equals("Spotify", true) || it.equals("Apple Music", true)) "" else it }
+        var album = ""
+        var thumb = rawThumb.trim()
+        var durationMs = 0L
+
+        val term = listOf(title, artist).filter { it.isNotBlank() }.joinToString(" ").trim()
+        if (term.isBlank()) return CatalogMeta(artist, album, thumb, durationMs)
+
+        runCatching {
+            val apiUrl = "https://itunes.apple.com/search?term=${ScraperUtils.urlEncode(term)}&entity=song&limit=3"
+            val res = http.get(apiUrl)
+            if (res.status in 200..299 && res.body.isNotBlank()) {
+                val results = JSONObject(res.body).optJSONArray("results")
+                if (results != null && results.length() > 0) {
+                    val normTitle = title.lowercase(Locale.US).replace(Regex("[^a-z0-9]"), "")
+                    var picked = results.optJSONObject(0)
+                    for (i in 0 until results.length()) {
+                        val cand = results.optJSONObject(i) ?: continue
+                        val candTitle = cand.optString("trackName").lowercase(Locale.US).replace(Regex("[^a-z0-9]"), "")
+                        if (normTitle.isNotBlank() && (candTitle == normTitle || candTitle.contains(normTitle))) {
+                            picked = cand
+                            break
+                        }
+                    }
+                    if (picked != null) {
+                        if (artist.isBlank()) {
+                            artist = picked.optString("artistName").trim()
+                        }
+                        album = picked.optString("collectionName").trim()
+                        durationMs = picked.optLong("trackTimeMillis", 0L)
+                        if (thumb.isBlank()) {
+                            val art100 = picked.optString("artworkUrl100").trim()
+                            if (art100.isNotBlank()) {
+                                thumb = art100.replace("100x100bb", "600x600bb")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return CatalogMeta(artist, album, thumb, durationMs)
+    }
+
+    /**
+     * Resolves a Spotify/Apple Music track to an official YouTube Music ("- Topic" / Official Audio)
+     * video URL, rejecting ads, shorts, covers, karaoke, reactions, and duration mismatches.
+     */
+    private fun resolveOfficialYouTubeAudioUrl(
+        title: String,
+        artist: String,
+        durationMs: Long,
+    ): String? {
+        val cleanTitle = title.trim()
+        if (cleanTitle.isBlank()) return null
+        val query = listOf(artist.trim(), cleanTitle, "Topic").filter { it.isNotBlank() }.joinToString(" ")
+        return runCatching {
+            val searchUrl = "https://www.youtube.com/results?search_query=${ScraperUtils.urlEncode(query)}"
+            val res = http.get(searchUrl, mapOf("User-Agent" to HttpClientFactory.CHROME_DESKTOP_UA))
+            if (res.status !in 200..299 || res.body.isBlank()) return@runCatching null
+
+            val marker = "var ytInitialData = "
+            val start = res.body.indexOf(marker)
+            if (start < 0) return@runCatching null
+            val jsonStart = start + marker.length
+            val end = res.body.indexOf(";</script>", jsonStart)
+            if (end <= jsonStart) return@runCatching null
+
+            val root = JSONObject(res.body.substring(jsonStart, end))
+            val sections = root.optJSONObject("contents")
+                ?.optJSONObject("twoColumnSearchResultsRenderer")
+                ?.optJSONObject("primaryContents")
+                ?.optJSONObject("sectionListRenderer")
+                ?.optJSONArray("contents") ?: return@runCatching null
+
+            val titleLower = cleanTitle.lowercase(Locale.US)
+            val rejectTokens = listOf(
+                "cover", "karaoke", "reaction", "nightcore", "slowed", "reverb",
+                "8d", "instrumental", "shorts", "promo", "teaser", "trailer", "live",
+            ).filter { !titleLower.contains(it) }
+
+            var bestVideoId: String? = null
+            var bestScore = Int.MIN_VALUE
+
+            for (s in 0 until sections.length()) {
+                val items = sections.optJSONObject(s)
+                    ?.optJSONObject("itemSectionRenderer")
+                    ?.optJSONArray("contents") ?: continue
+                for (i in 0 until items.length().coerceAtMost(12)) {
+                    val vr = items.optJSONObject(i)?.optJSONObject("videoRenderer") ?: continue
+                    val vid = vr.optString("videoId").trim()
+                    if (vid.length != 11) continue
+                    val lengthText = vr.optJSONObject("lengthText")?.optString("simpleText").orEmpty().trim()
+                    if (lengthText.isBlank()) continue // skip livestreams
+
+                    val vTitle = vr.optJSONObject("title")?.optJSONArray("runs")
+                        ?.optJSONObject(0)?.optString("text").orEmpty().lowercase(Locale.US)
+                    val owner = vr.optJSONObject("ownerText")?.optJSONArray("runs")
+                        ?.optJSONObject(0)?.optString("text").orEmpty()
+                    val ownerLower = owner.lowercase(Locale.US)
+
+                    var score = 0
+                    if (ownerLower.endsWith(" - topic") || ownerLower.endsWith("– topic")) score += 120
+                    if (vTitle.contains("official audio") || vTitle.contains("provided to youtube")) score += 60
+                    if (artist.isNotBlank() && (ownerLower.contains(artist.lowercase(Locale.US)) || vTitle.contains(artist.lowercase(Locale.US)))) {
+                        score += 30
+                    }
+                    for (bad in rejectTokens) {
+                        if (vTitle.contains(bad) || ownerLower.contains(bad)) score -= 100
+                    }
+                    if (durationMs > 0L) {
+                        val candMs = parseDurationTextMs(lengthText)
+                        if (candMs > 0L) {
+                            val diffSec = kotlin.math.abs(candMs - durationMs) / 1000L
+                            if (diffSec <= 15L) score += 50
+                            else if (diffSec > 45L) score -= 120
+                        }
+                    }
+                    if (score > bestScore) {
+                        bestScore = score
+                        bestVideoId = vid
+                    }
+                }
+            }
+            if (bestVideoId != null && bestScore > 0) {
+                "https://www.youtube.com/watch?v=$bestVideoId"
+            } else null
+        }.getOrNull()
+    }
+
+    private fun parseDurationTextMs(text: String): Long {
+        val parts = text.split(":").mapNotNull { it.trim().toLongOrNull() }
+        return when (parts.size) {
+            2 -> (parts[0] * 60L + parts[1]) * 1000L
+            3 -> (parts[0] * 3600L + parts[1] * 60L + parts[2]) * 1000L
+            else -> 0L
+        }
     }
 
     private fun fetchCoverBytes(thumbnailUrl: String): Pair<ByteArray?, String> {
