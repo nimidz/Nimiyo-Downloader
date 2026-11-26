@@ -1,35 +1,57 @@
 <div align="center">
 
-  <img src="assets/icon_untukdi_aboutthisapp.webp" alt="NIMIYO Downloader Icon" width="115" style="border-radius: 26px; box-shadow: 0 8px 24px rgba(0,0,0,0.25);" />
+  <img src="iconaboutapp.png" width="140" height="140" alt="NIMIYO Downloader Logo" />
 
-  # 🐥 NIMIYO Downloader (Lite)
-
-  **A Premium, Ultra-Fast & Lightweight Universal Media Downloader for Android**
-
-  [![Release](https://img.shields.io/badge/Release-v2.4.0--Lite-00C48C.svg?style=for-the-badge&logo=android&logoColor=white)](https://github.com/nimidz/Nimiyo-Downloader/releases)
-  [![Total Downloads](https://img.shields.io/github/downloads/nimidz/Nimiyo-Downloader/total?style=for-the-badge&logo=github&color=3b82f6&label=Downloads)](https://github.com/nimidz/Nimiyo-Downloader/releases)
-  [![Stars](https://img.shields.io/github/stars/nimidz/Nimiyo-Downloader?style=for-the-badge&logo=apachespark&color=f59e0b&label=Stars)](https://github.com/nimidz/Nimiyo-Downloader/stargazers)
-  [![License](https://img.shields.io/badge/License-GPL--3.0-black.svg?style=for-the-badge)](LICENSE)
-  [![Platform](https://img.shields.io/badge/Platform-Android%208.0+-3DDC84.svg?style=for-the-badge&logo=android&logoColor=white)](https://github.com/nimidz/Nimiyo-Downloader)
-  [![Size](https://img.shields.io/badge/App%20Size-±3.0%20MB-8b5cf6.svg?style=for-the-badge&logo=files)](https://github.com/nimidz/Nimiyo-Downloader/releases/latest)
-  [![Design](https://img.shields.io/badge/Design-Neobrutalism_%26_SoftUI-FFE500.svg?style=for-the-badge&logoColor=black)](https://github.com/nimidz/Nimiyo-Downloader)
-  [![Trakteer](https://img.shields.io/badge/Support-Trakteer-be1e2d.svg?style=for-the-badge&logo=ko-fi&logoColor=white)](https://trakteer.id/nimidz)
-
-  <br/>
+  <h1>🐥 NIMIYO Downloader</h1>
 
   <p align="center">
-    <b>Download videos, music, high-res photos, and audio tracks effortlessly from 16+ platforms without ads, popups, or limits.</b>
+    <a href="README.md">
+      <img src="https://img.shields.io/badge/🇺🇸%20English-6366f1?style=for-the-badge&labelColor=1e1e2e" alt="English" />
+    </a>
+    <a href="README_ID.md">
+      <img src="https://img.shields.io/badge/🇮🇩%20Indonesia-00C48C?style=for-the-badge&labelColor=1e1e2e" alt="Indonesia" />
+    </a>
   </p>
 
   <p align="center">
-    <a href="https://github.com/nimidz/Nimiyo-Downloader/releases/download/v2.4.0/Nimiyo.v2.4.0.apk">
-      <img src="https://img.shields.io/badge/Direct_Download_APK-⬇️_v2.4.0-00C48C?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
+    <strong>Universal Native Android Media Downloader, Music Player &amp; Dual-Engine Lyrics Suite.</strong>
+    <br />
+    <em>Rebuilt from the ground up in 100% Native Kotlin &amp; Jetpack Compose.</em>
+  </p>
+
+  <p align="center">
+    <a href="#-two-editions-nimiyo-vs-nimiyolite"><b>Editions</b></a> •
+    <a href="#-features"><b>Features</b></a> •
+    <a href="#-screenshots"><b>Screenshots</b></a> •
+    <a href="#-supported-platforms"><b>Platforms</b></a> •
+    <a href="#-lyrics--music-player"><b>Lyrics &amp; DSP</b></a> •
+    <a href="#-building-from-source"><b>Build</b></a> •
+    <a href="#-open-source--acknowledgements"><b>Credits</b></a> •
+    <a href="#-legal-disclaimer--app-rules"><b>Legal</b></a>
+  </p>
+
+  <div align="center">
+    <img src="https://img.shields.io/badge/Version-v3.0.0-6366f1?style=for-the-badge&logo=android&logoColor=white&labelColor=1e1e2e" alt="Version v3.0.0" />
+    <img src="https://img.shields.io/github/downloads/nimidz/Nimiyo-Downloader/total?style=for-the-badge&color=00C48C&labelColor=1e1e2e&logo=github&label=Downloads" alt="Downloads" />
+    <img src="https://img.shields.io/github/stars/nimidz/Nimiyo-Downloader?style=for-the-badge&color=f59e0b&labelColor=1e1e2e&logo=apachespark&label=Stars" alt="Stars" />
+    <img src="https://img.shields.io/badge/License-GPL--3.0-ef4444?style=for-the-badge&labelColor=1e1e2e" alt="License GPL-3.0" />
+    <img src="https://img.shields.io/badge/Android-8.0%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white&labelColor=1e1e2e" alt="Android 8.0+" />
+    <img src="https://img.shields.io/badge/Languages-12_Countries-0ea5e9?style=for-the-badge&logo=googletranslate&logoColor=white&labelColor=1e1e2e" alt="12 Languages" />
+    <a href="https://trakteer.id/nimidz"><img src="https://img.shields.io/badge/Support-Trakteer_☕-be1e2d?style=for-the-badge&logo=ko-fi&logoColor=white&labelColor=1e1e2e" alt="Support on Trakteer" /></a>
+  </div>
+
+  <p align="center">
+    <img src="https://img.shields.io/badge/🇺🇸_EN_|_🇮🇩_ID_|_🇨🇳_ZH_|_🇯🇵_JA_|_🇸🇦_AR_|_🇻🇳_VI_|_🇹🇭_TH_|_🇰🇷_KO_|_🇪🇸_ES_|_🇧🇷_PT_|_🇲🇾_MS_|_🇮🇳_HI-1e1e2e?style=flat-square" alt="Supported App Languages" />
+  </p>
+
+  <br />
+
+  <p align="center">
+    <a href="https://github.com/nimidz/Nimiyo-Downloader/releases/latest">
+      <img src="https://img.shields.io/badge/Download_NIMIYO_(yt--dlp_Native)-⬇️_~63_MB-4f46e5?style=for-the-badge&logo=android&logoColor=white" alt="Download Nimiyo Native" />
     </a>
     <a href="https://github.com/nimidz/Nimiyo-Downloader/releases/latest">
-      <img src="https://img.shields.io/badge/GitHub_Releases-🚀-3b82f6?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Releases" />
-    </a>
-    <a href="https://trakteer.id/nimidz">
-      <img src="https://img.shields.io/badge/Dukung_Saya-Trakteer_☕-be1e2d?style=for-the-badge" alt="Support on Trakteer" />
+      <img src="https://img.shields.io/badge/Download_NimiyoLite_(Scraper)-⚡_~3.5_MB-059669?style=for-the-badge&logo=android&logoColor=white" alt="Download NimiyoLite" />
     </a>
   </p>
 
@@ -37,195 +59,200 @@
 
 ---
 
-## 📱 App Screenshots & Interactive Showcase
+> [!CAUTION]
+> **OFFICIAL RELEASE NOTICE — NOT ON GOOGLE PLAY**
+>
+> **NIMIYO Downloader is NOT published on Google Play Store.** Official APKs are only distributed through [**GitHub Releases**](https://github.com/nimidz/Nimiyo-Downloader/releases/latest). Any listing on Google Play or third-party app stores using the NIMIYO name or icon is unofficial and unverified.
 
-<div align="center">
+> [!IMPORTANT]
+> **Rebuilt in 100% Native Kotlin & Jetpack Compose (v3.0.0)**
+>
+> Replacing the legacy v2.4.0 Capacitor WebView, NIMIYO now ships in two native editions that can be installed side-by-side: **NIMIYO (`com.nimiyo.dl`)** with built-in `yt-dlp` + `FFmpeg` + `aria2c`, and **NimiyoLite (`com.nimiyo.dllite`)** powered by lightweight Kotlin scrapers (`scrapr` by [@coflyn](https://github.com/coflyn)).
 
-| 1. Home / Analyzer | 2. Media Player & Tabs | 3. History & Storage |
-| :---: | :---: | :---: |
-| <img src="assets/screenshots/screenshot_01_home.jpg" width="220" alt="1. Home Screen" /> | <img src="assets/screenshots/screenshot_02_player.jpg" width="220" alt="2. Player Page" /> | <img src="assets/screenshots/screenshot_03_history.jpg" width="220" alt="3. History Page" /> |
+> [!NOTE]
+> **100% Local Privacy & Security**
+>
+> Downloads, music library, playlists, history, and WebView login cookies (`cookies.txt`) stay strictly inside your device sandbox (`android:allowBackup="false"`), with zero ads or telemetry.
 
-| 4. Settings & UI/UX | 5. Quick Save Floating Panel | 6. Player: TTML Word-by-Word Lyrics |
-| :---: | :---: | :---: |
-| <img src="assets/screenshots/screenshot_04_settings.jpg" width="220" alt="4. Settings Page" /> | <img src="assets/screenshots/screenshot_05_quicksave.jpg" width="220" alt="5. Quick Download Page" /> | <a href="assets/videos/newLyrics_.mp4" title="Click to view full MP4 video"><img src="assets/videos/newLyrics_.webp" width="220" alt="6. Player TTML Word-by-Word Lyrics" style="border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.3);" /></a> |
+---
 
-| 7. Player: Classic LRC Synced Lyrics | 8. Multi-Select Song Manager | 9. Custom Playlists |
-| :---: | :---: | :---: |
-| <a href="assets/videos/oldLyrics.mp4" title="Click to view full MP4 video"><img src="assets/videos/oldLyrics.webp" width="220" alt="7. Player Classic LRC Synced Lyrics" style="border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.3);" /></a> | <img src="assets/screenshots/screenshot_08_multiselect.jpg" width="220" alt="8. Multi-Select Songs" /> | <img src="assets/screenshots/screenshot_09_playlist.jpg" width="220" alt="9. Playlist Page" /> |
+## ⚖️ Two Editions: NIMIYO vs NimiyoLite
 
-| 10. Built-in HD Video Player |
-| :---: |
-| <img src="assets/screenshots/screenshot_10_videoplayer.jpg" width="280" alt="10. Video Player" /> |
+<div id="-two-editions-nimiyo-vs-nimiyolite">
+
+| Feature / Aspect | 🚀 **NIMIYO** (`com.nimiyo.dl`) | ⚡ **NimiyoLite** (`com.nimiyo.dllite`) |
+| :--- | :--- | :--- |
+| **Core Engine** | Built-in **`yt-dlp`** + **`FFmpeg`** + **`aria2c`** | Pure Kotlin **Scraper Engine** (`scrapr` by `@coflyn`) |
+| **APK Size** | ~63 MB (`arm64-v8a`) | **~3.5 MB** (Ultra-lightweight) |
+| **Supported Platforms** | **1000+ websites** (`yt-dlp`) + local photo scrapers | **16 curated platforms** with multi-server fallback |
+| **Photo & Carousel Posts** | **Local-first** direct scraping (TikTok `/photo/`, IG, Pixiv, Threads, RedNote, Pinterest) + `FxTwitter` fallback | Multi-server scraper (TikWM, SnapTik, IG Embed, FxTwitter, Pixiv, etc.) |
+| **QuickSave & Direct Mode** | Full **Direct / Analyze** toggle, custom QuickSave format preset, auto-close, Direct after share | Fast **Analyze** overlay with live **Server Switcher** (`TikTokIO`, `SnapTik`, etc.) |
+| **Advanced `yt-dlp` Tools** | Subtitles (`--write-subs`), SponsorBlock, Split Chapters, MKV/MP4, Custom CLI Args, Channel Updater (`Stable`/`Nightly`) | Automatic server fallback & lazy stream resolution + local MP4 muxer (`Mp4Muxer`) |
+| **Private / Login Content** | Built-in **WebView Cookie Vault** (`cookies.txt`) for IG Stories, RedNote, etc. | Cookie-free public scraping |
+| **Music Player & Lyrics** | ✅ Full DSP, MixTools FX, TTML/LRC Dual-Engine Lyrics | ✅ Identical Full DSP, MixTools FX, TTML/LRC Dual-Engine Lyrics |
+| **Video Player & Image Viewer** | ✅ Hardware-accelerated + 2s auto-fade controls | ✅ Hardware-accelerated + 2s auto-fade controls |
+| **Recommended For** | Power users, 4K/60fps, subtitles, Spotify/Apple Music tagging, private links | Low-storage devices, instant lightweight social downloads |
 
 </div>
 
 ---
 
-## 🎤 Dual-Engine Lyrics Showcase (TTML vs LRC)
+## 📸 Screenshots
 
-Experience synchronized singing with our dual-engine lyrics player. Seamlessly toggle between classic line-by-line synced LRC and dynamic syllable-by-syllable TTML lyrics at any time.
+<div align="center" id="-screenshots">
 
-<div align="center">
+### 🚀 NIMIYO (`yt-dlp` Native Edition)
 
-| 🎵 Classic Synced Lyrics (LRC Mode) | ✨ Word-by-Word Dynamic Lyrics (TTML Mode) |
-| :---: | :---: |
-| <a href="assets/videos/oldLyrics.mp4" title="Click to view full MP4 video"><img src="assets/videos/oldLyrics.webp" width="270" alt="Classic LRC Synced Lyrics" style="border-radius: 14px; box-shadow: 0 6px 20px rgba(0,0,0,0.35);" /></a> | <a href="assets/videos/newLyrics_.mp4" title="Click to view full MP4 video"><img src="assets/videos/newLyrics_.webp" width="270" alt="Word-by-Word Dynamic Lyrics" style="border-radius: 14px; box-shadow: 0 6px 20px rgba(0,0,0,0.35);" /></a> |
-| *Precision line-by-line scrolling & center alignment*<br/><sub>▶️ <i>(Klik media untuk melihat video MP4 penuh)</i></sub> | *Real-time syllable highlighting & smooth back-vocal animations*<br/><sub>▶️ <i>(Klik media untuk melihat video MP4 penuh)</i></sub> |
+<img src="nimiyoscreenshot_versidl/nimiyodl_navhome.jpg" alt="Nimiyo Home" width="30%" />
+<img src="nimiyoscreenshot_versidl/nimiyodlversion_screenshot%20(4).jpg" alt="Nimiyo Direct Mode" width="30%" />
+<img src="nimiyoscreenshot_versidl/nimiyo%20quicksave_versiondl%20(1).jpg" alt="QuickSave Analyze Mode" width="30%" />
+<img src="nimiyoscreenshot_versidl/nimiyo%20quicksave_versiondl%20(2).jpg" alt="QuickSave Direct Mode" width="30%" />
+<img src="nimiyoscreenshot_versidl/nimiyodl_navsetting.jpg" alt="Nimiyo Settings" width="30%" />
+<img src="nimiyoscreenshot_versidl/nimiyodlversion_screenshot%20(3).jpg" alt="Engine Download Settings" width="30%" />
+<img src="nimiyoscreenshot_versidl/nimiyodlversion_screenshot%20(2).jpg" alt="Subtitles SponsorBlock Custom Args" width="30%" />
+<img src="nimiyoscreenshot_versidl/nimiyodlversion_screenshot%20(1).jpg" alt="Cookie Vault Settings" width="30%" />
+
+---
+
+### ⚡ NimiyoLite (Scraper Edition)
+
+<img src="nimiyoscreenshot_versilite/nimiyolite_navhome.jpg" alt="NimiyoLite Home" width="30%" />
+<img src="nimiyoscreenshot_versilite/nimiyoquicksave_versionlite.jpg" alt="NimiyoLite QuickSave" width="30%" />
+<img src="nimiyoscreenshot_versilite/nimiyolite_navsetting.jpg" alt="NimiyoLite Settings" width="30%" />
+<img src="nimiyoscreenshot_versilite/serverdefault_versilite.jpg" alt="Default Server per Platform" width="30%" />
+
+---
+
+### 🎵 Music Player, Dual-Engine Lyrics & History (Both Editions)
+
+<img src="nimiyoscreenshot_allversion_allhave/navmusic_lite&dl.jpg" alt="Music Library" width="30%" />
+<img src="nimiyoscreenshot_allversion_allhave/music_allscreenshot_versionlite&dl%20(6).jpg" alt="Now Playing Cover" width="30%" />
+<img src="nimiyoscreenshot_allversion_allhave/music_allscreenshot_versionlite&dl%20(3).jpg" alt="TTML Dynamic Lyrics" width="30%" />
+<img src="nimiyoscreenshot_allversion_allhave/music_allscreenshot_versionlite&dl%20(4).jpg" alt="Classic Synced LRC Lyrics" width="30%" />
+<img src="nimiyoscreenshot_allversion_allhave/music_allscreenshot_versionlite&dl%20(2).jpg" alt="Lyrics Source Picker" width="30%" />
+<img src="nimiyoscreenshot_allversion_allhave/music_allscreenshot_versionlite&dl%20(5).jpg" alt="MixTools FX" width="30%" />
+<img src="nimiyoscreenshot_allversion_allhave/music_allscreenshot_versionlite&dl%20(1).jpg" alt="Custom Playlists" width="30%" />
+<img src="nimiyoscreenshot_allversion_allhave/menggantikan_no7_dan_8%20(1).jpg" alt="Music Settings Playback &amp; Audio" width="30%" />
+<img src="nimiyoscreenshot_allversion_allhave/menggantikan_no7_dan_8%20(2).jpg" alt="Playlist Button in Pill Tabs Setting" width="30%" />
+<img src="nimiyoscreenshot_allversion_allhave/menggantikan_no7_dan_8%20(3).jpg" alt="Player Styling &amp; Custom Lyrics Backdrop" width="30%" />
+<img src="nimiyoscreenshot_allversion_allhave/menggantikan_no7_dan_8%20(4).jpg" alt="Player Styling Lyrics &amp; Font Options" width="30%" />
+<img src="nimiyoscreenshot_allversion_allhave/Screenshot_2026-11-26-01-08-59-386_com.nimiyo.dllite.jpg" alt="Custom Media Lyrics Backdrop Live" width="30%" />
+<img src="nimiyoscreenshot_allversion_allhave/navhistory_lite&dl.jpg" alt="Download History" width="30%" />
 
 </div>
 
 ---
 
-## 🎼 Multi-Provider Lyrics Architecture
+## ✨ Features
 
-NIMIYO incorporates an intelligent multi-provider lyrics engine designed to ensure you never miss lyrics, supporting both syllable-synced TTML and timestamped LRC formats:
+<div align="center" id="-features">
 
-### 1. 🎤 Word-by-Word TTML Lyrics Providers (Karaoke & Syllable Timing)
-- **BetterLyrics API (`api.betterlyrics.org`)**:
-  - High-precision cloud provider delivering Apple Music & Spotify TTML word-by-word synchronized lyrics data in XML/TTML format.
-- **Boidu Lyrics API (`lyrics-api.boidu.dev`)**:
-  - Dedicated fast-response endpoint providing syllable-level timing timestamps and rich background vocal metadata (`ttm:role="lyric:background"`).
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <div align="left">
+        <h3>📥 Downloading &amp; Extraction</h3>
+        <ul>
+          <li><b>Dual-Mode Downloader:</b> Switch instantly between <b>Analyze Link</b> (pick exact stream) and <b>Direct</b> (one-tap preset format).</li>
+          <li><b>Nimiyo QuickSave:</b> Share any link from TikTok, YouTube, Instagram, or X to download via a floating bottom sheet — switch between <b>Analyze</b> and <b>Direct</b> on the fly without changing settings.</li>
+          <li><b>Local-First Photo Carousels:</b> Extracts full-resolution multi-photo galleries directly from TikTok (<code>/photo/</code>), Instagram, Pixiv, Threads, RedNote, and Pinterest.</li>
+          <li><b><code>aria2c</code> Acceleration (Native):</b> Multi-connection HTTP acceleration paired with safe HLS/DASH fragment handling.</li>
+          <li><b>Spotify &amp; Apple Music Resolution:</b> Extracts real artist/title/cover metadata and embeds ID3 tags &amp; artwork automatically.</li>
+          <li><b>Batch &amp; Playlist Support:</b> Download entire albums, playlists, or multi-photo posts in one queue.</li>
+        </ul>
+      </div>
+    </td>
+    <td width="50%" valign="top">
+      <div align="left">
+        <h3>🎵 Music Player &amp; DSP Suite</h3>
+        <ul>
+          <li><b>Built-in Offline Library:</b> Dedicated tabs for <b>NIMIYO</b> downloads, <b>Songs</b>, <b>Artists</b>, <b>Albums</b>, and <b>Custom Playlists</b> — with a setting to swap any pill tab with <b>Playlist</b>.</li>
+          <li><b>Player Styling (Lyrics Backdrop &amp; Font):</b> Customize the lyrics screen with <b>Custom Media</b> (Image, GIF, WebP, or muted looping Video with Zoom, 0–25% Blur, Opacity &amp; left/right edge fade), <b>Solid Black</b>, or <b>Album Blur</b>, plus custom <code>.ttf</code>/<code>.otf</code> fonts, weight, and text shadow.</li>
+          <li><b>MixTools FX:</b> Real-time <b>Speed FX</b> (60%–140% Slowed / SpeedUp) and a <b>2D Acoustic Reverb XY Pad</b> (Wide/Tight × Dry/Wet).</li>
+          <li><b>Audio Enhancement:</b> Volume Normalization &amp; Gain Boost (up to +9 dB) and Mono Audio toggle.</li>
+          <li><b>Smart Playback Guards:</b> Pause on headset disconnect, auto-play on Bluetooth/headset, resume after phone call, and <b>configurable Low Battery Auto-Stop</b> (5%–50% via gear button).</li>
+          <li><b>Gradual Sleep Timer:</b> Smooth 2.5-second audio fade-out before pausing.</li>
+          <li><b>Floating MiniPlayer:</b> Persistent playback bar across Home, Music, History, and Settings.</li>
+        </ul>
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <div align="left" id="-lyrics--music-player">
+        <h3>🎤 Dual-Engine Lyrics (TTML &amp; LRC)</h3>
+        <ul>
+          <li><b>Independent TTML &amp; LRC Pipelines:</b> TTML (Apple Music style) and classic LRC never overwrite each other — if TTML is unavailable for a song, LRC displays automatically.</li>
+          <li><b>TTML Reading Modes:</b> Choose between <b>Per Character</b> (smooth wave sweep) or <b>Per Word</b> highlighting via dropdown.</li>
+          <li><b>Duet &amp; Backing Vocals:</b> Supports <code>ttm:agent</code> duet alignment (<b>Align Left</b>, <b>Align Right</b>, <b>Split Duet</b>), accordion backing vocals, instrumental interlude dots, and <code>x-translation</code> / <code>x-roman</code> sub-lines.</li>
+          <li><b>Multi-Provider Search:</b> KuGou Studio, LRCLIB (with smart Japanese/Vocaloid title cleaning &amp; search fallback), Boidu TTML, BetterLyrics TTML, and Paxsenix Apple TTML.</li>
+          <li><b>Full Customization:</b> Adjustable text size (Small to Extra Large), Translation toggle, Tap-to-Seek toggle, plus built-in <code>.lrc</code> / <code>.ttml</code> Editor, Importer &amp; Exporter.</li>
+        </ul>
+      </div>
+    </td>
+    <td width="50%" valign="top">
+      <div align="left">
+        <h3>🎨 UI/UX, Storage &amp; Built-in Viewers</h3>
+        <ul>
+          <li><b>UI/UX Customization:</b> Choose between <b>Material 3</b>, <b>Soft UI</b>, and <b>Neobrutalism</b> styles, Dark/Light/System theme, and Dynamic/Custom accent colors.</li>
+          <li><b>12 Built-in Languages:</b> English, Indonesian, Chinese, Japanese, Arabic, Vietnamese, Thai, Korean, Spanish, Portuguese, Malay, and Hindi.</li>
+          <li><b>Per-Media Custom Folders:</b> Set separate SAF destination folders for <b>Video</b>, <b>Audio</b>, <b>Images</b>, and <b>SD Card</b>, plus platform subfolders and filename templates.</li>
+          <li><b>Built-in Video Player &amp; Image Viewer:</b> Hardware-accelerated ExoPlayer video viewer with 2-second auto-fadeout overlay controls and pinch-to-zoom image viewer.</li>
+          <li><b>Safety &amp; Policy Guard:</b> Built-in URL &amp; metadata compliance filtering and local-only Cookie Vault.</li>
+        </ul>
+      </div>
+    </td>
+  </tr>
+</table>
 
-### 2. 📝 Line-by-Line LRC Synced Lyrics Providers (Studio & Community)
-- **KuGou Music Studio API (`kugou.com`)**:
-  - High-precision studio-synced lyrics database with candidate matching by duration and song hash, offering unmatched accuracy for Asian, anime, and international releases.
-- **LRCLIB (`lrclib.net`)**:
-  - Open-source global community lyrics repository providing millisecond-accurate synchronized LRC timestamps across international tracks.
-- **Smart Hierarchical Fallback**:
-  - Automatic intelligent search order: **KuGou Studio → LRCLIB → Boidu → BetterLyrics** with fallback to plain lyrics if synced timestamps are unavailable.
-
-### 3. 📂 Local & Offline Lyrics Engine
-- **Local Storage Auto-Detector (`.lrc`)**:
-  - Automatically detects and pairs local `.lrc` files placed alongside your downloaded audio tracks or inside `Download/Nimiyo/LyricsYO/`.
-- **In-App Interactive Lyrics Editor**:
-  - Built-in visual editor for manual timestamp adjustments, line-by-line timecode fine-tuning, and direct local `.lrc` file exporting.
-- **Offline Persistent Caching**:
-  - Automatically caches fetched lyrics in `localStorage` and `LyricsYO/` so previously played songs always have instant lyrics without internet access.
-
----
-
-## ✨ Key Features
-
-- ⚡ **All-In-One Universal Downloader**: Support for videos, audio tracks, covers, slideshows, and photo carousels from 16+ major platforms.
-- 🎤 **Word-by-Word Lyrics (Karaoke TTML Engine)**: Syllable-by-syllable dynamic text highlighting, fluid Spotlight onboarding guide, smooth back-vocal animations, and instant LRC/TTML mode toggle.
-- 🎼 **Smart Hierarchical Lyrics Engine**: Automated lyrics resolution across KuGou, LRCLIB, Boidu, and BetterLyrics with interactive tap-to-seek, built-in manual lyrics editor, local `.lrc` import/export, and offline cache at `Nimiyo/LyricsYO/`.
-- 🎛️ **MixTools Audio Studio**: Real-time playback speed control (**Speed FX**) for Slowed & Speed Up listening, paired with an interactive 2D XY Soundstage Pad for **Spatial Reverb FX**.
-- 🎨 **Dynamic Accent Color & UI Aesthetics**: Automatic vibrant color extraction from active album art synchronized across the entire player UI, background radial glow, and controls. Choose between distinctive Neobrutalism or sleek Soft UI themes.
-- 🎵 **Built-In Music Player**: Offline audio playback from `Download/Nimiyo/AudioYo/`, custom playlist creation, interactive artist/album explorer, and lightweight native Android media session notifications.
-- 📲 **Quick Save Share Sheet**: Share links from any app (TikTok, YouTube, Instagram, Shopee, SoundCloud) directly into NIMIYO's floating bottom sheet without leaving your current app.
-- 🎬 **Integrated Video & Photo Viewer**: Smooth in-app playback for history items with full-screen, looping, and native sharing.
-- 🗂️ **Organized Media Storage**:
-  - 🎬 `Download/Nimiyo/VideoYo/`
-  - 🎵 `Download/Nimiyo/AudioYo/`
-  - 📝 `Download/Nimiyo/LyricsYO/`
-  - 🖼️ `Download/Nimiyo/ImageYo/`
-- 📁 **Direct Folder Opener**: One-tap direct folder navigation into Xiaomi File Explorer, Samsung My Files, Google Files, and ZArchiver.
-- 🔄 **Smart Concurrent Downloads & Auto-Retry**: Download up to 5 items simultaneously in parallel with smart automatic retries on connection hiccups.
-- 🔄 **Easy Update Checker**: Check for updates directly inside the app and open the official GitHub Releases page with one tap, without requiring intrusive system install permissions.
-- 🌍 **Multilingual Localization**: Complete native language parity for **English**, **Bahasa Indonesia**, **简体中文**, and **日本語**.
-- 🛡️ **Community Guidelines & Rules**: Built-in Terms of Use modal prohibiting harmful, violent, and NSFW content.
-- 🔒 **Privacy First**: Built-in Incognito Mode, zero tracking, and strictly local history management.
+</div>
 
 ---
 
 ## 🌐 Supported Platforms
 
-| Platform | Video | Audio / MP3 | Photos / Album | Status |
-| :--- | :---: | :---: | :---: | :---: |
-| **YouTube** | ✅ | ✅ | ❌ | ![Active](https://img.shields.io/badge/Online-brightgreen?style=flat-square) |
-| **TikTok** | ✅ (No Watermark) | ✅ | ✅ (Slideshow) | ![Active](https://img.shields.io/badge/Online-brightgreen?style=flat-square) |
-| **Instagram** | ✅ (Reels/Stories) | ✅ | ✅ (Carousels) | ![Active](https://img.shields.io/badge/Online-brightgreen?style=flat-square) |
-| **SoundCloud** | ❌ | ✅ (HQ MP3 / Stream) | ✅ (Cover Art) | ![Active](https://img.shields.io/badge/Online-brightgreen?style=flat-square) |
-| **Shopee** | ✅ (HD Video) | ❌ | ✅ (Product Media) | ![Active](https://img.shields.io/badge/Online-brightgreen?style=flat-square) |
-| **Spotify** | ❌ | ✅ (320kbps MP3) | ✅ (Cover Art) | ![Active](https://img.shields.io/badge/Online-brightgreen?style=flat-square) |
-| **Apple Music** | ❌ | ✅ (HQ M4A/MP3) | ✅ (Cover Art) | ![Active](https://img.shields.io/badge/Online-brightgreen?style=flat-square) |
-| **Twitter / X** | ✅ (HD) | ❌ | ✅ | ![Active](https://img.shields.io/badge/Online-brightgreen?style=flat-square) |
-| **Facebook** | ✅ (Reels/Watch) | ✅ | ✅ | ![Active](https://img.shields.io/badge/Online-brightgreen?style=flat-square) |
-| **Threads** | ✅ | ❌ | ✅ | ![Active](https://img.shields.io/badge/Online-brightgreen?style=flat-square) |
-| **Pinterest** | ✅ | ❌ | ✅ (High-Res) | ![Active](https://img.shields.io/badge/Online-brightgreen?style=flat-square) |
-| **Bilibili** | ✅ | ✅ | ❌ | ![Active](https://img.shields.io/badge/Online-brightgreen?style=flat-square) |
-| **Douyin** | ✅ (No Watermark) | ✅ | ✅ | ![Active](https://img.shields.io/badge/Online-brightgreen?style=flat-square) |
-| **Bandcamp** | ❌ | ✅ (Lossless/MP3) | ✅ | ![Active](https://img.shields.io/badge/Online-brightgreen?style=flat-square) |
-| **Pixiv** | ❌ | ❌ | ✅ (Full Size) | ![Active](https://img.shields.io/badge/Online-brightgreen?style=flat-square) |
-| **RedNote (小红书)** | ✅ | ❌ | ✅ (HD Images) | ![Active](https://img.shields.io/badge/Online-brightgreen?style=flat-square) |
+<div id="-supported-platforms">
 
----
+- **16 Core Social, Video, Music & Art Platforms**: **YouTube & Shorts** (up to 4K + subtitles), **TikTok** (no-watermark video, MP3, & full multi-photo `/photo/` slides), **Instagram** (Reels, Stories, & full photo/video carousels), **Spotify & Apple Music** (track/album/playlist metadata resolved with automatic ID3 & cover-art tagging), **SoundCloud**, **X / Twitter** (HD video & multi-photo tweets), **Facebook** (Reels/Watch HD & SD), **Pinterest** (video pins & `/originals/` images), **Threads** (carousel photos & videos), **Pixiv** (all original artwork pages), **RedNote / Xiaohongshu**, **Douyin**, **Bilibili**, **Bandcamp**, and **Shopee Video**.
+- **1,000+ Additional Sites (NIMIYO Native)**: Any other supported link (Twitch, Vimeo, Reddit, Dailymotion, Niconico, VK, Kick, Rumble, etc.) is handled directly by the built-in `yt-dlp` engine.
 
-## 🛠️ Repository Structure
-
-```
-Nimiyo-Downloader/
-├── assets/                   # Media Assets & Showcase Media
-│   ├── icon_untukdi_aboutthisapp.webp
-│   ├── nimiyo_icon.webp
-│   ├── videos/               # Feature Demonstration Videos
-│   │   ├── newLyrics_.mp4    # Word-by-Word TTML Lyrics Demo
-│   │   └── oldLyrics.mp4     # Classic LRC Synced Lyrics Demo
-│   └── screenshots/          # High-Res Application Screenshots
-│       ├── screenshot_01_home.jpg
-│       ├── screenshot_02_player.jpg
-│       ├── screenshot_03_history.jpg
-│       ├── screenshot_04_settings.jpg
-│       ├── screenshot_05_quicksave.jpg
-│       ├── screenshot_08_multiselect.jpg
-│       ├── screenshot_09_playlist.jpg
-│       └── screenshot_10_videoplayer.jpg
-├── src/                      # Web UI & Application Logic
-│   ├── index.html            # Main Application UI
-│   ├── app.js                # State Management & Localization
-│   ├── index.css             # Neobrutalist Design System Tokens
-│   ├── soft-ui.css           # Soft UI Modern Tokens
-│   ├── scrapers/             # Modular Media Analysis & Platform Scrapers
-│   ├── js/musicPlayer.js     # Native-Style Music Player Engine
-│   ├── share.html            # Native Quick Save Floating Panel
-│   └── share.js              # Quick Save Logic & Bridge
-├── android/                  # Native Android Platform (Capacitor)
-│   ├── app/src/main/java/nimiyo/litedownloader/
-│   │   ├── MainActivity.java         # Main App Container
-│   │   ├── ShareActivity.java        # Quick Save Native Bottom Sheet
-│   │   ├── MediaSaverPlugin.java     # MediaStore Storage & Native Downloader Plugin
-│   │   ├── MusicPlaybackService.java # Android Native Media Notification & Session
-│   │   ├── VideoPlayerActivity.java  # Hardware Accelerated Video Player
-│   │   └── ImageViewerActivity.java  # High-Res Image Viewer
-│   └── app/src/main/AndroidManifest.xml
-├── build.js                  # Scraper Engine Bundler & Asset Syncer
-├── version.json              # In-App Auto Update Manifest
-└── capacitor.config.json     # Capacitor Configuration
-```
+</div>
 
 ---
 
 ## 🚀 Building from Source
 
+<div id="-building-from-source">
+
 ### Prerequisites
-- **Node.js**: v18 or higher
-- **JDK**: Java 17, 21, or 25
-- **Android SDK**: Android API 34+
+- **JDK**: Java 17 or Java 21
+- **Android SDK**: Compile SDK 35 / Min SDK 26 (Android 8.0+)
+- **Gradle**: Uses the included `./gradlew` wrapper
 
-### Step-by-Step Build
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/nimidz/Nimiyo-Downloader.git
-   cd Nimiyo-Downloader
-   ```
+### 1. Clone the Repository
+```bash
+git clone https://github.com/nimidz/Nimiyo-Downloader.git
+cd Nimiyo-Downloader
+```
 
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+### 2. Build NIMIYO (`yt-dlp` Native Edition)
+```bash
+cd Nimiyo_native
 
-3. **Bundle web assets & sync Capacitor**:
-   ```bash
-   npm run build
-   npx cap copy android
-   ```
+# Run unit tests & build arm64-v8a release APK (fast single-ABI build)
+./gradlew testDebugUnitTest assembleRelease -Parm64Only=true
+```
+*Output APK:* `Nimiyo_native/app/build/outputs/apk/release/app-arm64-v8a-release.apk`
 
-4. **Compile Release APK**:
-   ```bash
-   cd android
-   .\gradlew.bat assembleRelease
-   ```
-   *The compiled APK will be located at `android/app/build/outputs/apk/release/app-release.apk`.*
+### 3. Build NimiyoLite (Scraper Edition)
+```bash
+cd Nimiyo_scraper_versilite
+
+./gradlew assembleRelease
+```
+*Output APK:* `Nimiyo_scraper_versilite/app/build/outputs/apk/release/app-release.apk`
+
+</div>
 
 ---
 
@@ -239,15 +266,61 @@ Nimiyo-Downloader/
 
 ---
 
-## 🤝 Acknowledgements & Credits
+## ⚙️ Development & Engineering
 
-- Built with ❤️ by [nimidz](https://github.com/nimidz)
-- Powered by `scrapr` engine by [@coflyn](https://github.com/coflyn)
-- Powered by the Open-Source Community
-- Built with [Capacitor](https://capacitorjs.com/)
+- **Architecture**: 100% Native **Kotlin** + **Jetpack Compose** (`Material 3`, `Soft UI`, `Neobrutalism`), `StateFlow` reactive state management, and Foreground Services for uninterrupted background downloads and media playback.
+- **Audio DSP Pipeline**: Custom `NimiyoDspAudioProcessor` built on **AndroidX Media3 / ExoPlayer** supporting real-time speed/pitch adjustment and 2D spatial reverb.
+- **Storage Compliance**: Android Scoped Storage (`MediaStore`) + Storage Access Framework (`SAF`) for per-media custom folders & SD Card output.
+
+---
+
+## 📜 Legal Disclaimer & App Rules
+
+<div id="-legal-disclaimer--app-rules">
+
+> [!WARNING]
+> **User Responsibility & Copyright**
+>
+> NIMIYO Downloader is intended strictly for **personal, offline archiving, and educational use**. Users are solely responsible for ensuring they have the right or permission to download any content and for complying with the Terms of Service of source platforms and applicable copyright laws in their jurisdiction.
+
+### Built-in App Rules (`NimiyoContentGuard`)
+To keep the application safe and responsible, NIMIYO enforces built-in URL and metadata filtering that blocks:
+- **Adult / NSFW (18+) content**
+- **Extreme violence & gore**
+- **Hate speech & harassment**
+- **Illegal or harmful content**
+
+</div>
+
+---
+
+## 🤝 Open Source & Acknowledgements
+
+<div id="-open-source--acknowledgements">
+
+- **Creator & Maintainer**: Built with ❤️ by [**nimidz**](https://github.com/nimidz)
+- **Scraper Architecture**: Powered by `scrapr` engine concepts by [**@coflyn**](https://github.com/coflyn)
+- **Download & Media Engines**:
+  - [**yt-dlp**](https://github.com/yt-dlp/yt-dlp) & [**youtubedl-android**](https://github.com/yausername/youtubedl-android) (`yausername`)
+  - [**FFmpeg**](https://ffmpeg.org/) & [**aria2c**](https://aria2.github.io/)
+- **Lyrics Providers**:
+  - **KuGou Studio**, **LRCLIB**, **Boidu TTML**, **BetterLyrics TTML**, & **Paxsenix Apple TTML**
+- **Android Stack**:
+  - **Kotlin**, **Jetpack Compose (Material 3)**, **AndroidX Media3 / ExoPlayer**, **Coil**, **OkHttp**, & **Jsoup**
+
+</div>
+
+---
+
+## ⚖️ License, Copyright & Trademark
+
+- **License**: Distributed under the **GNU General Public License v3.0 (GPL-3.0)**. See [`LICENSE`](LICENSE) for full terms.
+- **Copyright**: © 2026 **NIMIYO** (`nimidz`).
+- **Trademark Notice**: All third-party platform names, logos, and trademarks (YouTube, TikTok, Instagram, Spotify, Apple Music, X/Twitter, Facebook, Pixiv, Threads, SoundCloud, etc.) belong to their respective owners. NIMIYO is an independent open-source project and is not affiliated with, endorsed by, or sponsored by any of these platforms.
 
 ---
 
 <div align="center">
-  <sub>Made with passion for media freedom. © 2026 NIMIYO.</sub>
+  <sub>Licensed under GPL-3.0 • Made with passion for media freedom. © 2026 NIMIYO.</sub>
 </div>
+

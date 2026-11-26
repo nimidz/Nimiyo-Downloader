@@ -1,0 +1,21 @@
+-keep class com.nimiyo.nativeapp.** { *; }
+-keep class com.yausername.** { *; }
+-dontwarn com.yausername.**
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod,Exceptions
+-keep class com.fasterxml.jackson.** { *; }
+-dontwarn com.fasterxml.jackson.**
+-keep class org.apache.commons.compress.** { *; }
+-dontwarn org.apache.commons.compress.**
+-keep class org.apache.commons.io.** { *; }
+-dontwarn org.apache.commons.io.**
+-dontwarn org.tukaani.**
+-dontwarn com.github.luben.**
+-dontwarn org.brotli.**
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn org.jsoup.**
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**
+-dontwarn java.lang.invoke.**
+

@@ -1,0 +1,28 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="256dp"
+    android:height="256dp"
+    android:viewportWidth="256"
+    android:viewportHeight="256">
+    <!-- Dark/warm background rounded rect -->
+    <path
+        android:fillColor="#1E1E24"
+        android:pathData="M0,0h256v256h-256z"/>
+    <!-- Outer subtle ring -->
+    <path
+        android:fillColor="#2A2A34"
+        android:pathData="M128,16C66.14,16 16,66.14 16,128s50.14,112 112,112 112,-50.14 112,-112S189.86,16 128,16z"/>
+    <!-- Grooves ring -->
+    <path
+        android:strokeColor="#3A3A48"
+        android:strokeWidth="3"
+        android:fillColor="#00000000"
+        android:pathData="M128,48C83.82,48 48,83.82 48,128s35.82,80 80,80 80,-35.82 80,-80S172.18,48 128,48z"/>
+    <!-- Center disc accent in warm Nimiyo yellow -->
+    <path
+        android:fillColor="#FACC15"
+        android:pathData="M128,80C101.49,80 80,101.49 80,128s21.49,48 48,48 48,-21.49 48,-48S154.51,80 128,80z"/>
+    <!-- Center musical note -->
+    <path
+        android:fillColor="#121212"
+        android:pathData="M136,104v30.2c-1.8,-1.1 -4.1,-1.7 -6.5,-1.7 -6.6,0 -12,4.9 -12,11s5.4,11 12,11 12,-4.9 12,-11V116h16v-12h-21.5z"/>
+</vector>

@@ -1,27 +1,15 @@
 {
-  "versionCode": 10,
-  "versionName": "2.4.0",
-  "minRequiredVersion": "2.0.0",
-  "releaseDate": "2026-11-02",
-  "downloadUrl": "https://github.com/nimidz/Nimiyo-Downloader/releases/download/v2.4.0/Nimiyo.v2.4.0.apk",
+  "versionName": "3.0.0",
+  "versionCode": 12,
+  "releaseDate": "2026-11-26",
+  "downloadUrl": "https://github.com/nimidz/Nimiyo-Downloader/releases/latest",
   "changelog": [
-    "Security: Mengatasi deteksi Google Play Protect dan menghapus kode yang bermasalah.",
-    "New: Menambahkan server unduhan baru untuk TikTok, Instagram, YouTube, dan Spotify.",
-    "Fixed: Perbaikan tombol Sort, Shuffle, Playlist, dan Refresh Music di Music Player.",
-    "Fixed: Perbaikan Share Nimiyo agar unduhan tidak gagal atau macet saat jendela Share ditutup lebih awal.",
-    "Fixed: Perbaikan unduhan agar muncul lengkap di riwayat unduhan (termasuk multi-gambar).",
-    "Improvements: Database playlist tersimpan lebih andal di Download/Nimiyo/Database.",
-    "Improvements: Nimiyo QuickSave lebih mulus tanpa perlu menunggu di halaman QuickSave.",
-    "Improvements: Mengurangi spam popup berlebih selama unduhan berlangsung, notifikasi realtime."
-  ],
-  "changelog_en": [
-    "Security: Addressed Google Play Protect detection and removed harmful code.",
-    "New: Added new download servers for TikTok, Instagram, YouTube, and Spotify.",
-    "Fixed: Fixed Sort button, Shuffle button, Playlist button, and Refresh Music button in Music Player.",
-    "Fixed: Fixed Share Nimiyo downloads failing or getting stuck when the Share window is closed too early.",
-    "Fixed: Fixed downloads not appearing completely in download history, including multi-images.",
-    "Improvements: Improved playlist database storage reliability in Download/Nimiyo/Database.",
-    "Improvements: Improved Nimiyo QuickSave downloads for smoother performance without waiting.",
-    "Improvements: Reduced excessive popup notifications during downloads with realtime notification."
+    "Major Rewrite: Rebuilt from the ground up as a 100% native Android app in Kotlin & Jetpack Compose (replacing legacy v2.4.0 WebView).",
+    "Two Editions: Now available as NIMIYO YTDLP (com.nimiyo.dl) and Nimiyo Lite (com.nimiyo.dllite), installable side-by-side.",
+    "Performance & Stability: Fixed media player bugs, excessive resource usage, overheating, and MixTools audio stuttering.",
+    "Nimiyo YTDLP: Powered by built-in yt-dlp, FFmpeg, and aria2c with 1000+ platform support, Cookie Vault, and QuickSave Direct/Analyze mode.",
+    "Nimiyo Lite: Ultra-lightweight (~3.7 MB) Kotlin scraper engine with default server selector and QuickSave auto-close toggle + settings shortcut.",
+    "Music Player & Lyrics: Added Pause On, Resume On, Always Play On, Volume Boost, Playlist Button, Echo in MixTools Reverb, and Lyrics Styling (Custom Media Image/GIF/WebP/Video backdrop, Solid Black, Album Blur, custom fonts).",
+    "Download History: Added media type filter tabs (Audio, Video, Image) and upgraded built-in media player."
   ]
 }

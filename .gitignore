@@ -1,62 +1,43 @@
-# Node & Dependencies
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Build outputs
-www/
-android/app/src/main/assets/public/
-android/app/src/main/assets/capacitor.config.json
-
-# Gradle & Android build files
+# Gradle & Android build outputs
 .gradle/
-android/.gradle/
-android/build/
-android/app/build/
-android/capacitor-cordova-android-plugins/build/
-android/local.properties
-android/**/build/
+**/.gradle/
+.kotlin/
+**/.kotlin/
+build/
+**/build/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Local & IDE config
+local.properties
+**/local.properties
+.idea/
+*.iml
+.vscode/
+.agents/
+
+# Signing & Secrets
+*.jks
+*.keystore
+signing.properties
+**/signing.properties
+
+# Compiled APKs / Bundles (upload via GitHub Releases, not Git repo)
 *.apk
 *.aab
+release_v*/
 
-# Temporary logs & assets
-/*Screenshot*.jpg
-/*.woff2
-*.log
-logcat*.txt
-check_screen*.png
-*.mp4
-!assets/**
+# Prototype / unused root assets
+android/
+Nimiyo_windows_prototype/
+iconapp1024.png
+iconapp2.png
+iconnotification.png
+iconnotification96.png
 
-# Reference & external scrapers (non-Nimiyo sources)
-ContohJS_untukScraper_PastikanHanyaMenyontekCode/
-ingredientsforAPP/
-*Bahan*/
-scratch/
-scratch_log.txt
-scrapr_src/
-*.bak
-edjing_dump/
-search_contoh.js
-
-# Temporary root png images
-/*.png
-!assets/**
-
-# Explicitly track assets directory
-!assets/
-!assets/**
-
-# IDE, Agent, & OS
-GEMINI.md
-AGENTS.md
-.agents/
-Rules/
-.idea/
-.vscode/
-*.swp
-*.swo
+# OS & Temp
 .DS_Store
 Thumbs.db
+*.log
 
