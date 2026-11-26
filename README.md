@@ -1,6 +1,6 @@
 <div align="center">
 
-  <img src="iconaboutapp.png" width="140" height="140" alt="NIMIYO Downloader Logo" />
+  <img src="assets/icon/iconaboutapp.png" width="140" height="140" alt="NIMIYO Downloader Logo" />
 
   <h1>🐥 NIMIYO Downloader</h1>
 
@@ -103,41 +103,41 @@
 
 ### 🚀 NIMIYO (`yt-dlp` Native Edition)
 
-<img src="nimiyoscreenshot_versidl/nimiyodl_navhome.jpg" alt="Nimiyo Home" width="30%" />
-<img src="nimiyoscreenshot_versidl/nimiyodlversion_screenshot%20(4).jpg" alt="Nimiyo Direct Mode" width="30%" />
-<img src="nimiyoscreenshot_versidl/nimiyo%20quicksave_versiondl%20(1).jpg" alt="QuickSave Analyze Mode" width="30%" />
-<img src="nimiyoscreenshot_versidl/nimiyo%20quicksave_versiondl%20(2).jpg" alt="QuickSave Direct Mode" width="30%" />
-<img src="nimiyoscreenshot_versidl/nimiyodl_navsetting.jpg" alt="Nimiyo Settings" width="30%" />
-<img src="nimiyoscreenshot_versidl/nimiyodlversion_screenshot%20(3).jpg" alt="Engine Download Settings" width="30%" />
-<img src="nimiyoscreenshot_versidl/nimiyodlversion_screenshot%20(2).jpg" alt="Subtitles SponsorBlock Custom Args" width="30%" />
-<img src="nimiyoscreenshot_versidl/nimiyodlversion_screenshot%20(1).jpg" alt="Cookie Vault Settings" width="30%" />
+<img src="assets/screenshots/nimiyo-ytdlp/nimiyodl_navhome.jpg" alt="Nimiyo Home" width="30%" />
+<img src="assets/screenshots/nimiyo-ytdlp/nimiyodlversion_screenshot%20(4).jpg" alt="Nimiyo Direct Mode" width="30%" />
+<img src="assets/screenshots/nimiyo-ytdlp/nimiyo%20quicksave_versiondl%20(1).jpg" alt="QuickSave Analyze Mode" width="30%" />
+<img src="assets/screenshots/nimiyo-ytdlp/nimiyo%20quicksave_versiondl%20(2).jpg" alt="QuickSave Direct Mode" width="30%" />
+<img src="assets/screenshots/nimiyo-ytdlp/nimiyodl_navsetting.jpg" alt="Nimiyo Settings" width="30%" />
+<img src="assets/screenshots/nimiyo-ytdlp/nimiyodlversion_screenshot%20(3).jpg" alt="Engine Download Settings" width="30%" />
+<img src="assets/screenshots/nimiyo-ytdlp/nimiyodlversion_screenshot%20(2).jpg" alt="Subtitles SponsorBlock Custom Args" width="30%" />
+<img src="assets/screenshots/nimiyo-ytdlp/nimiyodlversion_screenshot%20(1).jpg" alt="Cookie Vault Settings" width="30%" />
 
 ---
 
 ### ⚡ NimiyoLite (Scraper Edition)
 
-<img src="nimiyoscreenshot_versilite/nimiyolite_navhome.jpg" alt="NimiyoLite Home" width="30%" />
-<img src="nimiyoscreenshot_versilite/nimiyoquicksave_versionlite.jpg" alt="NimiyoLite QuickSave" width="30%" />
-<img src="nimiyoscreenshot_versilite/nimiyolite_navsetting.jpg" alt="NimiyoLite Settings" width="30%" />
-<img src="nimiyoscreenshot_versilite/serverdefault_versilite.jpg" alt="Default Server per Platform" width="30%" />
+<img src="assets/screenshots/nimiyo-lite/nimiyolite_navhome.jpg" alt="NimiyoLite Home" width="30%" />
+<img src="assets/screenshots/nimiyo-lite/nimiyoquicksave_versionlite.jpg" alt="NimiyoLite QuickSave" width="30%" />
+<img src="assets/screenshots/nimiyo-lite/nimiyolite_navsetting.jpg" alt="NimiyoLite Settings" width="30%" />
+<img src="assets/screenshots/nimiyo-lite/serverdefault_versilite.jpg" alt="Default Server per Platform" width="30%" />
 
 ---
 
 ### 🎵 Music Player, Dual-Engine Lyrics & History (Both Editions)
 
-<img src="nimiyoscreenshot_allversion_allhave/navmusic_lite&dl.jpg" alt="Music Library" width="30%" />
-<img src="nimiyoscreenshot_allversion_allhave/music_allscreenshot_versionlite&dl%20(6).jpg" alt="Now Playing Cover" width="30%" />
-<img src="nimiyoscreenshot_allversion_allhave/music_allscreenshot_versionlite&dl%20(3).jpg" alt="TTML Dynamic Lyrics" width="30%" />
-<img src="nimiyoscreenshot_allversion_allhave/music_allscreenshot_versionlite&dl%20(4).jpg" alt="Classic Synced LRC Lyrics" width="30%" />
-<img src="nimiyoscreenshot_allversion_allhave/music_allscreenshot_versionlite&dl%20(2).jpg" alt="Lyrics Source Picker" width="30%" />
-<img src="nimiyoscreenshot_allversion_allhave/music_allscreenshot_versionlite&dl%20(5).jpg" alt="MixTools FX" width="30%" />
-<img src="nimiyoscreenshot_allversion_allhave/music_allscreenshot_versionlite&dl%20(1).jpg" alt="Custom Playlists" width="30%" />
-<img src="nimiyoscreenshot_allversion_allhave/menggantikan_no7_dan_8%20(1).jpg" alt="Music Settings Playback &amp; Audio" width="30%" />
-<img src="nimiyoscreenshot_allversion_allhave/menggantikan_no7_dan_8%20(2).jpg" alt="Playlist Button in Pill Tabs Setting" width="30%" />
-<img src="nimiyoscreenshot_allversion_allhave/menggantikan_no7_dan_8%20(3).jpg" alt="Player Styling &amp; Custom Lyrics Backdrop" width="30%" />
-<img src="nimiyoscreenshot_allversion_allhave/menggantikan_no7_dan_8%20(4).jpg" alt="Player Styling Lyrics &amp; Font Options" width="30%" />
-<img src="nimiyoscreenshot_allversion_allhave/Screenshot_2026-11-26-01-08-59-386_com.nimiyo.dllite.jpg" alt="Custom Media Lyrics Backdrop Live" width="30%" />
-<img src="nimiyoscreenshot_allversion_allhave/navhistory_lite&dl.jpg" alt="Download History" width="30%" />
+<img src="assets/screenshots/shared/navmusic_lite&dl.jpg" alt="Music Library" width="30%" />
+<img src="assets/screenshots/shared/music_allscreenshot_versionlite&dl%20(6).jpg" alt="Now Playing Cover" width="30%" />
+<img src="assets/screenshots/shared/music_allscreenshot_versionlite&dl%20(3).jpg" alt="TTML Dynamic Lyrics" width="30%" />
+<img src="assets/screenshots/shared/music_allscreenshot_versionlite&dl%20(4).jpg" alt="Classic Synced LRC Lyrics" width="30%" />
+<img src="assets/screenshots/shared/music_allscreenshot_versionlite&dl%20(2).jpg" alt="Lyrics Source Picker" width="30%" />
+<img src="assets/screenshots/shared/music_allscreenshot_versionlite&dl%20(5).jpg" alt="MixTools FX" width="30%" />
+<img src="assets/screenshots/shared/music_allscreenshot_versionlite&dl%20(1).jpg" alt="Custom Playlists" width="30%" />
+<img src="assets/screenshots/shared/menggantikan_no7_dan_8%20(1).jpg" alt="Music Settings Playback &amp; Audio" width="30%" />
+<img src="assets/screenshots/shared/menggantikan_no7_dan_8%20(2).jpg" alt="Playlist Button in Pill Tabs Setting" width="30%" />
+<img src="assets/screenshots/shared/menggantikan_no7_dan_8%20(3).jpg" alt="Player Styling &amp; Custom Lyrics Backdrop" width="30%" />
+<img src="assets/screenshots/shared/menggantikan_no7_dan_8%20(4).jpg" alt="Player Styling Lyrics &amp; Font Options" width="30%" />
+<img src="assets/screenshots/shared/Screenshot_2026-11-26-01-08-59-386_com.nimiyo.dllite.jpg" alt="Custom Media Lyrics Backdrop Live" width="30%" />
+<img src="assets/screenshots/shared/navhistory_lite&dl.jpg" alt="Download History" width="30%" />
 
 </div>
 
@@ -253,6 +253,21 @@ cd Nimiyo_scraper_versilite
 *Output APK:* `Nimiyo_scraper_versilite/app/build/outputs/apk/release/app-release.apk`
 
 </div>
+
+---
+
+## 📁 Repository Structure
+
+| Directory / File | Description |
+| :--- | :--- |
+| **[Nimiyo_native/](Nimiyo_native/)** | **NIMIYO YTDLP** (`com.nimiyo.dl`) — Full `yt-dlp` + `FFmpeg` + `aria2c` native Android project |
+| ↳ [app/src/main/java/com/nimiyo/nativeapp/](Nimiyo_native/app/src/main/java/com/nimiyo/nativeapp/) | Kotlin source root ([`download/`](Nimiyo_native/app/src/main/java/com/nimiyo/nativeapp/download/), [`player/`](Nimiyo_native/app/src/main/java/com/nimiyo/nativeapp/player/), [`scraper/`](Nimiyo_native/app/src/main/java/com/nimiyo/nativeapp/scraper/), [`ui/screens/`](Nimiyo_native/app/src/main/java/com/nimiyo/nativeapp/ui/screens/)) |
+| **[Nimiyo_scraper_versilite/](Nimiyo_scraper_versilite/)** | **NimiyoLite** (`com.nimiyo.dllite`) — Lightweight multi-server scraper Android project |
+| ↳ [app/src/main/java/com/nimiyo/nativeapp/](Nimiyo_scraper_versilite/app/src/main/java/com/nimiyo/nativeapp/) | Kotlin source root ([`download/`](Nimiyo_scraper_versilite/app/src/main/java/com/nimiyo/nativeapp/download/), [`player/`](Nimiyo_scraper_versilite/app/src/main/java/com/nimiyo/nativeapp/player/), [`scraper/`](Nimiyo_scraper_versilite/app/src/main/java/com/nimiyo/nativeapp/scraper/), [`ui/screens/`](Nimiyo_scraper_versilite/app/src/main/java/com/nimiyo/nativeapp/ui/screens/)) |
+| **[assets/screenshots/](assets/screenshots/)** | App screenshots ([`nimiyo-ytdlp/`](assets/screenshots/nimiyo-ytdlp/), [`nimiyo-lite/`](assets/screenshots/nimiyo-lite/), [`shared/`](assets/screenshots/shared/)) |
+| **[assets/icon/](assets/icon/)** | Transparent app logo (`iconaboutapp.png`) |
+| **[version.json](version.json)** | Remote update metadata for in-app update checker |
+| **[RELEASE_NOTES_v3.0.0.md](RELEASE_NOTES_v3.0.0.md)** | Release changelog & APK download table |
 
 ---
 
