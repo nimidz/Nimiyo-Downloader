@@ -256,21 +256,6 @@ cd Nimiyo_scraper_versilite
 
 ---
 
-## 📁 Repository Structure
-
-| Directory / File | Description |
-| :--- | :--- |
-| **[Nimiyo_native/](Nimiyo_native/)** | **NIMIYO YTDLP** (`com.nimiyo.dl`) — Full `yt-dlp` + `FFmpeg` + `aria2c` native Android project |
-| ↳ [app/src/main/java/com/nimiyo/nativeapp/](Nimiyo_native/app/src/main/java/com/nimiyo/nativeapp/) | Kotlin source root ([`download/`](Nimiyo_native/app/src/main/java/com/nimiyo/nativeapp/download/), [`player/`](Nimiyo_native/app/src/main/java/com/nimiyo/nativeapp/player/), [`scraper/`](Nimiyo_native/app/src/main/java/com/nimiyo/nativeapp/scraper/), [`ui/screens/`](Nimiyo_native/app/src/main/java/com/nimiyo/nativeapp/ui/screens/)) |
-| **[Nimiyo_scraper_versilite/](Nimiyo_scraper_versilite/)** | **NimiyoLite** (`com.nimiyo.dllite`) — Lightweight multi-server scraper Android project |
-| ↳ [app/src/main/java/com/nimiyo/nativeapp/](Nimiyo_scraper_versilite/app/src/main/java/com/nimiyo/nativeapp/) | Kotlin source root ([`download/`](Nimiyo_scraper_versilite/app/src/main/java/com/nimiyo/nativeapp/download/), [`player/`](Nimiyo_scraper_versilite/app/src/main/java/com/nimiyo/nativeapp/player/), [`scraper/`](Nimiyo_scraper_versilite/app/src/main/java/com/nimiyo/nativeapp/scraper/), [`ui/screens/`](Nimiyo_scraper_versilite/app/src/main/java/com/nimiyo/nativeapp/ui/screens/)) |
-| **[assets/screenshots/](assets/screenshots/)** | App screenshots ([`nimiyo-ytdlp/`](assets/screenshots/nimiyo-ytdlp/), [`nimiyo-lite/`](assets/screenshots/nimiyo-lite/), [`shared/`](assets/screenshots/shared/)) |
-| **[assets/icon/](assets/icon/)** | Transparent app logo (`iconaboutapp.png`) |
-| **[version.json](version.json)** | Remote update metadata for in-app update checker |
-| **[RELEASE_NOTES_v3.0.0.md](RELEASE_NOTES_v3.0.0.md)** | Release changelog & APK download table |
-
----
-
 ## 🌐 Connect with Developer
 
 - 📸 **Instagram**: [@nimidzy](https://instagram.com/nimidzy)

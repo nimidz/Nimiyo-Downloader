@@ -256,21 +256,6 @@ cd Nimiyo_scraper_versilite
 
 ---
 
-## 📁 Struktur Direktori Repository
-
-| Direktori / File | Deskripsi |
-| :--- | :--- |
-| **[Nimiyo_native/](Nimiyo_native/)** | **NIMIYO YTDLP** (`com.nimiyo.dl`) — Project Android native dengan `yt-dlp` + `FFmpeg` + `aria2c` |
-| ↳ [app/src/main/java/com/nimiyo/nativeapp/](Nimiyo_native/app/src/main/java/com/nimiyo/nativeapp/) | Source Kotlin utama ([`download/`](Nimiyo_native/app/src/main/java/com/nimiyo/nativeapp/download/), [`player/`](Nimiyo_native/app/src/main/java/com/nimiyo/nativeapp/player/), [`scraper/`](Nimiyo_native/app/src/main/java/com/nimiyo/nativeapp/scraper/), [`ui/screens/`](Nimiyo_native/app/src/main/java/com/nimiyo/nativeapp/ui/screens/)) |
-| **[Nimiyo_scraper_versilite/](Nimiyo_scraper_versilite/)** | **NimiyoLite** (`com.nimiyo.dllite`) — Project Android scraper ringan multi-server |
-| ↳ [app/src/main/java/com/nimiyo/nativeapp/](Nimiyo_scraper_versilite/app/src/main/java/com/nimiyo/nativeapp/) | Source Kotlin utama ([`download/`](Nimiyo_scraper_versilite/app/src/main/java/com/nimiyo/nativeapp/download/), [`player/`](Nimiyo_scraper_versilite/app/src/main/java/com/nimiyo/nativeapp/player/), [`scraper/`](Nimiyo_scraper_versilite/app/src/main/java/com/nimiyo/nativeapp/scraper/), [`ui/screens/`](Nimiyo_scraper_versilite/app/src/main/java/com/nimiyo/nativeapp/ui/screens/)) |
-| **[assets/screenshots/](assets/screenshots/)** | Screenshot aplikasi ([`nimiyo-ytdlp/`](assets/screenshots/nimiyo-ytdlp/), [`nimiyo-lite/`](assets/screenshots/nimiyo-lite/), [`shared/`](assets/screenshots/shared/)) |
-| **[assets/icon/](assets/icon/)** | Logo transparan aplikasi (`iconaboutapp.png`) |
-| **[version.json](version.json)** | Metadata update untuk pengecekan pembaruan di dalam aplikasi |
-| **[RELEASE_NOTES_v3.0.0.md](RELEASE_NOTES_v3.0.0.md)** | Catatan rilis & tabel unduhan APK |
-
----
-
 ## ⚙️ Pengembangan & Arsitektur Teknis
 
 - **Arsitektur**: 100% Native **Kotlin** + **Jetpack Compose** (`Material 3`, `Glassmorphism`, `Cupertino (iOS)`), manajemen state reaktif `StateFlow`, dan Foreground Service untuk unduhan serta pemutaran musik di latar belakang.
